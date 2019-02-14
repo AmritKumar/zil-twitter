@@ -1,0 +1,12 @@
+{
+	"_tag": "new_tweet",
+	"_amount": "0",
+	"_sender": "0x44345678901234567890123456789012345678cd",
+	"params": [
+		{
+			"vname": "tweet_id",
+			"type": "String",
+			"value": "1085915996148264961"
+		}
+	]
+}
