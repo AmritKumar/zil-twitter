@@ -1,0 +1,299 @@
+scilla_version 0
+
+import BoolUtils ListUtils PairUtils
+
+(* Twitter contract *)
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+library Twitter
+
+let one_msg = 
+    fun (msg : Message) => 
+    let nil_msg = Nil {Message} in
+    Cons {Message} msg nil_msg
+
+let false = False
+let true = True
+let zero = Uint128 0
+
+let accepted_code = Uint32 0
+let not_owner_code = Uint32 1
+let user_exists_code = Uint32 2
+let registered_success_code = Uint32 3
+let user_not_exists_code = Uint32 4
+let verifying_tweet_code = Uint32 5
+let tweet_exists_code = Uint32 6
+let tweet_not_valid_code = Uint32 7
+let tweet_valid_code = Uint32 8
+let not_oracle_code = Uint32 9
+
+(* TODO: Challenge - Use this to teach students to change variables to fields *)
+let zils_per_tweet = Uint128 10
+let blocks_per_day = Uint32 20
+let withdrawal_limit_per_day = Uint128 10000
+
+let str_exists = @list_exists String
+let fst_tweet = @fst Pair (ByStr20 Bool)
+let snd_tweet = @snd Pair (ByStr20 Bool)
+
+let fst_withdraw = @fst Pair (BNum Uint128)
+let snd_withdraw = @snd Pair (BNum Uint128)
+
+let is_owner =
+    fun (owner_address: ByStr20) =>
+    fun (address: ByStr20) =>
+        builtin eq owner_address address
+
+let lte =
+    fun (a: Uint128) =>
+    fun (b: Uint128) =>
+        let a_lt_b = builtin lt a b in
+        let a_eq_b = builtin eq a b in
+        orb a_lt_b a_eq_b
+
+(* Update the withdrawal time if above a day *)
+(* or, update the amount if below a day *)
+let update_withdrawal =
+    fun (last_withdrawal: Pair (BNum) (Uint128)) =>
+    fun (current_block: BNum) =>
+    fun (withdraw_amount: Uint128) =>
+        let last_withdraw_block = fst_withdraw last_withdrawal in
+        let cumulative_amount = snd_withdraw last_withdrawal in
+        let next_day_block = builtin badd last_withdraw_block blocks_per_day in
+        let not_next_day_yet = builtin blt current_block next_day_block in
+        let new_amount = builtin add cumulative_amount withdraw_amount in
+        let in_limit = lte new_amount withdrawal_limit_per_day in
+        let none_withdrawal = None {Pair (BNum) (Uint128)} in
+        match not_next_day_yet with
+        | True =>
+            match in_limit with
+            | True =>
+                let new_withdrawal = Pair {BNum Uint128} last_withdraw_block new_amount in
+                let some_withdrawal = Some {Pair (BNum) (Uint128)} new_withdrawal in
+                some_withdrawal
+            | False =>
+                none_withdrawal
+            end
+        | False =>
+            match in_limit with
+            | True =>
+                let new_withdrawal = Pair {BNum Uint128} current_block new_amount in
+                let some_withdrawal = Some {Pair (BNum) (Uint128)} new_withdrawal in
+                some_withdrawal
+            | False =>
+                none_withdrawal
+            end
+        end
+
+
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract Twitter
+(owner: ByStr20,
+oracle_address: ByStr20,
+hashtag: String)
+
+field users: Map ByStr20 String
+    = Emp ByStr20 String
+
+field used_usernames: Map String Bool
+    = Emp String Bool
+
+field verifying_tweets: Map String (Pair (ByStr20) (Bool))
+    = Emp String (Pair ByStr20 Bool)
+
+field last_withdrawal: Map ByStr20 (Pair (BNum) (Uint128))
+    = Emp ByStr20 (Pair BNum Uint128)
+
+(* Only owner can deposit ZIL *)
+transition deposit()
+    sender_is_owner = is_owner owner _sender;
+    match sender_is_owner with
+    | False =>
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: not_owner_code};
+        msgs = one_msg msg;
+        send msgs
+    | True =>
+        accept;
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: accepted_code};
+        msgs = one_msg msg;
+        send msgs
+    end
+end
+
+(* Only user that has not registered can register *)
+transition register_user(user_address: ByStr20, twitter_username: String)
+    user_exists <- exists users[user_address];
+    username_exists <- exists used_usernames[twitter_username];
+    
+    already_exists = andb user_exists username_exists;
+    match already_exists with
+    | True =>
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: user_exists_code};
+        msgs = one_msg msg;
+        send msgs
+    | False =>
+        users[user_address] := twitter_username;
+        used_usernames[twitter_username] := true;
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: registered_success_code};
+        msgs = one_msg msg;
+        send msgs
+    end
+end
+
+(* Tweets are added to pending verification *)
+transition new_tweet(tweet_id: String)
+    username <- users[_sender];
+
+    match username with
+    | None =>
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: user_not_exists_code};
+        msgs = one_msg msg;
+        send msgs
+    | Some username =>
+        tweet_exists <- exists verifying_tweets[tweet_id];
+        match tweet_exists with
+        | True =>
+            msg = {_tag: ""; 
+                    _recipient: _sender; 
+                    _amount: zero; 
+                    code: tweet_exists_code};
+            msgs = one_msg msg;
+            send msgs
+        | False =>
+            tweet = Pair {ByStr20 Bool} _sender false;
+            verifying_tweets[tweet_id] := tweet;
+
+            e = {_eventname : "verify_tweet";
+                username: username;
+                tweet_id: tweet_id};
+            event e;
+
+            msg = {_tag: ""; 
+                    _recipient: _sender; 
+                    _amount: zero; 
+                    code: verifying_tweet_code};
+            msgs = one_msg msg;
+            send msgs
+        end
+
+    end
+end
+
+(* this is sent by the oracle server *)
+transition verify_tweet(
+    user_address: ByStr20,
+    tweet_id: String, tweet_text: String,
+    start_pos: Uint32, end_pos: Uint32
+)
+    is_oracle = builtin eq _sender oracle_address;
+
+    match is_oracle with
+    | False =>
+        msg = {_tag: ""; 
+                _recipient: _sender; 
+                _amount: zero; 
+                code: not_oracle_code};
+        msgs = one_msg msg;
+        send msgs
+    | True =>
+        is_verifying_tweet <- verifying_tweets[tweet_id];
+
+        match is_verifying_tweet with
+        | None =>
+            msg = {_tag: ""; 
+                    _recipient: _sender; 
+                    _amount: zero; 
+                    code: tweet_not_valid_code};
+            msgs = one_msg msg;
+            send msgs
+        | Some tweet =>
+
+            recipient_address = fst_tweet tweet;
+            is_verified_tweet = snd_tweet tweet;
+            not_verified_tweet = negb is_verified_tweet;
+            is_matching_address = builtin eq recipient_address user_address;
+            is_valid = andb is_matching_address not_verified_tweet;
+
+            match is_valid with
+            | False =>
+                msg = {_tag: ""; 
+                        _recipient: _sender; 
+                        _amount: zero; 
+                        code: tweet_not_valid_code};
+                msgs = one_msg msg;
+                send msgs
+            | True =>
+
+                substr_len = builtin sub end_pos start_pos;
+                (* TODO: Should defend against exception where end_pos larger than string length *)
+                match_hashtag = builtin substr tweet_text start_pos substr_len;
+                is_hashtag = builtin eq match_hashtag hashtag;
+
+                match is_hashtag with
+                | False =>
+                    msg = {_tag: ""; 
+                        _recipient: user_address; 
+                        _amount: zero; 
+                        code: tweet_not_valid_code};
+                    msgs = one_msg msg;
+                    send msgs
+                | True =>
+
+                    new_tweet = Pair {ByStr20 Bool} user_address true;
+                    verifying_tweets[tweet_id] := new_tweet;
+
+                    withdrawal <- last_withdrawal[user_address];
+                    current_block <- & BLOCKNUMBER;
+
+                    new_withdrawal =
+                        match withdrawal with
+                        | None =>
+                            let new_withdrawal = Pair {BNum Uint128} current_block zils_per_tweet in
+                            new_withdrawal
+                        | Some withdrawal =>
+                            let new_withdrawal = update_withdrawal withdrawal current_block zils_per_tweet in
+                            match new_withdrawal with
+                            | None =>
+                                withdrawal
+                            | Some new_withdrawal =>
+                                new_withdrawal
+                            end
+                        end
+                    ;
+
+                    last_withdrawal[user_address] := new_withdrawal;
+
+                    msg = {_tag: ""; 
+                        _recipient: user_address; 
+                        _amount: zils_per_tweet;
+                        code: tweet_valid_code};
+                    msgs = one_msg msg;
+                    send msgs
+                end
+                
+            end
+        end
+    end
+
+end

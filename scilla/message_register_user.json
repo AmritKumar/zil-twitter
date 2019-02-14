@@ -1,0 +1,13 @@
+{
+	"_tag": "register_user",
+	"_amount": "0",
+	"_sender": "0x1234567890123456789012345678901234567890",
+	"params": [
+		{
+			"vname": "user_address",
+			"type": "ByStr20",
+			"value": "0x44345678901234567890123456789012345678cd"
+		},
+		{ "vname": "twitter_username", "type": "String", "value": "kenchangh" }
+	]
+}
