@@ -169,6 +169,20 @@ var getOne = function(req, res) {
 
 router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
+function fulfillFundsRequest(req, res, next) {
+  console.log(req.body);
+  User.findById(req.body.user.id, (err, user) => {
+    if (err) {
+      res.status(400).send("Not authenticated");
+    } else {
+      res.status(200).send(JSON.stringify(user));
+      next();
+    }
+  });
+}
+
+router.route("/request-funds").post(fulfillFundsRequest);
+
 app.use("/api/v1", router);
 
 app.listen(4000);
