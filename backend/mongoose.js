@@ -14,10 +14,11 @@ module.exports = function() {
     // },
     twitterProvider: {
       type: {
+        username: String,
         id: String,
-        token: String
-      },
-      select: false
+        token: String,
+        tokenSecret: String
+      }
     }
   });
 
@@ -40,6 +41,7 @@ module.exports = function() {
           var newUser = new that({
             // email: profile.emails[0].value,
             twitterProvider: {
+              username: profile.username,
               id: profile.id,
               token: token,
               tokenSecret: tokenSecret
