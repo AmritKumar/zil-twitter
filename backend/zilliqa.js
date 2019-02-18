@@ -79,7 +79,7 @@ async function fundAccount(address) {
   const tx = await zilliqa.blockchain.createTransaction(
     zilliqa.transactions.new({
       version: VERSION,
-      toAddr: address,
+      toAddr: `0x${address}`,
       amount: new BN(units.toQa("300", units.Units.Zil)),
       gasPrice: myGasPrice,
       gasLimit: Long.fromNumber(1)
@@ -88,10 +88,26 @@ async function fundAccount(address) {
   return tx.receipt;
 }
 
-async function registerUser(address) {
-  const tx = await zilliqa.blockchain.createTransaction(
-    zilliqa.transactions.new({})
+async function registerUser(contract, userAddress, username) {
+  const tx = await contract.call(
+    "register_user",
+    [
+      {
+        vname: "user_address",
+        type: "ByStr20",
+        value: `0x${userAddress}`
+      },
+      { vname: "twitter_username", type: "String", value: username }
+    ],
+    {
+      version: VERSION,
+      amount: new BN(0),
+      gasPrice: myGasPrice,
+      gasLimit: Long.fromNumber(1000)
+    }
   );
+  console.log(tx, tx.receipt);
+  return tx.receipt;
 }
 
 async function getBalance() {
@@ -102,8 +118,9 @@ async function getBalance() {
 }
 
 async function main() {
-  // await deployTestContract();
-  await fundAccount(oracleAddress);
+  const contract = await deployTestContract();
+  await registerUser(contract, oracleAddress, "kenchangh");
+  // await fundAccount(oracleAddress);
 }
 main();
 

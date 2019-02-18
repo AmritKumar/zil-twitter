@@ -177,13 +177,15 @@ var getOne = function(req, res) {
 router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
 async function fulfillFundsRequest(req, res, next) {
-  const { id: userId, address } = req.body;
-  const { address } = req.body;
+  const { userId, token, tokenSecret, address } = req.body;
 
   try {
     const user = await User.findById(userId);
+    const { matchToken, matchTokenSecret } = user.twitterProvider;
+    if (token !== matchToken || tokenSecret !== matchTokenSecret) {
+      throw new Error("Token & token secret does not match");
+    }
     const receipt = await fundAccount(address);
-    console.log(receipt);
     res.status(200).send(JSON.stringify(user));
     next();
   } catch (e) {
