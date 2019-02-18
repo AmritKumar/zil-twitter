@@ -23,7 +23,8 @@ zilliqa.wallet.addByPrivateKey(USER_PRIVATE_KEY);
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
 const userAddress = CP.getAddressFromPrivateKey(USER_PRIVATE_KEY);
-const myGasPrice = units.toQa("1000", units.Units.Li);
+console.log(ownerAddress, oracleAddress, userAddress);
+const myGasPrice = units.fromQa("1000", units.Units.Li);
 
 async function readContractFile(filepath) {
   const readfile = promisify(fs.readFile);
@@ -65,7 +66,7 @@ async function deployTestContract() {
     const [deployTx, deployedContract] = await contract.deploy({
       version: VERSION,
       gasPrice: myGasPrice,
-      gasLimit: Long.fromNumber(10000)
+      gasLimit: Long.fromNumber(1)
     });
     return deployedContract;
   } catch (e) {
@@ -99,7 +100,7 @@ async function registerUser(contract, username) {
     version: VERSION,
     amount: new BN(0),
     gasPrice: myGasPrice,
-    gasLimit: Long.fromNumber(10000)
+    gasLimit: Long.fromNumber(1)
   });
   return callTx;
 }

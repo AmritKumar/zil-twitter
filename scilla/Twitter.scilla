@@ -35,11 +35,11 @@ let blocks_per_day = Uint32 20
 let withdrawal_limit_per_day = Uint128 10000
 
 let str_exists = @list_exists String
-let fst_tweet = @fst Pair (ByStr20 Bool)
-let snd_tweet = @snd Pair (ByStr20 Bool)
+let fst_tweet = @fst ByStr20 Bool
+let snd_tweet = @snd ByStr20 Bool
 
-let fst_withdraw = @fst Pair (BNum Uint128)
-let snd_withdraw = @snd Pair (BNum Uint128)
+let fst_withdraw = @fst BNum Uint128
+let snd_withdraw = @snd BNum Uint128
 
 let is_owner =
     fun (owner_address: ByStr20) =>
@@ -65,13 +65,13 @@ let update_withdrawal =
         let not_next_day_yet = builtin blt current_block next_day_block in
         let new_amount = builtin add cumulative_amount withdraw_amount in
         let in_limit = lte new_amount withdrawal_limit_per_day in
-        let none_withdrawal = None {Pair (BNum) (Uint128)} in
+        let none_withdrawal = None {(Pair BNum Uint128)} in
         match not_next_day_yet with
         | True =>
             match in_limit with
             | True =>
                 let new_withdrawal = Pair {BNum Uint128} last_withdraw_block new_amount in
-                let some_withdrawal = Some {Pair (BNum) (Uint128)} new_withdrawal in
+                let some_withdrawal = Some {(Pair (BNum) (Uint128))} new_withdrawal in
                 some_withdrawal
             | False =>
                 none_withdrawal
@@ -80,7 +80,7 @@ let update_withdrawal =
             match in_limit with
             | True =>
                 let new_withdrawal = Pair {BNum Uint128} current_block new_amount in
-                let some_withdrawal = Some {Pair (BNum) (Uint128)} new_withdrawal in
+                let some_withdrawal = Some {(Pair (BNum) (Uint128))} new_withdrawal in
                 some_withdrawal
             | False =>
                 none_withdrawal
@@ -105,27 +105,27 @@ field used_usernames: Map String Bool
     = Emp String Bool
 
 field verifying_tweets: Map String (Pair (ByStr20) (Bool))
-    = Emp String (Pair ByStr20 Bool)
+    = Emp String (Pair (ByStr20) (Bool))
 
-field last_withdrawal: Map ByStr20 (Pair (BNum) (Uint128))
-    = Emp ByStr20 (Pair BNum Uint128)
+field last_withdrawal: Map (ByStr20) (Pair (BNum) (Uint128))
+    = Emp (ByStr20) (Pair (BNum) (Uint128))
 
 (* Only owner can deposit ZIL *)
 transition deposit()
     sender_is_owner = is_owner owner _sender;
     match sender_is_owner with
     | False =>
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: not_owner_code};
         msgs = one_msg msg;
         send msgs
     | True =>
         accept;
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: accepted_code};
         msgs = one_msg msg;
         send msgs
@@ -140,18 +140,18 @@ transition register_user(user_address: ByStr20, twitter_username: String)
     already_exists = andb user_exists username_exists;
     match already_exists with
     | True =>
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: user_exists_code};
         msgs = one_msg msg;
         send msgs
     | False =>
         users[user_address] := twitter_username;
         used_usernames[twitter_username] := true;
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: registered_success_code};
         msgs = one_msg msg;
         send msgs
@@ -164,9 +164,9 @@ transition new_tweet(tweet_id: String)
 
     match username with
     | None =>
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: user_not_exists_code};
         msgs = one_msg msg;
         send msgs
@@ -174,9 +174,9 @@ transition new_tweet(tweet_id: String)
         tweet_exists <- exists verifying_tweets[tweet_id];
         match tweet_exists with
         | True =>
-            msg = {_tag: ""; 
-                    _recipient: _sender; 
-                    _amount: zero; 
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: zero;
                     code: tweet_exists_code};
             msgs = one_msg msg;
             send msgs
@@ -189,9 +189,9 @@ transition new_tweet(tweet_id: String)
                 tweet_id: tweet_id};
             event e;
 
-            msg = {_tag: ""; 
-                    _recipient: _sender; 
-                    _amount: zero; 
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: zero;
                     code: verifying_tweet_code};
             msgs = one_msg msg;
             send msgs
@@ -210,9 +210,9 @@ transition verify_tweet(
 
     match is_oracle with
     | False =>
-        msg = {_tag: ""; 
-                _recipient: _sender; 
-                _amount: zero; 
+        msg = {_tag: "";
+                _recipient: _sender;
+                _amount: zero;
                 code: not_oracle_code};
         msgs = one_msg msg;
         send msgs
@@ -221,9 +221,9 @@ transition verify_tweet(
 
         match is_verifying_tweet with
         | None =>
-            msg = {_tag: ""; 
-                    _recipient: _sender; 
-                    _amount: zero; 
+            msg = {_tag: "";
+                    _recipient: _sender;
+                    _amount: zero;
                     code: tweet_not_valid_code};
             msgs = one_msg msg;
             send msgs
@@ -237,9 +237,9 @@ transition verify_tweet(
 
             match is_valid with
             | False =>
-                msg = {_tag: ""; 
-                        _recipient: _sender; 
-                        _amount: zero; 
+                msg = {_tag: "";
+                        _recipient: _sender;
+                        _amount: zero;
                         code: tweet_not_valid_code};
                 msgs = one_msg msg;
                 send msgs
@@ -252,9 +252,9 @@ transition verify_tweet(
 
                 match is_hashtag with
                 | False =>
-                    msg = {_tag: ""; 
-                        _recipient: user_address; 
-                        _amount: zero; 
+                    msg = {_tag: "";
+                        _recipient: user_address;
+                        _amount: zero;
                         code: tweet_not_valid_code};
                     msgs = one_msg msg;
                     send msgs
@@ -284,8 +284,8 @@ transition verify_tweet(
 
                     last_withdrawal[user_address] := new_withdrawal;
 
-                    msg = {_tag: ""; 
-                        _recipient: user_address; 
+                    msg = {_tag: "";
+                        _recipient: user_address;
                         _amount: zils_per_tweet;
                         code: tweet_valid_code};
                     msgs = one_msg msg;

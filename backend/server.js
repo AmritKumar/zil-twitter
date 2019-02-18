@@ -13,6 +13,9 @@ var mongoose = require("./mongoose"),
   request = require("request"),
   twitterConfig = require("./twitter.config.js");
 
+const { promisify } = require("util");
+const { fundAccount } = require("./zilliqa");
+
 mongoose();
 
 var User = require("mongoose").model("User");
@@ -64,7 +67,10 @@ var generateToken = function(req, res, next) {
 
 var sendToken = function(req, res) {
   res.setHeader("x-auth-token", req.token);
-  return res.status(200).send(JSON.stringify(req.user));
+  const { screen_name: username } = req.body;
+  const { _id: id } = req.user;
+  const payload = { username, id };
+  return res.status(200).send(JSON.stringify(payload));
 };
 
 router.route("/auth/twitter/reverse").post(function(req, res) {
@@ -113,6 +119,7 @@ router.route("/auth/twitter").post(
         req.body["oauth_token"] = parsedBody.oauth_token;
         req.body["oauth_token_secret"] = parsedBody.oauth_token_secret;
         req.body["user_id"] = parsedBody.user_id;
+        req.body["screen_name"] = parsedBody.screen_name;
 
         next();
       }
@@ -169,16 +176,20 @@ var getOne = function(req, res) {
 
 router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
-function fulfillFundsRequest(req, res, next) {
-  console.log(req.body);
-  User.findById(req.body.user.id, (err, user) => {
-    if (err) {
-      res.status(400).send("Not authenticated");
-    } else {
-      res.status(200).send(JSON.stringify(user));
-      next();
-    }
-  });
+async function fulfillFundsRequest(req, res, next) {
+  const { id: userId, address } = req.body;
+  const { address } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const receipt = await fundAccount(address);
+    console.log(receipt);
+    res.status(200).send(JSON.stringify(user));
+    next();
+  } catch (e) {
+    console.error(e);
+    res.status(400).send("Not authenticated");
+  }
 }
 
 router.route("/request-funds").post(fulfillFundsRequest);

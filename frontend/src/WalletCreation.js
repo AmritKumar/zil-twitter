@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import TwitterLogin from "react-twitter-auth";
 import "whatwg-fetch";
-
 const CP = require("@zilliqa-js/crypto");
 
 export default class WalletCreation extends Component {
@@ -22,14 +21,21 @@ export default class WalletCreation extends Component {
 
   async requestFunds(privkey) {
     const { user, token } = this.props;
+    const { id: userId, screen_name: username } = user;
     const address = CP.getAddressFromPrivateKey(privkey);
+    console.log(user);
 
     const data = await fetch("http://localhost:4000/api/v1/request-funds", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ user: user.id, token, address })
+      body: JSON.stringify({
+        userId,
+        username,
+        token,
+        address
+      })
     });
     return data;
   }
