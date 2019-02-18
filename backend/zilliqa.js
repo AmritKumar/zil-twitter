@@ -101,7 +101,10 @@ async function getBalance() {
   return balance;
 }
 
-deployTestContract();
-// getBalance();
+async function main() {
+  // await deployTestContract();
+  await fundAccount(oracleAddress);
+}
+main();
 
 module.exports = { fundAccount };
