@@ -76,9 +76,9 @@ const App = () => {
   return (
     <Router>
       <div>
-        {/*<Route exact path="/" component={HomeScreen} />*/}
+        <Route exact path="/" component={HomeScreen} />
         <Route path="/create" component={WalletCreation} />
-        <Route exact path="/" component={SubmitTweet} />
+        <Route path="/submit" component={SubmitTweet} />
       </div>
     </Router>
   );

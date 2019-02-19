@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
+import { registerUser as _registerUser } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
 
 export default class WalletCreation extends Component {
@@ -9,8 +10,10 @@ export default class WalletCreation extends Component {
     super();
     this.generateWallet = this.generateWallet.bind(this);
     this.requestFunds = this.requestFunds.bind(this);
+    this.registerUser = this.registerUser.bind(this);
     this.state = {
-      successRequestFund: false,
+      successRequestFund: null,
+      successRegisterUser: null,
       privkey: null
     };
   }
@@ -19,12 +22,21 @@ export default class WalletCreation extends Component {
     localStorage.setItem("privateKey", privateKey);
   }
 
-  generateWallet() {
+  async generateWallet() {
+    const { username } = this.props.location.state.user;
     const privkey = CP.schnorr.generatePrivateKey();
-    this.requestFunds(privkey);
-    this.setState({ privkey }, () => {
-      this.storePrivateKey(privkey);
-    });
+    this.setState({ privkey });
+    this.storePrivateKey(privkey);
+    await this.requestFunds(privkey);
+    await this.registerUser(privkey, username);
+  }
+
+  async registerUser(privkey, username) {
+    if (this.state.successRequestFund) {
+      const address = CP.getAddressFromPrivateKey(privkey);
+      const receipt = await _registerUser(privkey, address, username);
+      this.setState({ successRegisterUser: receipt.success });
+    }
   }
 
   async requestFunds(privkey) {
@@ -32,7 +44,7 @@ export default class WalletCreation extends Component {
     const { id: userId, username } = user;
     const address = CP.getAddressFromPrivateKey(privkey);
 
-    const data = await fetch("http://localhost:4000/api/v1/request-funds", {
+    const response = await fetch("http://localhost:4000/api/v1/request-funds", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,22 +55,22 @@ export default class WalletCreation extends Component {
         address
       })
     });
-    if (data.success) {
-      this.setState({ successRequestFund: true });
-    }
-    return data;
+    const receipt = await response.json();
+    console.log(receipt);
+    this.setState({ successRequestFund: receipt.success });
+    return receipt;
   }
 
   render() {
-    if (this.state.successRequestFund) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/submit"
-          }}
-        />
-      );
-    }
+    // if (this.state.successRequestFund) {
+    //   return (
+    //     <Redirect
+    //       to={{
+    //         pathname: "/submit"
+    //       }}
+    //     />
+    //   );
+    // }
     return (
       <div>
         <button onClick={this.generateWallet}>Create Wallet</button>
@@ -68,6 +80,17 @@ export default class WalletCreation extends Component {
             <p>Private key: {this.state.privkey}</p>
           </div>
         ) : null}
+        {this.state.successRequestFund === null
+          ? "Requesting funds..."
+          : this.state.successRequestFund
+          ? "Successfully requested funds"
+          : "Failed requested funds"}
+        {"\n"}
+        {this.state.successRegisterUser === null
+          ? "Registering user..."
+          : this.state.successRegisterUser
+          ? "Successfully register user"
+          : "Failed register user"}
       </div>
     );
   }

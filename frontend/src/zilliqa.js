@@ -8,7 +8,7 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "6ac6e30b8cd822a4ea1985d66a565e25f88f1c04";
+const contractAddress = "0ac58f9e1efe9fbf564d6c955807d8120ba7bc2c";
 const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("1000000000");
@@ -32,7 +32,6 @@ export async function registerUser(privateKey, userAddress, username) {
       gasLimit: Long.fromNumber(1000)
     }
   );
-  console.log("registerUser", tx.receipt);
   return tx.receipt;
 }
 

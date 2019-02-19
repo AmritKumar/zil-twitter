@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "0x6ac6e30b8cd822a4ea1985d66a565e25f88f1c04";
+const contractAddress = "0x0ac58f9e1efe9fbf564d6c955807d8120ba7bc2c";
 const deployedContract = zilliqa.contracts.at(contractAddress);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -61,6 +61,7 @@ const initParams = [
 ];
 
 async function deployTestContract() {
+  console.log("deploying contract...");
   const code = await readContractFile(CONTRACT_PATH);
   const contract = zilliqa.contracts.new(code, initParams);
   try {
