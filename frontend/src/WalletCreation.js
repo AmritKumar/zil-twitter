@@ -41,7 +41,7 @@ export default class WalletCreation extends Component {
 
   async requestFunds(privkey) {
     const { user, token } = this.props.location.state;
-    const { id: userId, username } = user;
+    const { id: userId, username, token: twitterToken } = user;
     const address = CP.getAddressFromPrivateKey(privkey);
 
     const response = await fetch("http://localhost:4000/api/v1/request-funds", {
@@ -52,7 +52,8 @@ export default class WalletCreation extends Component {
       },
       body: JSON.stringify({
         username,
-        address
+        address,
+        twitterToken
       })
     });
     const receipt = await response.json();

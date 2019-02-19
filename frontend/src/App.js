@@ -52,7 +52,7 @@ class HomeScreen extends Component {
       return (
         <Redirect
           to={{
-            pathname: "/create",
+            pathname: "/submit",
             state: { user, token }
           }}
         />
@@ -76,8 +76,8 @@ const App = () => {
   return (
     <Router>
       <div>
-        {/* <Route exact path="/" component={HomeScreen} />
-        <Route path="/create" component={WalletCreation} />*/}
+        <Route exact path="/" component={HomeScreen} />
+        <Route path="/create" component={WalletCreation} />
         <Route path="/submit" component={SubmitTweet} />
       </div>
     </Router>
