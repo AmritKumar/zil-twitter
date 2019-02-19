@@ -20,8 +20,8 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "0x5cffc10a16f83c9ab950d25dc53573ef45d1d281";
-const deployedContract = zilliqa.contracts.at(contractAddress);
+const contractAddress = "5cffc10a16f83c9ab950d25dc53573ef45d1d281";
+const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
@@ -135,11 +135,26 @@ async function getTweetId(txnId) {
   }
 }
 
+async function getHashtag() {
+  try {
+    const init = await zilliqa.blockchain.getSmartContractInit(contractAddress);
+    const initParam = init.result.find(
+      initParam => initParam.vname === "hashtag"
+    );
+    const hashtagVal = initParam.value;
+    return hashtagVal;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 async function main() {
-  const contract = await deployTestContract();
+  // const hashtag = await getHashtag();
+  // console.log(hashtag);
+  // const contract = await deployTestContract();
   // await registerUser(contract, oracleAddress, "kenchangh");
   // await fundAccount(oracleAddress);
 }
-// main();
+main();
 
-module.exports = { fundAccount, registerUser, getTweetId };
+module.exports = { fundAccount, registerUser, getTweetId, getHashtag };
