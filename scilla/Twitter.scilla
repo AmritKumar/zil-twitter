@@ -137,7 +137,7 @@ transition register_user(user_address: ByStr20, twitter_username: String)
     user_exists <- exists users[user_address];
     username_exists <- exists used_usernames[twitter_username];
     
-    already_exists = andb user_exists username_exists;
+    already_exists = orb user_exists username_exists;
     match already_exists with
     | True =>
         msg = {_tag: "";

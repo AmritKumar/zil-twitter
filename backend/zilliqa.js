@@ -20,6 +20,8 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
+const contractAddress = "0x6ac6e30b8cd822a4ea1985d66a565e25f88f1c04";
+const deployedContract = zilliqa.contracts.at(contractAddress);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
@@ -80,16 +82,17 @@ async function fundAccount(address) {
     zilliqa.transactions.new({
       version: VERSION,
       toAddr: `0x${address}`,
-      amount: new BN(units.toQa("300", units.Units.Zil)),
-      gasPrice: myGasPrice,
+      amount: new BN(units.toQa("50", units.Units.Zil)),
+      gasPrice: new BN("2000000000"),
       gasLimit: Long.fromNumber(1)
     })
   );
+  console.log("fundAccount", tx.receipt);
   return tx.receipt;
 }
 
-async function registerUser(contract, userAddress, username) {
-  const tx = await contract.call(
+async function registerUser(userAddress, username) {
+  const tx = await deployedContract.call(
     "register_user",
     [
       {
@@ -102,11 +105,11 @@ async function registerUser(contract, userAddress, username) {
     {
       version: VERSION,
       amount: new BN(0),
-      gasPrice: myGasPrice,
+      gasPrice: new BN("2000000000"),
       gasLimit: Long.fromNumber(1000)
     }
   );
-  console.log(tx, tx.receipt);
+  console.log("registerUser", tx.receipt);
   return tx.receipt;
 }
 
@@ -118,10 +121,10 @@ async function getBalance() {
 }
 
 async function main() {
-  const contract = await deployTestContract();
-  await registerUser(contract, oracleAddress, "kenchangh");
+  // const contract = await deployTestContract();
+  // await registerUser(contract, oracleAddress, "kenchangh");
   // await fundAccount(oracleAddress);
 }
 main();
 
-module.exports = { fundAccount };
+module.exports = { fundAccount, registerUser };

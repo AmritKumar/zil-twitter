@@ -14,7 +14,7 @@ var mongoose = require("./mongoose"),
   twitterConfig = require("./twitter.config.js");
 
 const { promisify } = require("util");
-const { fundAccount } = require("./zilliqa");
+const { fundAccount, registerUser } = require("./zilliqa");
 
 mongoose();
 
@@ -177,16 +177,26 @@ var getOne = function(req, res) {
 router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
 async function fulfillFundsRequest(req, res, next) {
-  const { userId, token, tokenSecret, address } = req.body;
+  // const { userId, token, tokenSecret, address } = req.body;
+  const { username, address } = req.body;
 
   try {
-    const user = await User.findById(userId);
-    const { matchToken, matchTokenSecret } = user.twitterProvider;
-    if (token !== matchToken || tokenSecret !== matchTokenSecret) {
-      throw new Error("Token & token secret does not match");
-    }
-    const receipt = await fundAccount(address);
-    res.status(200).send(JSON.stringify(user));
+    // const user = await User.findById(userId);
+    // const {
+    //   token: matchToken,
+    //   tokenSecret: matchTokenSecret
+    // } = user.twitterProvider;
+    // console.log("user", userId, token, tokenSecret);
+    // console.log("match", userId, matchToken, matchTokenSecret);
+    // if (token !== matchToken || tokenSecret !== matchTokenSecret) {
+    //   throw new Error("Token & token secret does not match");
+    // }
+    console.log("funding account:", address);
+    const fundReceipt = await fundAccount(address);
+    const registerReceipt = await registerUser(address, username);
+    // const promises = [fundAccount(address), registerUser(address, username)];
+    // const receipts = await Promise.all(promises);
+    res.status(200).send(JSON.stringify(fundReceipt));
     next();
   } catch (e) {
     console.error(e);
@@ -194,7 +204,7 @@ async function fulfillFundsRequest(req, res, next) {
   }
 }
 
-router.route("/request-funds").post(fulfillFundsRequest);
+router.route("/request-funds").post(authenticate, fulfillFundsRequest);
 
 app.use("/api/v1", router);
 
