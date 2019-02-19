@@ -193,7 +193,7 @@ async function fulfillFundsRequest(req, res, next) {
     // }
     console.log("funding account:", address);
     const fundReceipt = await fundAccount(address);
-    const registerReceipt = await registerUser(address, username);
+    // const registerReceipt = await registerUser(address, username);
     // const promises = [fundAccount(address), registerUser(address, username)];
     // const receipts = await Promise.all(promises);
     res.status(200).send(JSON.stringify(fundReceipt));

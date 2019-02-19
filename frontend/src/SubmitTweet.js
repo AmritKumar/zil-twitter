@@ -19,7 +19,6 @@ export default class SubmitTweet extends Component {
   async submitTweet() {
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
-    await registerUser(privateKey, address, "kenchangh");
     await _submitTweet(privateKey, this.state.tweetId);
   }
 
