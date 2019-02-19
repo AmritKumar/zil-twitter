@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import TwitterLogin from "react-twitter-auth";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect
+} from "react-router-dom";
 import WalletCreation from "./WalletCreation";
+import SubmitTweet from "./SubmitTweet";
 
-class App extends Component {
+class HomeScreen extends Component {
   constructor() {
     super();
 
@@ -42,18 +49,39 @@ class App extends Component {
     const { isAuthenticated, user, token } = this.state;
 
     if (this.state.isAuthenticated) {
-      return <WalletCreation user={user} token={token} />;
+      return (
+        <Redirect
+          to={{
+            pathname: "/create",
+            state: { user, token }
+          }}
+        />
+      );
     }
 
     return (
-      <TwitterLogin
-        loginUrl="http://localhost:4000/api/v1/auth/twitter"
-        onFailure={this.onFailed}
-        onSuccess={this.onSuccess}
-        requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
-      />
+      <div>
+        <TwitterLogin
+          loginUrl="http://localhost:4000/api/v1/auth/twitter"
+          onFailure={this.onFailed}
+          onSuccess={this.onSuccess}
+          requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
+        />
+      </div>
     );
   }
 }
+
+const App = () => {
+  return (
+    <Router>
+      <div>
+        {/*<Route exact path="/" component={HomeScreen} />*/}
+        <Route path="/create" component={WalletCreation} />
+        <Route exact path="/" component={SubmitTweet} />
+      </div>
+    </Router>
+  );
+};
 
 export default App;

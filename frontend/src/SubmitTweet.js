@@ -1,21 +1,26 @@
 import React, { Component } from "react";
-import { submitTweet as _submitTweet } from "./zilliqa";
+import { registerUser, submitTweet as _submitTweet } from "./zilliqa";
+const CP = require("@zilliqa-js/crypto");
 
 export default class SubmitTweet extends Component {
   constructor() {
     super();
+    this.handleChange = this.handleChange.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
     this.state = {
       tweetId: ""
     };
   }
 
-  getPrivateKey(privateKey) {
-    return localStorage.getItem("privateKey", privateKey);
+  getPrivateKey() {
+    return localStorage.getItem("privateKey");
   }
 
   async submitTweet() {
-    await _submitTweet(this.state.tweetId);
+    const privateKey = this.getPrivateKey();
+    const address = CP.getAddressFromPrivateKey(privateKey);
+    await registerUser(privateKey, address, "kenchangh");
+    await _submitTweet(privateKey, this.state.tweetId);
   }
 
   handleChange(e) {
