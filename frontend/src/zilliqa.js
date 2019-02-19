@@ -8,7 +8,7 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "0ac58f9e1efe9fbf564d6c955807d8120ba7bc2c";
+const contractAddress = "5cffc10a16f83c9ab950d25dc53573ef45d1d281";
 const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("1000000000");
@@ -37,7 +37,9 @@ export async function registerUser(privateKey, userAddress, username) {
 
 export async function submitTweet(privateKey, tweetId) {
   zilliqa.wallet.addByPrivateKey(privateKey);
-  const address = CP.getAddressFromPrivateKey(privateKey);
+
+  const state = await contract.getState();
+  console.log(state);
 
   const tx = await contract.call(
     "new_tweet",
@@ -55,6 +57,7 @@ export async function submitTweet(privateKey, tweetId) {
       gasLimit: Long.fromNumber(1000)
     }
   );
-  console.log(tx, tx.receipt);
-  return tx.receipt;
+  console.log(tx);
+  const { id: txnId } = tx;
+  return { txnId, ...tx.receipt };
 }

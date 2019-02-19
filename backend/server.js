@@ -14,7 +14,7 @@ var mongoose = require("./mongoose"),
   twitterConfig = require("./twitter.config.js");
 
 const { promisify } = require("util");
-const { fundAccount, registerUser } = require("./zilliqa");
+const { fundAccount, registerUser, getTweetId } = require("./zilliqa");
 
 mongoose();
 
@@ -205,6 +205,22 @@ async function fulfillFundsRequest(req, res, next) {
 }
 
 router.route("/request-funds").post(authenticate, fulfillFundsRequest);
+
+async function fulfillSubmitTweet(req, res, next) {
+  const { txnId } = req.body;
+  console.log(txnId);
+
+  try {
+    const txn = await getTweetId(txnId);
+    res.status(200).send(JSON.stringify(txn));
+  } catch (e) {
+    console.error(e);
+    res.status(400).send("Submit new tweet failed");
+  }
+}
+
+router.route("/submit-tweet").post(fulfillSubmitTweet);
+// router.route("/submit-tweet").post(authenticate, fulfillSubmitTweet);
 
 app.use("/api/v1", router);
 
