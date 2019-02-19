@@ -25,15 +25,18 @@ export default class SubmitTweet extends Component {
   }
 
   async sendTransactionId(txnId) {
-    // const { token } = this.props.location.state;
+    const { token, user } = this.props.location.state;
+    // const { username } = user;
     const response = await fetch("http://localhost:4000/api/v1/submit-tweet", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-        // "x-auth-token": token
+        "Content-Type": "application/json",
+        "x-auth-token": token
       },
       body: JSON.stringify({
-        txnId
+        txnId,
+        username: user.username,
+        twitterToken: user.token
       })
     });
   }

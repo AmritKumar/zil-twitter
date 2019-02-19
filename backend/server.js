@@ -69,7 +69,8 @@ var sendToken = function(req, res) {
   res.setHeader("x-auth-token", req.token);
   const { screen_name: username } = req.body;
   const { _id: id } = req.user;
-  const payload = { username, id };
+  const { token } = req.auth;
+  const payload = { username, id, token };
   return res.status(200).send(JSON.stringify(payload));
 };
 
@@ -130,10 +131,13 @@ router.route("/auth/twitter").post(
     if (!req.user) {
       return res.send(401, "User Not Authenticated");
     }
+    const { id, twitterProvider } = req.user;
+    const { token } = twitterProvider;
 
     // prepare token for API
     req.auth = {
-      id: req.user.id
+      id,
+      token
     };
 
     return next();
@@ -174,6 +178,19 @@ var getOne = function(req, res) {
   res.json(user);
 };
 
+async function verifyTwitterToken(req, res, next) {
+  const { username, twitterToken } = req.body;
+  const users = await User.find({
+    "twitterProvider.username": username,
+    "twitterProvider.token": twitterToken
+  });
+  if (users.length) {
+    next();
+  } else {
+    throw new Error("Token does not exist");
+  }
+}
+
 router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
 async function fulfillFundsRequest(req, res, next) {
@@ -204,11 +221,12 @@ async function fulfillFundsRequest(req, res, next) {
   }
 }
 
-router.route("/request-funds").post(authenticate, fulfillFundsRequest);
+router
+  .route("/request-funds")
+  .post(authenticate, verifyTwitterToken, fulfillFundsRequest);
 
 async function fulfillSubmitTweet(req, res, next) {
-  const { txnId } = req.body;
-  console.log(txnId);
+  const { txnId, username, twitterToken } = req.body;
 
   try {
     const txn = await getTweetId(txnId);
@@ -219,7 +237,9 @@ async function fulfillSubmitTweet(req, res, next) {
   }
 }
 
-router.route("/submit-tweet").post(fulfillSubmitTweet);
+router
+  .route("/submit-tweet")
+  .post(authenticate, verifyTwitterToken, fulfillSubmitTweet);
 // router.route("/submit-tweet").post(authenticate, fulfillSubmitTweet);
 
 app.use("/api/v1", router);
