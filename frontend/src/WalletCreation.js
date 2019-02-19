@@ -62,15 +62,18 @@ export default class WalletCreation extends Component {
   }
 
   render() {
-    // if (this.state.successRequestFund) {
-    //   return (
-    //     <Redirect
-    //       to={{
-    //         pathname: "/submit"
-    //       }}
-    //     />
-    //   );
-    // }
+    if (this.state.successRequestFund && this.state.successRegisterUser) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/submit",
+            state: {
+              ...this.props.location.state
+            }
+          }}
+        />
+      );
+    }
     return (
       <div>
         <button onClick={this.generateWallet}>Create Wallet</button>
