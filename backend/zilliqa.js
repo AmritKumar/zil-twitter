@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "5cffc10a16f83c9ab950d25dc53573ef45d1d281";
+const contractAddress = "c11b3f1cd0497f975ee4d35bd2c2cba8ecc88e73";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -114,6 +114,46 @@ async function registerUser(userAddress, username) {
   return tx.receipt;
 }
 
+async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
+  const params = [
+    {
+      vname: "user_address",
+      type: "ByStr20",
+      value: userAddress
+    },
+    {
+      vname: "tweet_id",
+      type: "String",
+      value: tweetId
+    },
+    {
+      vname: "tweet_text",
+      type: "String",
+      value: tweetText
+    },
+    {
+      vname: "start_pos",
+      type: "Uint32",
+      value: startPos.toString()
+    },
+    {
+      vname: "end_pos",
+      type: "Uint32",
+      value: endPos.toString()
+    }
+  ];
+  zilliqa.wallet.setDefault(oracleAddress);
+  const tx = await deployedContract.call("verify_tweet", params, {
+    version: VERSION,
+    amount: new BN(0),
+    gasPrice: new BN("2000000000"),
+    gasLimit: Long.fromNumber(5000)
+  });
+  zilliqa.wallet.setDefault(ownerAddress);
+  console.log(tx, tx.receipt, tx.receipt.event_logs);
+  return tx.receipt;
+}
+
 async function getBalance() {
   const balance = await zilliqa.blockchain.getBalance(ownerAddress);
   const minGasPrice = await zilliqa.blockchain.getMinimumGasPrice();
@@ -126,9 +166,12 @@ async function getTweetId(txnId) {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
     const { event_logs: eventLogs } = tx.receipt;
 
-    const param = eventLogs[0].params.find(p => p.vname === "tweet_id");
-    const tweetId = param.value;
-    return tweetId;
+    const eventLog = eventLogs.find(e => e._eventname === "new_tweet");
+    const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
+    const tweetId = tweetIdParam.value;
+    const senderParam = eventLog.params.find(p => p.vname === "sender");
+    const sender = senderParam.value;
+    return { tweetId, sender };
   } catch (e) {
     console.error(e);
     throw e;
@@ -148,13 +191,41 @@ async function getHashtag() {
   }
 }
 
+async function deposit() {
+  try {
+    const tx = await deployedContract.call("deposit", [], {
+      version: VERSION,
+      amount: new BN(units.toQa("50", units.Units.Zil)),
+      gasPrice: new BN("2000000000"),
+      gasLimit: Long.fromNumber(1000)
+    });
+    console.log(tx, tx.receipt);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 async function main() {
   // const hashtag = await getHashtag();
   // console.log(hashtag);
   // const contract = await deployTestContract();
   // await registerUser(contract, oracleAddress, "kenchangh");
-  // await fundAccount(oracleAddress);
+  // await fundAccount(contractAddress);
+  // await deposit();
+  // const tx = await verifyTweet(
+  //   "0x2a89b69ec1d4f23e7c2109f117adcd4f415a1a0a",
+  //   "1098114537063014401",
+  //   "hey yolo #BuiltWithZil",
+  //   9,
+  //   21
+  // );
 }
 main();
 
-module.exports = { fundAccount, registerUser, getTweetId, getHashtag };
+module.exports = {
+  fundAccount,
+  registerUser,
+  getTweetId,
+  getHashtag,
+  verifyTweet
+};

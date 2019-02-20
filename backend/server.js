@@ -14,7 +14,13 @@ var mongoose = require("./mongoose"),
   twitterConfig = require("./twitter.config.js");
 
 const { promisify } = require("util");
-const { fundAccount, registerUser, getTweetId } = require("./zilliqa");
+const {
+  fundAccount,
+  registerUser,
+  getTweetId,
+  verifyTweet
+} = require("./zilliqa");
+const { getTweetData } = require("./twitter");
 
 mongoose();
 
@@ -229,8 +235,25 @@ async function fulfillSubmitTweet(req, res, next) {
   const { txnId, username, twitterToken } = req.body;
 
   try {
-    const txn = await getTweetId(txnId);
-    res.status(200).send(JSON.stringify(txn));
+    const { tweetId, sender } = await getTweetId(txnId);
+
+    const users = await User.find({
+      "twitterProvider.username": username,
+      "twitterProvider.token": twitterToken
+    });
+    const user = users[0];
+    const tokenSecret = user.twitterProvider.tokenSecret;
+    const tweetData = await getTweetData(tweetId, twitterToken, tokenSecret);
+    const { tweetText, startPos, endPos } = tweetData;
+    console.log("verifyTweet...");
+    const receipt = await verifyTweet(
+      sender,
+      tweetId,
+      tweetText,
+      startPos,
+      endPos
+    );
+    res.status(200).send(JSON.stringify(receipt));
   } catch (e) {
     console.error(e);
     res.status(400).send("Submit new tweet failed");

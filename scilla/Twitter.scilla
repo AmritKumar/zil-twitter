@@ -17,6 +17,7 @@ let one_msg =
 let false = False
 let true = True
 let zero = Uint128 0
+let one = Uint32 1
 
 let accepted_code = Uint32 0
 let not_owner_code = Uint32 1
@@ -30,9 +31,9 @@ let tweet_valid_code = Uint32 8
 let not_oracle_code = Uint32 9
 
 (* TODO: Challenge - Use this to teach students to change variables to fields *)
-let zils_per_tweet = Uint128 10
+let zils_per_tweet = Uint128 10000000000000
 let blocks_per_day = Uint32 20
-let withdrawal_limit_per_day = Uint128 10000
+let withdrawal_limit_per_day = Uint128 1000000000000000
 
 let str_exists = @list_exists String
 let fst_tweet = @fst ByStr20 Bool
@@ -184,7 +185,8 @@ transition new_tweet(tweet_id: String)
             tweet = Pair {ByStr20 Bool} _sender false;
             verifying_tweets[tweet_id] := tweet;
 
-            e = {_eventname : "verify_tweet";
+            e = {_eventname : "new_tweet";
+                sender: _sender;
                 username: username;
                 tweet_id: tweet_id};
             event e;
@@ -246,6 +248,7 @@ transition verify_tweet(
             | True =>
 
                 substr_len = builtin sub end_pos start_pos;
+                substr_len = builtin add substr_len one;
                 (* TODO: Should defend against exception where end_pos larger than string length *)
                 match_hashtag = builtin substr tweet_text start_pos substr_len;
                 is_hashtag = builtin eq match_hashtag hashtag;
@@ -284,9 +287,29 @@ transition verify_tweet(
 
                     last_withdrawal[user_address] := new_withdrawal;
 
+                    (* Find the difference between new withdrawal and old withdrawal *)
+                    reward_amount =
+                        match withdrawal with
+                        (* No prior withdrawals, just withdraw the tweet *)
+                        | None =>
+                            zils_per_tweet
+                        | Some withdrawal =>
+                            let old_balance = snd_withdraw withdrawal in
+                            let new_balance = snd_withdraw new_withdrawal in
+                            let reward_amount = builtin sub new_balance old_balance in
+                            reward_amount
+                        end
+                    ;
+
+                    e = {_eventname : "verify_tweet";
+                        recipient: user_address;
+                        reward_amount: reward_amount;
+                        tweet_id: tweet_id};
+                    event e;
+
                     msg = {_tag: "";
                         _recipient: user_address;
-                        _amount: zils_per_tweet;
+                        _amount: reward_amount;
                         code: tweet_valid_code};
                     msgs = one_msg msg;
                     send msgs
