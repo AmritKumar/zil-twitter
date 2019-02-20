@@ -246,14 +246,8 @@ async function fulfillSubmitTweet(req, res, next) {
     const tweetData = await getTweetData(tweetId, twitterToken, tokenSecret);
     const { tweetText, startPos, endPos } = tweetData;
     console.log("verifyTweet...");
-    const receipt = await verifyTweet(
-      sender,
-      tweetId,
-      tweetText,
-      startPos,
-      endPos
-    );
-    res.status(200).send(JSON.stringify(receipt));
+    const tx = await verifyTweet(sender, tweetId, tweetText, startPos, endPos);
+    res.status(200).send(JSON.stringify(tx));
   } catch (e) {
     console.error(e);
     res.status(400).send("Submit new tweet failed");

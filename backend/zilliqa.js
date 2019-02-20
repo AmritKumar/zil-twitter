@@ -150,8 +150,7 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
     gasLimit: Long.fromNumber(5000)
   });
   zilliqa.wallet.setDefault(ownerAddress);
-  console.log(tx, tx.receipt, tx.receipt.event_logs);
-  return tx.receipt;
+  return tx;
 }
 
 async function getBalance() {

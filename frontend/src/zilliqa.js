@@ -61,3 +61,21 @@ export async function submitTweet(privateKey, tweetId) {
   const { id: txnId } = tx;
   return { txnId, ...tx.receipt };
 }
+
+export async function getTweetVerification(txnId, tweetId) {
+  try {
+    const tx = await zilliqa.blockchain.getTransaction(txnId);
+    const { event_logs: eventLogs } = tx.receipt;
+    const eventLog = eventLogs.find(e => e._eventname === "verify_tweet");
+    const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
+    const matchTweetId = tweetIdParam.value;
+    if (tweetId !== matchTweetId) {
+      throw new Error(
+        `Tweet ID '${tweetId}' does not match tweet ID from transaction '${matchTweetId}'`
+      );
+    }
+    return true;
+  } catch (e) {
+    console.error(e);
+  }
+}
