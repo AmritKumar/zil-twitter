@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import {
   sendTransactionId,
   registerUser,
-  submitTweet as _submitTweet
+  submitTweet as _submitTweet,
+  getTweetVerification
 } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
 const privkey =
@@ -44,11 +45,14 @@ export default class SubmitTweet extends Component {
   }
 
   async submitTweet() {
+    const { tweetId } = this.state;
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
-    const { txnId } = await _submitTweet(privateKey, this.state.tweetId);
-    const data = await this.sendTransactionId(txnId);
-    console.log(data);
+    const { txnId } = await _submitTweet(privateKey, tweetId);
+    const verifyTxn = await this.sendTransactionId(txnId);
+    const verifyTxnId = verifyTxn.id;
+    const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);
+    console.log(verifyTxn, tweetIsVerified);
   }
 
   handleChange(e) {
