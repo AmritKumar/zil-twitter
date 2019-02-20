@@ -6,7 +6,7 @@ import {
 } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
 const privkey =
-  "75f1943b7abfa635824f7a0e75d14244c2f7b5c2be81aa16f6e0c2f3e05a0508";
+  "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
 
 export default class SubmitTweet extends Component {
   constructor() {
@@ -39,13 +39,16 @@ export default class SubmitTweet extends Component {
         twitterToken: user.token
       })
     });
+    const data = await response.json();
+    return data;
   }
 
   async submitTweet() {
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
     const { txnId } = await _submitTweet(privateKey, this.state.tweetId);
-    await this.sendTransactionId(txnId);
+    const data = await this.sendTransactionId(txnId);
+    console.log(data);
   }
 
   handleChange(e) {
