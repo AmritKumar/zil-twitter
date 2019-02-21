@@ -6,10 +6,13 @@ import {
   Link,
   Redirect
 } from "react-router-dom";
+import Navbar from "./Navbar";
+import HomeScreen from "./HomeScreen";
+import Footer from "./Footer";
 import WalletCreation from "./WalletCreation";
 import SubmitTweet from "./SubmitTweet";
 
-class HomeScreen extends Component {
+class BaseScreen extends Component {
   constructor() {
     super();
 
@@ -60,14 +63,11 @@ class HomeScreen extends Component {
     }
 
     return (
-      <div>
-        <TwitterLogin
-          loginUrl="http://localhost:4000/api/v1/auth/twitter"
-          onFailure={this.onFailed}
-          onSuccess={this.onSuccess}
-          requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
-        />
-      </div>
+      <span>
+        <Navbar />
+        <HomeScreen />
+        <Footer />
+      </span>
     );
   }
 }
@@ -75,11 +75,15 @@ class HomeScreen extends Component {
 const App = () => {
   return (
     <Router>
-      <div>
-        <Route exact path="/" component={HomeScreen} />
-        <Route path="/create" component={WalletCreation} />
-        <Route path="/submit" component={SubmitTweet} />
-      </div>
+      <span>
+        <Navbar />
+        <span>
+          <Route exact path="/" component={HomeScreen} />
+          <Route path="/create" component={WalletCreation} />
+          <Route path="/submit" component={SubmitTweet} />
+        </span>
+        <Footer />
+      </span>
     </Router>
   );
 };
