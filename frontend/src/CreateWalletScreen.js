@@ -5,7 +5,7 @@ import "whatwg-fetch";
 import { registerUser as _registerUser } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
 
-export default class WalletCreation extends Component {
+export default class CreateWalletScreen extends Component {
   constructor() {
     super();
     this.generateWallet = this.generateWallet.bind(this);
@@ -76,8 +76,34 @@ export default class WalletCreation extends Component {
       );
     }
     return (
-      <div>
-        <button onClick={this.generateWallet}>Create Wallet</button>
+      <header className="masthead-create">
+        <div className="container h-100">
+          <div className="row h-100">
+            <div className="col-lg-12 my-auto">
+              <div className="header-content mx-auto">
+                <h1 className="mb-5">Thanks for registering</h1>
+                <h2>
+                  You'll also need a Zilliqa testnet wallet address to store the
+                  testnet tokens you have.
+                </h2>
+                <br />
+                <p className="warning">
+                  Warning: This is a testnet application for demo purposes and
+                  only handles testnet ZIL tokens. Please do not send any
+                  interim ERC-20 tokens or mainnet tokens here.
+                </p>
+                <div onClick={this.generateWallet} className="shiny-button">
+                  <button className="btn shiny-button-content">
+                    Generate a free testnet wallet for me
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/*<div>
+        <button >Create Wallet</button>
         {this.state.privkey ? (
           <div>
             <p>Address: {CP.getAddressFromPrivateKey(this.state.privkey)}</p>
@@ -95,7 +121,8 @@ export default class WalletCreation extends Component {
           : this.state.successRegisterUser
           ? "Successfully register user"
           : "Failed register user"}
-      </div>
+      </div>*/}
+      </header>
     );
   }
 }

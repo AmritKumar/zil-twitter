@@ -1,7 +1,49 @@
+import TwitterLogin from "react-twitter-auth";
+import { Redirect } from "react-router-dom";
 import React, { Component } from "react";
 
 export default class HomeScreen extends Component {
+  constructor() {
+    super();
+
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleFailed = this.handleFailed.bind(this);
+    this.state = { isAuthenticated: false, user: null, token: "" };
+  }
+
+  handleSuccess(response) {
+    const token = response.headers.get("x-auth-token");
+    response.json().then(user => {
+      if (token) {
+        this.setState({ isAuthenticated: true, user: user, token: token });
+        console.log(this.props);
+        // this.props.onSuccessLogin({ user, token });
+      }
+    });
+  }
+
+  handleFailed(error) {
+    alert(error);
+  }
+
+  logout() {
+    this.setState({ isAuthenticated: false, token: "", user: null });
+  }
+
   render() {
+    const { isAuthenticated, user, token } = this.state;
+
+    if (isAuthenticated) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/create",
+            state: { isAuthenticated, user, token }
+          }}
+        />
+      );
+    }
+
     return (
       <header className="masthead">
         <div className="container h-100">
@@ -13,12 +55,20 @@ export default class HomeScreen extends Component {
                 </h1>
                 <h2>Demo blockchain application by Zilliqa</h2>
                 <br />
-                <div className="shiny-button">
-                  <button className="btn shiny-button-content">
-                    <i className="fab fa-twitter" />
-                    JOIN SOCIAL PAY WITH TWITTER [DEMO]
-                  </button>
-                </div>
+                <TwitterLogin
+                  loginUrl="http://localhost:4000/api/v1/auth/twitter"
+                  onFailure={this.handleFailed}
+                  onSuccess={this.handleSuccess}
+                  requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
+                  className="twitter-login"
+                >
+                  <div className="shiny-button">
+                    <button className="btn shiny-button-content">
+                      <i className="fab fa-twitter" />
+                      JOIN SOCIAL PAY WITH TWITTER [DEMO]
+                    </button>
+                  </div>
+                </TwitterLogin>
               </div>
             </div>
             <div className="col-lg-7 my-auto">
