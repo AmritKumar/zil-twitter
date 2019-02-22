@@ -26,3 +26,8 @@ button:not(:disabled).twitter-login {
 	justify-content: center;
 	flex-direction: column;
 }
+
+.fa-times {
+	color: #c62828;
+	font-size: 70px;
+}
