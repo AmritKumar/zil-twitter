@@ -20,7 +20,7 @@ button:not(:disabled).twitter-login {
 	width: 90px;
 }
 
-.masthead-create .modal-body {
+.loading-modal .modal-body {
 	display: flex;
 	align-items: center;
 	justify-content: center;

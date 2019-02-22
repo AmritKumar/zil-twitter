@@ -163,7 +163,12 @@ async function getBalance() {
 async function getTweetId(txnId) {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
+    console.log(tx);
     const { event_logs: eventLogs } = tx.receipt;
+
+    if (!eventLogs) {
+      throw new Error("Tweet not valid");
+    }
 
     const eventLog = eventLogs.find(e => e._eventname === "new_tweet");
     const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");

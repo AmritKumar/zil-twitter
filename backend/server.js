@@ -250,7 +250,7 @@ async function fulfillSubmitTweet(req, res, next) {
     res.status(200).send(JSON.stringify(tx));
   } catch (e) {
     console.error(e);
-    res.status(400).send("Submit new tweet failed");
+    res.status(400).send("Tweet not valid");
   }
 }
 

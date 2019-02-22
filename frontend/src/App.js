@@ -26,20 +26,15 @@ class App extends Component {
       <Router>
         <span>
           <Navbar />
-          <span>
-            <Route
-              exact
-              path="/"
-              component={props => (
-                <HomeScreen
-                  {...props}
-                  onSuccessLogin={this.handleSuccessLogin}
-                />
-              )}
-            />
-            <Route path="/create" component={CreateWalletScreen} />
-            <Route path="/submit" component={SubmitTweet} />
-          </span>
+          <Route
+            exact
+            path="/"
+            component={props => (
+              <HomeScreen {...props} onSuccessLogin={this.handleSuccessLogin} />
+            )}
+          />
+          <Route path="/create" component={CreateWalletScreen} />
+          <Route path="/submit" component={SubmitTweet} />
           <Footer />
         </span>
       </Router>

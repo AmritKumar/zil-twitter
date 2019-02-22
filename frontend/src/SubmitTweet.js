@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import LoadingModal from "./LoadingModal";
 import {
   sendTransactionId,
   registerUser,
@@ -6,8 +7,8 @@ import {
   getTweetVerification
 } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
-const privkey =
-  "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
+// const privkey =
+//   "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
 
 export default class SubmitTweet extends Component {
   constructor() {
@@ -16,13 +17,17 @@ export default class SubmitTweet extends Component {
     this.submitTweet = this.submitTweet.bind(this);
     this.sendTransactionId = this.sendTransactionId.bind(this);
     this.state = {
-      tweetId: ""
+      tweetId: "",
+      errorMsg: null,
+      submittedTweet: false,
+      verifiedTweet: false,
+      retrievedVerification: false
     };
   }
 
   getPrivateKey() {
-    // return localStorage.getItem("privateKey");
-    return privkey;
+    return localStorage.getItem("privateKey");
+    // return privkey;
   }
 
   async sendTransactionId(txnId) {
@@ -48,11 +53,19 @@ export default class SubmitTweet extends Component {
     const { tweetId } = this.state;
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
-    const { txnId } = await _submitTweet(privateKey, tweetId);
-    const verifyTxn = await this.sendTransactionId(txnId);
-    const verifyTxnId = verifyTxn.id;
-    const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);
-    console.log(verifyTxn, tweetIsVerified);
+
+    try {
+      const { txnId } = await _submitTweet(privateKey, tweetId);
+      this.setState({ submittedTweet: true });
+      const verifyTxn = await this.sendTransactionId(txnId);
+      this.setState({ verifiedTweet: true });
+      const verifyTxnId = verifyTxn.id;
+      const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);
+      this.setState({ retrievedVerification: true });
+      console.log(verifyTxn, tweetIsVerified);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   handleChange(e) {
@@ -60,8 +73,33 @@ export default class SubmitTweet extends Component {
   }
 
   render() {
+    const { submittedTweet, verifiedTweet, retrievedVerification } = this.state;
+
+    let loadingPercent = 25;
+    let loadingText = "Submitting tweet to contract...";
+
+    if (submittedTweet) {
+      loadingPercent = 50;
+      loadingText = "Verifying tweet hashtag...";
+
+      if (verifiedTweet) {
+        loadingPercent = 75;
+        loadingText = "Retrieving verification...";
+
+        if (retrievedVerification) {
+          loadingPercent = 100;
+          loadingText = "Tweet is verified. Bringing you back...";
+        }
+      }
+    }
+
     return (
       <div>
+        <LoadingModal
+          title="Submitting tweet"
+          loadingText={loadingText}
+          loadingPercent={loadingPercent}
+        />
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
@@ -92,6 +130,9 @@ export default class SubmitTweet extends Component {
                       />
                       <div className="submit-tweet-btn shiny-button">
                         <button
+                          type="button"
+                          data-toggle="modal"
+                          data-target="#loadingModal"
                           onClick={this.submitTweet}
                           className="btn shiny-button-content"
                         >
