@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
-import { Line, Circle } from "rc-progress";
 import { registerUser as _registerUser } from "./zilliqa";
+import LoadingModal from "./LoadingModal";
 const CP = require("@zilliqa-js/crypto");
 
 export default class CreateWalletScreen extends Component {
@@ -81,71 +81,31 @@ export default class CreateWalletScreen extends Component {
       );
     }
 
-    let loadPercent = 0;
+    let loadingPercent = 0;
     let loadingText = "Generating private key...";
     if (privkey) {
       loadingText = "Requesting funds for wallet...";
-      loadPercent = 33.33;
+      loadingPercent = 33.33;
 
       if (successRequestFund) {
         loadingText = "Registering wallet in contract...";
-        loadPercent = 66.66;
+        loadingPercent = 66.66;
 
         if (successRegisterUser) {
           loadingText =
             "Successfully registered wallet in contract. Redirecting you...";
-          loadPercent = 100;
+          loadingPercent = 100;
         }
       }
     }
 
     return (
       <header className="masthead-create">
-        <div
-          className="modal fade"
-          id="exampleModal"
-          tabIndex="-1"
-          role="dialog"
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">
-                  Your Testnet Wallet
-                </h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="loader mb-3">
-                  <Circle
-                    percent={loadPercent}
-                    strokeWidth="5"
-                    strokeColor="#42e8e0"
-                  />
-                </div>
-                <span>{loadingText}</span>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-dismiss="modal"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LoadingModal
+          title="Your Testnet Wallet"
+          loadingPercent={loadingPercent}
+          loadingText={loadingText}
+        />
         <div className="container h-100">
           <div className="row h-100">
             <div className="col-lg-12 my-auto">

@@ -62,13 +62,85 @@ export default class SubmitTweet extends Component {
   render() {
     return (
       <div>
-        <input
-          type="text"
-          placeholder="Enter your tweet ID here"
-          onChange={this.handleChange}
-          value={this.state.tweetId}
-        />
-        <button onClick={this.submitTweet}>Submit Tweet</button>
+        <header className="masthead-submit">
+          <div className="container h-100">
+            <div className="row h-100">
+              <div className="balance">Balance: 20 ZILs</div>
+              <div className="col-lg-12 my-auto">
+                <div className="header-content mx-auto">
+                  <h1 className="mb-5">Enter your tweet ID</h1>
+                  <h2 className="mb-6">
+                    Your tweet must include the hashtag,{" "}
+                    <a
+                      target="_blank"
+                      href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                    >
+                      #BuiltWithZil
+                    </a>
+                  </h2>
+                  <div className="row my-auto w-100">
+                    <form
+                      action=""
+                      className="form-inline justify-content-center w-100 mt-5"
+                    >
+                      <input
+                        onChange={this.handleChange}
+                        value={this.state.tweetId}
+                        className="form-control mt-2 mb-2 mr-sm-3 pl-3"
+                        type="text"
+                        placeholder="1083722408815546368"
+                      />
+                      <div className="submit-tweet-btn shiny-button">
+                        <button
+                          onClick={this.submitTweet}
+                          className="btn shiny-button-content"
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  <div className="cta-container col-lg-12 text-center">
+                    <a className="cta-link" href="">
+                      How does this work?
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="instructions-section">
+          <div className="container">
+            <div className="row h-100">
+              <div className="col-lg-7 mx-auto my-auto">
+                <p className="heading">
+                  <strong className="ml-4">Instructions</strong>
+                  <ol>
+                    <li>Register or Sign in with your Twitter account.</li>
+                    <li>
+                      Note down the private key for your blockchain wallet
+                      generated for future use.
+                    </li>
+                    <li>
+                      Tweet something with the hashtag{" "}
+                      <a
+                        target="_blank"
+                        href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                      >
+                        #BuildWithZil
+                      </a>
+                      .
+                    </li>
+                    <li>Submit the tweet ID here for verification.</li>
+                    <li>Get test tokens for our test blockchain!</li>
+                  </ol>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
