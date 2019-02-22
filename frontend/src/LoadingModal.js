@@ -27,14 +27,20 @@ const LoadingModal = props => {
             </button>
           </div>
           <div className="modal-body">
-            <div className="loader mb-3">
-              <Circle
-                percent={props.loadingPercent}
-                strokeWidth="5"
-                strokeColor="#42e8e0"
-              />
+            <div className="loader mb-3 text-center">
+              {props.errorText ? (
+                <i className="fas fa-times" />
+              ) : (
+                <Circle
+                  percent={props.loadingPercent}
+                  strokeWidth="5"
+                  strokeColor="#42e8e0"
+                />
+              )}
             </div>
-            <span>{props.loadingText}</span>
+            <span className="text-center mr-5 ml-5">
+              {props.errorText ? props.errorText : props.loadingText}
+            </span>
           </div>
           <div className="modal-footer">
             <button

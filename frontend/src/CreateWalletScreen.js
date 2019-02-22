@@ -14,7 +14,8 @@ export default class CreateWalletScreen extends Component {
     this.state = {
       successRequestFund: null,
       successRegisterUser: null,
-      privkey: null
+      privkey: null,
+      errMsg: null
     };
   }
 
@@ -36,8 +37,14 @@ export default class CreateWalletScreen extends Component {
   async registerUser(privkey, username) {
     if (this.state.successRequestFund) {
       const address = CP.getAddressFromPrivateKey(privkey);
-      const receipt = await _registerUser(privkey, address, username);
-      this.setState({ successRegisterUser: receipt.success });
+      try {
+        const tx = await _registerUser(privkey, address, username);
+        console.log(tx);
+        // this.setState({ successRegisterUser: receipt.success });
+      } catch (e) {
+        this.setState({ errMsg: e.message });
+        console.error(e);
+      }
     }
   }
 
@@ -46,26 +53,38 @@ export default class CreateWalletScreen extends Component {
     const { id: userId, username, token: twitterToken } = user;
     const address = CP.getAddressFromPrivateKey(privkey);
 
-    const response = await fetch("http://localhost:4000/api/v1/request-funds", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token
-      },
-      body: JSON.stringify({
-        username,
-        address,
-        twitterToken
-      })
-    });
-    const receipt = await response.json();
-    console.log(receipt);
-    this.setState({ successRequestFund: receipt.success });
-    return receipt;
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/v1/request-funds",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token
+          },
+          body: JSON.stringify({
+            username,
+            address,
+            twitterToken
+          })
+        }
+      );
+      const receipt = await response.json();
+      console.log(receipt);
+      this.setState({ successRequestFund: receipt.success });
+      return receipt;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   render() {
-    const { successRegisterUser, successRequestFund, privkey } = this.state;
+    const {
+      successRegisterUser,
+      successRequestFund,
+      privkey,
+      errMsg
+    } = this.state;
 
     if (successRequestFund && successRegisterUser) {
       window.$("#loadingModal").modal("hide");
@@ -106,6 +125,7 @@ export default class CreateWalletScreen extends Component {
           title="Your Testnet Wallet"
           loadingPercent={loadingPercent}
           loadingText={loadingText}
+          errorText={errMsg}
         />
         <div className="container h-100">
           <div className="row h-100">

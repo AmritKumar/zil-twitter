@@ -8,7 +8,7 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "c11b3f1cd0497f975ee4d35bd2c2cba8ecc88e73";
+const contractAddress = "33099C764613A1D4F32821C1B0E9FC00A83D3190";
 const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("1000000000");
@@ -32,7 +32,13 @@ export async function registerUser(privateKey, userAddress, username) {
       gasLimit: Long.fromNumber(1000)
     }
   );
-  return tx.receipt;
+  const { event_logs: eventLogs } = tx.receipt;
+  if (!eventLogs) {
+    throw new Error(
+      "Username or address already used. Please try another username."
+    );
+  }
+  return tx;
 }
 
 export async function submitTweet(privateKey, tweetId) {

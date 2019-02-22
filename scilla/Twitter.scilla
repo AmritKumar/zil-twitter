@@ -150,6 +150,12 @@ transition register_user(user_address: ByStr20, twitter_username: String)
     | False =>
         users[user_address] := twitter_username;
         used_usernames[twitter_username] := true;
+
+        e = {_eventname : "register_user";
+                user: user_address;
+                username: twitter_username};
+        event e;
+
         msg = {_tag: "";
                 _recipient: _sender;
                 _amount: zero;

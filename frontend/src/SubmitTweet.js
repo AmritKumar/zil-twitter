@@ -111,6 +111,7 @@ export default class SubmitTweet extends Component {
                     Your tweet must include the hashtag,{" "}
                     <a
                       target="_blank"
+                      rel="noopener noreferrer"
                       href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                     >
                       #BuiltWithZil
@@ -168,6 +169,7 @@ export default class SubmitTweet extends Component {
                       Tweet something with the hashtag{" "}
                       <a
                         target="_blank"
+                        rel="noopener noreferrer"
                         href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
                         #BuildWithZil
