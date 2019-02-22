@@ -12,6 +12,7 @@ export default class CreateWalletScreen extends Component {
     this.requestFunds = this.requestFunds.bind(this);
     this.registerUser = this.registerUser.bind(this);
     this.state = {
+      redirectBack: false,
       successRequestFund: null,
       successRegisterUser: null,
       privkey: null,
@@ -26,6 +27,7 @@ export default class CreateWalletScreen extends Component {
   async generateWallet() {
     const { username } = this.props.location.state.user;
     const privkey = CP.schnorr.generatePrivateKey();
+    // delay to create illusion
     setTimeout(() => {
       this.setState({ privkey });
       this.storePrivateKey(privkey);
@@ -78,13 +80,42 @@ export default class CreateWalletScreen extends Component {
     }
   }
 
+  componentDidMount() {
+    window.$("#loadingModal").on("hidden.bs.modal", () => {
+      if (this.state.errMsg) {
+        this.setState({ redirectBack: true });
+      } else {
+        // refresh the state
+        this.setState({
+          successRequestFund: null,
+          successRegisterUser: null,
+          privkey: null
+        });
+      }
+    });
+  }
+
   render() {
     const {
       successRegisterUser,
       successRequestFund,
       privkey,
-      errMsg
+      errMsg,
+      redirectBack
     } = this.state;
+
+    if (redirectBack) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/",
+            state: {
+              ...this.props.location.state
+            }
+          }}
+        />
+      );
+    }
 
     if (successRequestFund && successRegisterUser) {
       window.$("#loadingModal").modal("hide");
