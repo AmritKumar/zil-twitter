@@ -16,7 +16,6 @@ export default class HomeScreen extends Component {
     response.json().then(user => {
       if (token) {
         this.setState({ isAuthenticated: true, user: user, token: token });
-        console.log(this.props);
         // this.props.onSuccessLogin({ user, token });
       }
     });

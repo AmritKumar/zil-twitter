@@ -9,9 +9,20 @@ body {
 	border: none;
 }
 
-[type="button"]:not(:disabled),
+[type="button"]:not(:disabled).twitter-login,
 [type="reset"]:not(:disabled),
 [type="submit"]:not(:disabled),
 button:not(:disabled).twitter-login {
 	cursor: inherit;
+}
+
+.loader {
+	width: 90px;
+}
+
+.masthead-create .modal-body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
 }

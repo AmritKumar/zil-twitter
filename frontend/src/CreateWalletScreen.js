@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
+import { Line, Circle } from "rc-progress";
 import { registerUser as _registerUser } from "./zilliqa";
 const CP = require("@zilliqa-js/crypto");
 
@@ -25,8 +26,10 @@ export default class CreateWalletScreen extends Component {
   async generateWallet() {
     const { username } = this.props.location.state.user;
     const privkey = CP.schnorr.generatePrivateKey();
-    this.setState({ privkey });
-    this.storePrivateKey(privkey);
+    setTimeout(() => {
+      this.setState({ privkey });
+      this.storePrivateKey(privkey);
+    }, 5000);
     await this.requestFunds(privkey);
     await this.registerUser(privkey, username);
   }
@@ -63,7 +66,9 @@ export default class CreateWalletScreen extends Component {
   }
 
   render() {
-    if (this.state.successRequestFund && this.state.successRegisterUser) {
+    const { successRegisterUser, successRequestFund, privkey } = this.state;
+
+    if (successRequestFund && successRegisterUser) {
       return (
         <Redirect
           to={{
@@ -75,8 +80,72 @@ export default class CreateWalletScreen extends Component {
         />
       );
     }
+
+    let loadPercent = 0;
+    let loadingText = "Generating private key...";
+    if (privkey) {
+      loadingText = "Requesting funds for wallet...";
+      loadPercent = 33.33;
+
+      if (successRequestFund) {
+        loadingText = "Registering wallet in contract...";
+        loadPercent = 66.66;
+
+        if (successRegisterUser) {
+          loadingText =
+            "Successfully registered wallet in contract. Redirecting you...";
+          loadPercent = 100;
+        }
+      }
+    }
+
     return (
       <header className="masthead-create">
+        <div
+          className="modal fade"
+          id="exampleModal"
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">
+                  Your Testnet Wallet
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="loader mb-3">
+                  <Circle
+                    percent={loadPercent}
+                    strokeWidth="5"
+                    strokeColor="#42e8e0"
+                  />
+                </div>
+                <span>{loadingText}</span>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="container h-100">
           <div className="row h-100">
             <div className="col-lg-12 my-auto">
@@ -93,7 +162,12 @@ export default class CreateWalletScreen extends Component {
                   interim ERC-20 tokens or mainnet tokens here.
                 </p>
                 <div onClick={this.generateWallet} className="shiny-button">
-                  <button className="btn shiny-button-content">
+                  <button
+                    type="button"
+                    className="btn shiny-button-content"
+                    data-toggle="modal"
+                    data-target="#exampleModal"
+                  >
                     Generate a free testnet wallet for me
                   </button>
                 </div>
@@ -101,27 +175,6 @@ export default class CreateWalletScreen extends Component {
             </div>
           </div>
         </div>
-
-        {/*<div>
-        <button >Create Wallet</button>
-        {this.state.privkey ? (
-          <div>
-            <p>Address: {CP.getAddressFromPrivateKey(this.state.privkey)}</p>
-            <p>Private key: {this.state.privkey}</p>
-          </div>
-        ) : null}
-        {this.state.successRequestFund === null
-          ? "Requesting funds..."
-          : this.state.successRequestFund
-          ? "Successfully requested funds"
-          : "Failed requested funds"}
-        {"\n"}
-        {this.state.successRegisterUser === null
-          ? "Registering user..."
-          : this.state.successRegisterUser
-          ? "Successfully register user"
-          : "Failed register user"}
-      </div>*/}
       </header>
     );
   }
