@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
 import { registerUser as _registerUser } from "./zilliqa";
@@ -69,6 +68,8 @@ export default class CreateWalletScreen extends Component {
     const { successRegisterUser, successRequestFund, privkey } = this.state;
 
     if (successRequestFund && successRegisterUser) {
+      window.$("#loadingModal").modal("hide");
+
       return (
         <Redirect
           to={{
@@ -126,7 +127,7 @@ export default class CreateWalletScreen extends Component {
                     type="button"
                     className="btn shiny-button-content"
                     data-toggle="modal"
-                    data-target="#exampleModal"
+                    data-target="#loadingModal"
                   >
                     Generate a free testnet wallet for me
                   </button>

@@ -1,11 +1,11 @@
-import React, { Component } from "react";
-import { Line, Circle } from "rc-progress";
+import React from "react";
+import { Circle } from "rc-progress";
 
 const LoadingModal = props => {
   return (
     <div
-      className="modal fade"
-      id="exampleModal"
+      className="modal loading-modal fade"
+      id="loadingModal"
       tabIndex="-1"
       role="dialog"
       aria-labelledby="exampleModalLabel"
