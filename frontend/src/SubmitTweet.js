@@ -5,6 +5,7 @@ import {
   registerUser,
   submitTweet as _submitTweet,
   getTweetVerification,
+  isTweetIdAlreadyRegistered,
   zilliqa
 } from "./zilliqa";
 const { units, BN } = require("@zilliqa-js/util");
@@ -73,6 +74,24 @@ export default class SubmitTweet extends Component {
     const { tweetId } = this.state;
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty" });
+      window.$("#loadingModal").modal("show");
+      return;
+    }
+
+    if (tweetId.length < 18) {
+      this.setState({
+        errMsg:
+          "Invalid tweet ID. Please look at instructions to see what a tweet ID is."
+      });
+      window.$("#loadingModal").modal("show");
+      return;
+    }
+
+    const isRegistered = await isTweetIdAlreadyRegistered();
+    if (isRegistered) {
+      this.setState({
+        errMsg: "Tweet ID already submitted. Please submit another tweet ID."
+      });
       window.$("#loadingModal").modal("show");
       return;
     }
