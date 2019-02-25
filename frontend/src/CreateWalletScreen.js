@@ -15,6 +15,7 @@ export default class CreateWalletScreen extends Component {
       redirectBack: false,
       successRequestFund: null,
       successRegisterUser: null,
+      redirectToSubmitTweet: false,
       privkey: null,
       errMsg: null
     };
@@ -42,7 +43,7 @@ export default class CreateWalletScreen extends Component {
       try {
         const tx = await _registerUser(privkey, address, username);
         console.log(tx);
-        // this.setState({ successRegisterUser: receipt.success });
+        this.setState({ successRegisterUser: tx.receipt.success });
       } catch (e) {
         this.setState({ errMsg: e.message });
         console.error(e);
@@ -95,16 +96,28 @@ export default class CreateWalletScreen extends Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { successRegisterUser, successRequestFund } = this.state;
+    if (successRegisterUser && successRequestFund) {
+      setTimeout(() => {
+        window.$("#loadingModal").modal("hide");
+        this.setState({ redirectToSubmitTweet: true });
+      }, 1000);
+    }
+  }
+
   render() {
     const {
       successRegisterUser,
       successRequestFund,
       privkey,
       errMsg,
-      redirectBack
+      redirectBack,
+      redirectToSubmitTweet
     } = this.state;
 
-    if (redirectBack) {
+    const { location } = this.props;
+    if (redirectBack || !location.state) {
       return (
         <Redirect
           to={{
@@ -117,9 +130,7 @@ export default class CreateWalletScreen extends Component {
       );
     }
 
-    if (successRequestFund && successRegisterUser) {
-      window.$("#loadingModal").modal("hide");
-
+    if (redirectToSubmitTweet) {
       return (
         <Redirect
           to={{

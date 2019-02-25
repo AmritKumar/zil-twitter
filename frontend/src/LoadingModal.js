@@ -28,6 +28,9 @@ const LoadingModal = props => {
           </div>
           <div className="modal-body">
             <div className="loader mb-3 text-center">
+              {props.loadingPercent === 100 ? (
+                <i className="fas fa-check" />
+              ) : null}
               {props.errorText ? (
                 <i className="fas fa-times" />
               ) : (

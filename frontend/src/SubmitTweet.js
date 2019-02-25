@@ -4,8 +4,10 @@ import {
   sendTransactionId,
   registerUser,
   submitTweet as _submitTweet,
-  getTweetVerification
+  getTweetVerification,
+  zilliqa
 } from "./zilliqa";
+const { units, BN } = require("@zilliqa-js/util");
 const CP = require("@zilliqa-js/crypto");
 // const privkey =
 //   "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
@@ -16,18 +18,29 @@ export default class SubmitTweet extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
     this.sendTransactionId = this.sendTransactionId.bind(this);
+    this.updateBalance = this.updateBalance.bind(this);
     this.state = {
       tweetId: "",
       errorMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
-      retrievedVerification: false
+      retrievedVerification: false,
+      closeModal: false,
+      balance: 0
     };
   }
 
   getPrivateKey() {
     return localStorage.getItem("privateKey");
     // return privkey;
+  }
+
+  async updateBalance() {
+    const address = CP.getAddressFromPrivateKey(this.getPrivateKey());
+    const data = await zilliqa.blockchain.getBalance(address);
+    const { balance } = data.result;
+    const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+    this.setState({ balance: zilBalance });
   }
 
   async sendTransactionId(txnId) {
@@ -50,6 +63,12 @@ export default class SubmitTweet extends Component {
   }
 
   async submitTweet() {
+    this.setState({
+      submittedTweet: false,
+      verifiedTweet: false,
+      retrievedVerification: false
+    });
+
     const { tweetId } = this.state;
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
@@ -72,8 +91,35 @@ export default class SubmitTweet extends Component {
     this.setState({ tweetId: e.target.value });
   }
 
-  render() {
+  componentDidMount() {
+    setInterval(() => {
+      this.updateBalance();
+    }, 5000);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
     const { submittedTweet, verifiedTweet, retrievedVerification } = this.state;
+    if (submittedTweet && verifiedTweet && retrievedVerification) {
+      // clear form
+      setTimeout(() => {
+        window.$("#loadingModal").modal("hide");
+        this.setState({
+          tweetId: "",
+          submittedTweet: false,
+          verifiedTweet: false,
+          retrievedVerification: false
+        });
+      }, 4000);
+    }
+  }
+
+  render() {
+    const {
+      balance,
+      submittedTweet,
+      verifiedTweet,
+      retrievedVerification
+    } = this.state;
 
     let loadingPercent = 25;
     let loadingText = "Submitting tweet to contract...";
@@ -88,7 +134,7 @@ export default class SubmitTweet extends Component {
 
         if (retrievedVerification) {
           loadingPercent = 100;
-          loadingText = "Tweet is verified. Bringing you back...";
+          loadingText = "Tweet is verified. Rewarded 10 ZILs!";
         }
       }
     }
@@ -103,7 +149,7 @@ export default class SubmitTweet extends Component {
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
-              <div className="balance">Balance: 20 ZILs</div>
+              <div className="balance">Balance: {balance} ZILs</div>
               <div className="col-lg-12 my-auto">
                 <div className="header-content mx-auto">
                   <h1 className="mb-5">Enter your tweet ID</h1>

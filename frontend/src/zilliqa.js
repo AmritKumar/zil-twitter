@@ -8,8 +8,8 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "33099C764613A1D4F32821C1B0E9FC00A83D3190";
-const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+const contractAddress = "79ce3c05a0b9c9863d7ab26023c4e67565af4bb3";
+export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("1000000000");
 
@@ -83,5 +83,6 @@ export async function getTweetVerification(txnId, tweetId) {
     return true;
   } catch (e) {
     console.error(e);
+    return false;
   }
 }
