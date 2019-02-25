@@ -121,16 +121,17 @@ export default class SubmitTweet extends Component {
       retrievedVerification
     } = this.state;
 
+    const msg = "\nPlease be patient, this will take a while.";
     let loadingPercent = 25;
-    let loadingText = "Submitting tweet to contract...";
+    let loadingText = "Submitting tweet to contract..." + msg;
 
     if (submittedTweet) {
       loadingPercent = 50;
-      loadingText = "Verifying tweet hashtag...";
+      loadingText = "Verifying tweet hashtag..." + msg;
 
       if (verifiedTweet) {
         loadingPercent = 75;
-        loadingText = "Retrieving verification...";
+        loadingText = "Retrieving verification..." + msg;
 
         if (retrievedVerification) {
           loadingPercent = 100;

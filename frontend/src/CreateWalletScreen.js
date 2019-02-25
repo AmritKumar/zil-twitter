@@ -78,6 +78,9 @@ export default class CreateWalletScreen extends Component {
       return receipt;
     } catch (e) {
       console.log(e);
+      this.setState({
+        errMsg: "Failed in requesting funds.\nPlease refresh and try again."
+      });
     }
   }
 
@@ -143,14 +146,15 @@ export default class CreateWalletScreen extends Component {
       );
     }
 
+    const msg = "\nPlease be patient, this will take a while.";
     let loadingPercent = 0;
     let loadingText = "Generating private key...";
     if (privkey) {
-      loadingText = "Requesting funds for wallet...";
+      loadingText = "Requesting funds for wallet..." + msg;
       loadingPercent = 33.33;
 
       if (successRequestFund) {
-        loadingText = "Registering wallet in contract...";
+        loadingText = "Registering wallet in contract..." + msg;
         loadingPercent = 66.66;
 
         if (successRegisterUser) {
