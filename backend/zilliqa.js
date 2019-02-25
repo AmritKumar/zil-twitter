@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "edf8fbb9e371bd0bb9ae6ea2bc62b4ac36a9a18c";
+const contractAddress = "4a3164bdca141e21c30c9d42c47abe6bcc4b8915";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -146,7 +146,7 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
   const tx = await deployedContract.call("verify_tweet", params, {
     version: VERSION,
     amount: new BN(0),
-    gasPrice: new BN("2000000000"),
+    gasPrice: new BN("5000000000"),
     gasLimit: Long.fromNumber(5000)
   });
   zilliqa.wallet.setDefault(ownerAddress);
@@ -200,7 +200,7 @@ async function depositToContract(contract) {
     const tx = await contract.call("deposit", [], {
       version: VERSION,
       amount: new BN(units.toQa("50", units.Units.Zil)),
-      gasPrice: new BN("2000000000"),
+      gasPrice: new BN("5000000000"),
       gasLimit: Long.fromNumber(1000)
     });
     console.log(tx, tx.receipt);

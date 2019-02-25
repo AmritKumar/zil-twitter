@@ -219,7 +219,6 @@ async function fulfillFundsRequest(req, res, next) {
     // const registerReceipt = await registerUser(address, username);
     // const promises = [fundAccount(address), registerUser(address, username)];
     // const receipts = await Promise.all(promises);
-    throw new Error();
     res.status(200).send(JSON.stringify(fundReceipt));
     next();
   } catch (e) {
