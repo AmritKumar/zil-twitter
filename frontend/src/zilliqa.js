@@ -8,7 +8,7 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "79ce3c05a0b9c9863d7ab26023c4e67565af4bb3";
+const contractAddress = "edf8fbb9e371bd0bb9ae6ea2bc62b4ac36a9a18c";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("1000000000");
