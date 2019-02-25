@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "33099C764613A1D4F32821C1B0E9FC00A83D3190";
+const contractAddress = "79ce3c05a0b9c9863d7ab26023c4e67565af4bb3";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -231,5 +231,7 @@ module.exports = {
   registerUser,
   getTweetId,
   getHashtag,
-  verifyTweet
+  verifyTweet,
+  depositToContract,
+  deployTestContract
 };

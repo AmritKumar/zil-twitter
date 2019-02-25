@@ -17,6 +17,10 @@ button:not(:disabled).twitter-login {
 }
 
 .loader {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	width: 90px;
 }
 
@@ -30,4 +34,10 @@ button:not(:disabled).twitter-login {
 .fa-times {
 	color: #c62828;
 	font-size: 70px;
+}
+
+.fa-check {
+	position: absolute;
+	color: #42e8e0;
+	font-size: 40px;
 }

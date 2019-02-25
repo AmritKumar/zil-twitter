@@ -22,7 +22,7 @@ export default class HomeScreen extends Component {
   }
 
   handleFailed(error) {
-    alert(error);
+    console.error(error);
   }
 
   logout() {
