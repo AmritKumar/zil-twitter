@@ -14,23 +14,54 @@ import SubmitTweet from "./SubmitTweet";
 class App extends Component {
   constructor() {
     super();
-    this.handleSuccessLogin = this.handleSuccessLogin.bind(this);
+    this.handleSuccess = this.handleSuccess.bind(this);
+    this.handleFailed = this.handleFailed.bind(this);
+    this.state = { isAuthenticated: false, user: null, token: "" };
   }
 
   handleSuccessLogin() {
     this.setState({ isAuthenticated: true });
   }
 
+  handleSuccess(response) {
+    const token = response.headers.get("x-auth-token");
+    response.json().then(user => {
+      if (token) {
+        this.setState({ isAuthenticated: true, user: user, token: token });
+        // this.props.onSuccessLogin({ user, token });
+      }
+    });
+  }
+
+  handleFailed(error) {
+    console.error(error);
+  }
+
+  logout() {
+    this.setState({ isAuthenticated: false, token: "", user: null });
+  }
+
   render() {
+    const { isAuthenticated } = this.state;
+
     return (
       <Router>
         <span>
-          <Navbar />
+          <Navbar
+            isAuthenticated={isAuthenticated}
+            onLoginSuccess={this.handleSuccess}
+            onLoginFail={this.handleFailed}
+          />
           <Route
             exact
             path="/"
             component={props => (
-              <HomeScreen {...props} onSuccessLogin={this.handleSuccessLogin} />
+              <HomeScreen
+                {...props}
+                isAuthenticated={isAuthenticated}
+                onLoginSuccess={this.handleSuccess}
+                onLoginFail={this.handleFailed}
+              />
             )}
           />
           <Route path="/create" component={CreateWalletScreen} />
