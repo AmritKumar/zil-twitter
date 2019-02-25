@@ -13,6 +13,13 @@ export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("5000000000");
 
+export async function isTweetIdAlreadyRegistered(tweetId) {
+  const state = await contract.getState();
+  const verifyingTweets = state.find(s => s.vname === "verifying_tweets");
+  const tweet = verifyingTweets.value.find(v => v.key === tweetId);
+  return !tweet;
+}
+
 export async function registerUser(privateKey, userAddress, username) {
   zilliqa.wallet.addByPrivateKey(privateKey);
   const tx = await contract.call(
@@ -43,8 +50,6 @@ export async function registerUser(privateKey, userAddress, username) {
 
 export async function submitTweet(privateKey, tweetId) {
   zilliqa.wallet.addByPrivateKey(privateKey);
-
-  const state = await contract.getState();
 
   try {
     const tx = await contract.call(
