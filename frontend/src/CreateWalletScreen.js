@@ -194,6 +194,8 @@ export default class CreateWalletScreen extends Component {
                     className="btn shiny-button-content"
                     data-toggle="modal"
                     data-target="#loadingModal"
+                    data-backdrop="static"
+                    data-keyboard="false"
                   >
                     Generate a free testnet wallet for me
                   </button>

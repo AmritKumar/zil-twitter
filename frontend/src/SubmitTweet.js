@@ -25,7 +25,6 @@ export default class SubmitTweet extends Component {
       submittedTweet: false,
       verifiedTweet: false,
       retrievedVerification: false,
-      closeModal: false,
       balance: 0
     };
   }
@@ -46,34 +45,45 @@ export default class SubmitTweet extends Component {
   async sendTransactionId(txnId) {
     const { token, user } = this.props.location.state;
     // const { username } = user;
-    const response = await fetch("http://localhost:4000/api/v1/submit-tweet", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token
-      },
-      body: JSON.stringify({
-        txnId,
-        username: user.username,
-        twitterToken: user.token
-      })
-    });
-    const data = await response.json();
-    return data;
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/v1/submit-tweet",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token
+          },
+          body: JSON.stringify({
+            txnId,
+            username: user.username,
+            twitterToken: user.token
+          })
+        }
+      );
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.error(e);
+      throw new Error("Failed to verify tweet. Please try again.");
+    }
   }
 
   async submitTweet() {
-    this.setState({
-      submittedTweet: false,
-      verifiedTweet: false,
-      retrievedVerification: false
-    });
-
     const { tweetId } = this.state;
+    if (tweetId === "") {
+      this.setState({ errMsg: "Tweet ID cannot be empty" });
+      window.$("#loadingModal").modal("show");
+      return;
+    }
+
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
+      const modal = window
+        .$("#loadingModal")
+        .modal({ backdrop: "static", keyboard: false });
       const { txnId } = await _submitTweet(privateKey, tweetId);
       this.setState({ submittedTweet: true });
       const verifyTxn = await this.sendTransactionId(txnId);
@@ -84,6 +94,7 @@ export default class SubmitTweet extends Component {
       console.log(verifyTxn, tweetIsVerified);
     } catch (e) {
       console.error(e);
+      this.setState({ errMsg: e.message });
     }
   }
 
@@ -95,6 +106,16 @@ export default class SubmitTweet extends Component {
     setInterval(() => {
       this.updateBalance();
     }, 5000);
+
+    window.$("#loadingModal").on("hidden.bs.modal", () => {
+      this.setState({
+        tweetId: "",
+        errorMsg: null,
+        submittedTweet: false,
+        verifiedTweet: false,
+        retrievedVerification: false
+      });
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -105,11 +126,12 @@ export default class SubmitTweet extends Component {
         window.$("#loadingModal").modal("hide");
         this.setState({
           tweetId: "",
+          errMsg: null,
           submittedTweet: false,
           verifiedTweet: false,
           retrievedVerification: false
         });
-      }, 4000);
+      }, 5000);
     }
   }
 
@@ -118,7 +140,8 @@ export default class SubmitTweet extends Component {
       balance,
       submittedTweet,
       verifiedTweet,
-      retrievedVerification
+      retrievedVerification,
+      errMsg
     } = this.state;
 
     const msg = "\nPlease be patient, this will take a while.";
@@ -143,6 +166,7 @@ export default class SubmitTweet extends Component {
     return (
       <div>
         <LoadingModal
+          errorText={errMsg}
           title="Submitting tweet"
           loadingText={loadingText}
           loadingPercent={loadingPercent}
@@ -179,8 +203,6 @@ export default class SubmitTweet extends Component {
                       <div className="submit-tweet-btn shiny-button">
                         <button
                           type="button"
-                          data-toggle="modal"
-                          data-target="#loadingModal"
                           onClick={this.submitTweet}
                           className="btn shiny-button-content"
                         >

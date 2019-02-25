@@ -8,10 +8,10 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "edf8fbb9e371bd0bb9ae6ea2bc62b4ac36a9a18c";
+const contractAddress = "4a3164bdca141e21c30c9d42c47abe6bcc4b8915";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
-const myGasPrice = new BN("1000000000");
+const myGasPrice = new BN("5000000000");
 
 export async function registerUser(privateKey, userAddress, username) {
   zilliqa.wallet.addByPrivateKey(privateKey);
@@ -28,7 +28,7 @@ export async function registerUser(privateKey, userAddress, username) {
     {
       version: VERSION,
       amount: new BN(0),
-      gasPrice: new BN("2000000000"),
+      gasPrice: myGasPrice,
       gasLimit: Long.fromNumber(1000)
     }
   );
@@ -45,27 +45,31 @@ export async function submitTweet(privateKey, tweetId) {
   zilliqa.wallet.addByPrivateKey(privateKey);
 
   const state = await contract.getState();
-  console.log(state);
 
-  const tx = await contract.call(
-    "new_tweet",
-    [
+  try {
+    const tx = await contract.call(
+      "new_tweet",
+      [
+        {
+          vname: "tweet_id",
+          type: "String",
+          value: tweetId
+        }
+      ],
       {
-        vname: "tweet_id",
-        type: "String",
-        value: tweetId
+        version: VERSION,
+        amount: new BN(0),
+        gasPrice: myGasPrice,
+        gasLimit: Long.fromNumber(1000)
       }
-    ],
-    {
-      version: VERSION,
-      amount: new BN(0),
-      gasPrice: myGasPrice,
-      gasLimit: Long.fromNumber(1000)
-    }
-  );
-  console.log(tx);
-  const { id: txnId } = tx;
-  return { txnId, ...tx.receipt };
+    );
+    console.log(tx);
+    const { id: txnId } = tx;
+    return { txnId, ...tx.receipt };
+  } catch (e) {
+    console.error(e);
+    throw new Error("Failed to submit tweet. Please try again.");
+  }
 }
 
 export async function getTweetVerification(txnId, tweetId) {
@@ -83,6 +87,8 @@ export async function getTweetVerification(txnId, tweetId) {
     return true;
   } catch (e) {
     console.error(e);
-    return false;
+    throw new Error(
+      "Cannot retrieve tweet verification. Please refresh and try again."
+    );
   }
 }
