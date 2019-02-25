@@ -20,6 +20,13 @@ export async function isTweetIdAlreadyRegistered(tweetId) {
   return !tweet;
 }
 
+export async function isUserRegistered(username) {
+  const state = await contract.getState();
+  const usedUsernames = state.find(s => s.vname === "used_usernames");
+  const isUsed = usedUsernames.value.find(u => u.key === username);
+  return !!isUsed;
+}
+
 export async function registerUser(privateKey, userAddress, username) {
   zilliqa.wallet.addByPrivateKey(privateKey);
   const tx = await contract.call(

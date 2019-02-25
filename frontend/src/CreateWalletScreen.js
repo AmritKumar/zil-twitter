@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
-import { registerUser as _registerUser } from "./zilliqa";
+import { registerUser as _registerUser, isUserRegistered } from "./zilliqa";
 import LoadingModal from "./LoadingModal";
 const CP = require("@zilliqa-js/crypto");
 
@@ -27,6 +27,13 @@ export default class CreateWalletScreen extends Component {
 
   async generateWallet() {
     const { username } = this.props.location.state.user;
+    const isRegistered = await isUserRegistered(username);
+    if (isRegistered) {
+      this.setState({ errMsg: "User is already registered." });
+      window.$("#loadingModal").modal("show");
+      return;
+    }
+
     const privkey = CP.schnorr.generatePrivateKey();
     // delay to create illusion
     setTimeout(() => {
