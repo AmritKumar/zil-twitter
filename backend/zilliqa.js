@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "281a2010be243358634dda5f0fafd085cf385a68";
+const contractAddress = "16b7efba383e1ebabc0d6f39de6771c14fb49255";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -56,7 +56,7 @@ const initParams = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#BuiltWithZil"
+    value: "#BuildonZIL"
   }
 ];
 
@@ -219,7 +219,7 @@ async function main() {
   // const tx = await verifyTweet(
   //   "0x2a89b69ec1d4f23e7c2109f117adcd4f415a1a0a",
   //   "1098114537063014401",
-  //   "hey yolo #BuiltWithZil",
+  //   "hey yolo #BuildonZIL",
   //   9,
   //   21
   // );

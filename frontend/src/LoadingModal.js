@@ -2,6 +2,9 @@ import React from "react";
 import { Circle } from "rc-progress";
 
 const LoadingModal = props => {
+  const LOADING_COLOR = "#42e8e0";
+  const ERROR_COLOR = "#c62828";
+
   return (
     <div
       className="modal loading-modal fade"
@@ -31,15 +34,12 @@ const LoadingModal = props => {
               {props.loadingPercent === 100 ? (
                 <i className="fas fa-check" />
               ) : null}
-              {props.errorText ? (
-                <i className="fas fa-times" />
-              ) : (
-                <Circle
-                  percent={props.loadingPercent}
-                  strokeWidth="5"
-                  strokeColor="#42e8e0"
-                />
-              )}
+              {props.errorText ? <i className="fas fa-times" /> : null}
+              <Circle
+                percent={props.errorText ? 100 : props.loadingPercent}
+                strokeWidth="5"
+                strokeColor={props.errorText ? ERROR_COLOR : LOADING_COLOR}
+              />
             </div>
             <span className="text-center mr-5 ml-5">
               {props.errorText ? props.errorText : props.loadingText}

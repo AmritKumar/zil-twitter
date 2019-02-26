@@ -32,8 +32,9 @@ button:not(:disabled).twitter-login {
 }
 
 .fa-times {
+	position: absolute;
 	color: #c62828;
-	font-size: 70px;
+	font-size: 40px;
 }
 
 .fa-check {
