@@ -1,14 +1,12 @@
 const { Zilliqa } = require("@zilliqa-js/zilliqa");
 const { BN, Long, bytes, units } = require("@zilliqa-js/util");
 const contracts = require("@zilliqa-js/contract");
-const CP = require("@zilliqa-js/crypto");
-const { promisify } = require("util");
 
 const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "281a2010be243358634dda5f0fafd085cf385a68";
+const contractAddress = "16b7efba383e1ebabc0d6f39de6771c14fb49255";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("5000000000");

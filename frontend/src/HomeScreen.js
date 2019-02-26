@@ -1,9 +1,9 @@
 import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
-import React, { Component } from "react";
+import React from "react";
 
 const HomeScreen = props => {
-  const { isAuthenticated, onLoginSuccess, onLoginFail, user, token } = props;
+  const { isAuthenticated, user, token } = props;
 
   const privateKey = localStorage.getItem("privateKey");
 

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import TwitterLogin from "react-twitter-auth";
 import { Link } from "react-router-dom";
 
@@ -9,7 +9,7 @@ const Navbar = props => {
       id="mainNav"
     >
       <div className="container">
-        <Link className="navbar-brand js-scroll-trigger" exact to="/">
+        <Link className="navbar-brand js-scroll-trigger" to="/">
           SocialPlay
         </Link>
         <button

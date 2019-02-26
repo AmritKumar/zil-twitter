@@ -1,10 +1,5 @@
 import React, { Component } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect
-} from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Navbar from "./Navbar";
 import HomeScreen from "./HomeScreen";
 import Footer from "./Footer";
@@ -51,6 +46,8 @@ class App extends Component {
   logout() {
     console.log("logged out");
     this.setState({ isAuthenticated: false, token: "", user: null });
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   }
 
   validateAuth(user, token) {
@@ -62,9 +59,11 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const { user, token } = this.getAuth();
-    this.validateAuth(user, token);
-    this.setState({ isAuthenticated: true, user, token });
+    try {
+      const { user, token } = this.getAuth();
+      this.validateAuth(user, token);
+      this.setState({ isAuthenticated: true, user, token });
+    } catch (e) {}
   }
 
   render() {

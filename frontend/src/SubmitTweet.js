@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import LoadingModal from "./LoadingModal";
 import {
-  sendTransactionId,
-  registerUser,
   submitTweet as _submitTweet,
   getTweetVerification,
   isTweetIdAlreadyRegistered,
@@ -23,7 +21,7 @@ export default class SubmitTweet extends Component {
     this.updateBalance = this.updateBalance.bind(this);
     this.state = {
       tweetId: "",
-      errorMsg: null,
+      errMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
       retrievedVerification: false,
@@ -98,12 +96,13 @@ export default class SubmitTweet extends Component {
     // }
 
     const privateKey = this.getPrivateKey();
-    const address = CP.getAddressFromPrivateKey(privateKey);
+    // const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
       const modal = window
         .$("#loadingModal")
         .modal({ backdrop: "static", keyboard: false });
+      modal.modal("show");
       const { txnId } = await _submitTweet(privateKey, tweetId);
       this.setState({ submittedTweet: true });
       const verifyTxn = await this.sendTransactionId(txnId);
@@ -129,10 +128,14 @@ export default class SubmitTweet extends Component {
       this.updateBalance();
     }, 10000);
 
+    window.$(".submit-tweet-form").submit(e => {
+      e.preventDefault();
+    });
+
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       this.setState({
         tweetId: "",
-        errorMsg: null,
+        errMsg: null,
         submittedTweet: false,
         verifiedTweet: false,
         retrievedVerification: false
@@ -218,18 +221,21 @@ export default class SubmitTweet extends Component {
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                      href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                     >
-                      #BuiltWithZil
+                      #BuildonZIL
                     </a>
                   </h2>
                   <div className="row my-auto w-100">
                     <form
-                      action=""
-                      className="form-inline justify-content-center w-100 mt-5"
+                      action="#"
+                      className="submit-tweet-form form-inline justify-content-center w-100 mt-5"
                     >
                       <input
                         onChange={this.handleChange}
+                        onKeyPress={e => {
+                          if (e.key === "Enter") this.submitTweet();
+                        }}
                         value={this.state.tweetId}
                         className="form-control mt-2 mb-2 mr-sm-3 pl-3"
                         type="text"
@@ -274,7 +280,7 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuiltWithZil&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
                         #BuildWithZil
                       </a>

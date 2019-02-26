@@ -55,7 +55,7 @@ const init = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#BuiltWithZil"
+    value: "#BuildonZIL"
   }
 ];
 

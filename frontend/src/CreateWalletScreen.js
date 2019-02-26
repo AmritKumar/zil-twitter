@@ -60,7 +60,7 @@ export default class CreateWalletScreen extends Component {
 
   async requestFunds(privkey) {
     const { user, token } = this.props.location.state;
-    const { id: userId, username, token: twitterToken } = user;
+    const { username, token: twitterToken } = user;
     const address = CP.getAddressFromPrivateKey(privkey);
 
     try {
@@ -123,7 +123,6 @@ export default class CreateWalletScreen extends Component {
       successRequestFund,
       privkey,
       errMsg,
-      redirectBack,
       redirectToSubmitTweet
     } = this.state;
 
@@ -131,6 +130,21 @@ export default class CreateWalletScreen extends Component {
 
     if (!isAuthenticated) {
       return <Redirect exact to="/" />;
+    } else {
+      // dont regenerate private keys for the user
+      const existingPrivateKey = localStorage.getItem("privateKey");
+      if (existingPrivateKey) {
+        return (
+          <Redirect
+            to={{
+              pathname: "/submit",
+              state: {
+                ...this.props.location.state
+              }
+            }}
+          />
+        );
+      }
     }
 
     if (redirectToSubmitTweet) {
