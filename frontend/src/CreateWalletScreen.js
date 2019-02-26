@@ -94,7 +94,8 @@ export default class CreateWalletScreen extends Component {
   componentDidMount() {
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       if (this.state.errMsg) {
-        this.setState({ redirectBack: true });
+        this.props.onLogout();
+        // this.setState({ redirectBack: true });
       } else {
         // refresh the state
         this.setState({
@@ -126,18 +127,10 @@ export default class CreateWalletScreen extends Component {
       redirectToSubmitTweet
     } = this.state;
 
-    const { location } = this.props;
-    if (redirectBack || !location.state) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/",
-            state: {
-              ...this.props.location.state
-            }
-          }}
-        />
-      );
+    const { isAuthenticated } = this.props;
+
+    if (!isAuthenticated) {
+      return <Redirect exact to="/" />;
     }
 
     if (redirectToSubmitTweet) {
