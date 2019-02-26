@@ -8,7 +8,7 @@ import {
   isTweetIdAlreadyRegistered,
   zilliqa
 } from "./zilliqa";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 const { units, BN } = require("@zilliqa-js/util");
 const CP = require("@zilliqa-js/crypto");
 // const privkey =
@@ -123,9 +123,11 @@ export default class SubmitTweet extends Component {
   }
 
   componentDidMount() {
+    this.updateBalance();
+
     this.updateBalanceInterval = setInterval(() => {
       this.updateBalance();
-    }, 5000);
+    }, 10000);
 
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       this.setState({
@@ -148,6 +150,7 @@ export default class SubmitTweet extends Component {
       // clear form
       setTimeout(() => {
         window.$("#loadingModal").modal("hide");
+        this.updateBalance();
         this.setState({
           tweetId: "",
           errMsg: null,
@@ -167,6 +170,12 @@ export default class SubmitTweet extends Component {
       retrievedVerification,
       errMsg
     } = this.state;
+
+    const { isAuthenticated } = this.props;
+
+    if (!isAuthenticated) {
+      return <Redirect exact to="/" />;
+    }
 
     const msg = "\nPlease be patient, this will take a while.";
     let loadingPercent = 25;

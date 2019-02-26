@@ -80,8 +80,18 @@ class App extends Component {
               />
             )}
           />
-          <Route path="/submit" component={SubmitTweet} />
-          <Route path="/wallet" component={WalletScreen} />
+          <Route
+            path="/submit"
+            component={props => (
+              <SubmitTweet {...props} isAuthenticated={isAuthenticated} />
+            )}
+          />
+          <Route
+            path="/wallet"
+            component={props => (
+              <WalletScreen {...props} isAuthenticated={isAuthenticated} />
+            )}
+          />
           <Footer />
         </span>
       </Router>

@@ -10,6 +10,9 @@ export default class Wallet extends Component {
     this.privateKey = localStorage.getItem("privateKey");
     this.address = CP.getAddressFromPrivateKey(this.privateKey);
     this.updateBalance = this.updateBalance.bind(this);
+    this.state = {
+      balance: 0
+    };
   }
 
   async updateBalance() {
@@ -18,6 +21,15 @@ export default class Wallet extends Component {
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
     this.setState({ balance: zilBalance });
+  }
+
+  copyToClipboard(str) {
+    const el = document.createElement("textarea");
+    el.value = str;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
   }
 
   componentDidMount() {
@@ -34,6 +46,7 @@ export default class Wallet extends Component {
 
   render() {
     const { isAuthenticated } = this.props;
+    const { balance } = this.state;
 
     if (!isAuthenticated) {
       return (
@@ -57,20 +70,26 @@ export default class Wallet extends Component {
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
-                        <div className="col-lg-7">20 ZIL</div>
+                        <div className="col-lg-7">{balance} ZIL</div>
                       </div>
                       <div className="row">
                         <div className="col-lg-3">Address</div>
                         <div className="col-lg-7">
                           <span>{this.address}</span>
-                          <i className="fas fa-paste pl-2" />
+                          <i
+                            onClick={e => this.copyToClipboard(this.address)}
+                            className="fas fa-paste pl-2"
+                          />
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-lg-3">Private Key</div>
                         <div className="col-lg-7">
                           <span>{this.privateKey}</span>
-                          <i className="fas fa-paste pl-2" />
+                          <i
+                            onClick={e => this.copyToClipboard(this.privateKey)}
+                            className="fas fa-paste pl-2"
+                          />
                         </div>
                       </div>
                       <div className="row">
