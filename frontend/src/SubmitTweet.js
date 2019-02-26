@@ -8,6 +8,7 @@ import {
   isTweetIdAlreadyRegistered,
   zilliqa
 } from "./zilliqa";
+import { Link } from "react-router-dom";
 const { units, BN } = require("@zilliqa-js/util");
 const CP = require("@zilliqa-js/crypto");
 // const privkey =
@@ -87,14 +88,14 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    const isRegistered = await isTweetIdAlreadyRegistered();
-    if (isRegistered) {
-      this.setState({
-        errMsg: "Tweet ID already submitted. Please submit another tweet ID."
-      });
-      window.$("#loadingModal").modal("show");
-      return;
-    }
+    // const isRegistered = await isTweetIdAlreadyRegistered();
+    // if (isRegistered) {
+    //   this.setState({
+    //     errMsg: "Tweet ID already submitted. Please submit another tweet ID."
+    //   });
+    //   window.$("#loadingModal").modal("show");
+    //   return;
+    // }
 
     const privateKey = this.getPrivateKey();
     const address = CP.getAddressFromPrivateKey(privateKey);
@@ -122,7 +123,7 @@ export default class SubmitTweet extends Component {
   }
 
   componentDidMount() {
-    setInterval(() => {
+    this.updateBalanceInterval = setInterval(() => {
       this.updateBalance();
     }, 5000);
 
@@ -135,6 +136,10 @@ export default class SubmitTweet extends Component {
         retrievedVerification: false
       });
     });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.updateBalanceInterval);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -193,7 +198,9 @@ export default class SubmitTweet extends Component {
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
-              <div className="balance">Balance: {balance} ZILs</div>
+              <div className="balance">
+                <Link to="/wallet">Balance: {balance} ZILs</Link>
+              </div>
               <div className="col-lg-12 my-auto">
                 <div className="header-content mx-auto">
                   <h1 className="mb-5">Enter your tweet ID</h1>

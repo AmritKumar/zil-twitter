@@ -64,7 +64,17 @@ const Navbar = props => {
                   </a>
                 </TwitterLogin>
               </li>
-            ) : null}
+            ) : (
+              <li className="nav-item">
+                <a
+                  onClick={props.onLogout}
+                  className="nav-link js-scroll-trigger"
+                  href="#logout"
+                >
+                  Logout
+                </a>
+              </li>
+            )}
           </ul>
         </div>
       </div>
