@@ -5,7 +5,20 @@ import React, { Component } from "react";
 const HomeScreen = props => {
   const { isAuthenticated, onLoginSuccess, onLoginFail, user, token } = props;
 
+  const privateKey = localStorage.getItem("privateKey");
+
   if (isAuthenticated) {
+    // if privateKey was generated before, redirect to the submitTweet page to be used
+    if (privateKey) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/submit",
+            state: { isAuthenticated, user, token }
+          }}
+        />
+      );
+    }
     return (
       <Redirect
         to={{
