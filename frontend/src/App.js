@@ -18,11 +18,19 @@ class App extends Component {
     this.handleSuccess = this.handleSuccess.bind(this);
     this.handleFailed = this.handleFailed.bind(this);
     this.logout = this.logout.bind(this);
+    this.storeAuth = this.storeAuth.bind(this);
     this.state = { isAuthenticated: false, user: null, token: "" };
   }
 
-  handleSuccessLogin() {
-    this.setState({ isAuthenticated: true });
+  storeAuth(user, token) {
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+  }
+
+  getAuth() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+    return { user, token };
   }
 
   handleSuccess(response) {
@@ -30,6 +38,7 @@ class App extends Component {
     response.json().then(user => {
       if (token) {
         this.setState({ isAuthenticated: true, user: user, token: token });
+        this.storeAuth(user, token);
         // this.props.onSuccessLogin({ user, token });
       }
     });
@@ -42,6 +51,20 @@ class App extends Component {
   logout() {
     console.log("logged out");
     this.setState({ isAuthenticated: false, token: "", user: null });
+  }
+
+  validateAuth(user, token) {
+    const isObject = typeof user === "object";
+    if (!isObject) throw new Error("user is not object");
+    if (!user.username) throw new Error("user.username is not present");
+    if (!user.id) throw new Error("user.id is not present");
+    if (!token) throw new Error("token is not present");
+  }
+
+  componentDidMount() {
+    const { user, token } = this.getAuth();
+    this.validateAuth(user, token);
+    this.setState({ isAuthenticated: true, user, token });
   }
 
   render() {
