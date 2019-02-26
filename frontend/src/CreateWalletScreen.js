@@ -113,7 +113,7 @@ export default class CreateWalletScreen extends Component {
       setTimeout(() => {
         window.$("#loadingModal").modal("hide");
         this.setState({ redirectToSubmitTweet: true });
-      }, 1000);
+      }, 3000);
     }
   }
 
