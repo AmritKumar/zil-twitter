@@ -42,6 +42,7 @@ class App extends Component {
 
   handleFailed(error) {
     console.error(error);
+    window.$("#loadingModal").modal("show");
   }
 
   logout() {
@@ -115,6 +116,9 @@ class App extends Component {
             render={props => (
               <HomeScreen
                 {...props}
+                errorText={
+                  "Login with Twitter failed. Please refresh your browser and try again."
+                }
                 isAuthenticated={isAuthenticated}
                 onLoginSuccess={this.handleSuccess}
                 onLoginFail={this.handleFailed}
