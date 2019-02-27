@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Joyride from "react-joyride";
 import LoadingModal from "./LoadingModal";
 import {
   submitTweet as _submitTweet,
@@ -19,13 +20,16 @@ export default class SubmitTweet extends Component {
     this.submitTweet = this.submitTweet.bind(this);
     this.sendTransactionId = this.sendTransactionId.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
+    this.shownIntro = localStorage.getItem("shownIntro");
+
     this.state = {
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
       retrievedVerification: false,
-      balance: 0
+      balance: 0,
+      runIntro: false
     };
   }
 
@@ -148,6 +152,13 @@ export default class SubmitTweet extends Component {
       this.updateBalance();
     }, 10000);
 
+    if (!this.shownIntro) {
+      setTimeout(() => {
+        this.setState({ runIntro: true });
+        localStorage.setItem("shownIntro", JSON.stringify(true));
+      }, 1000);
+    }
+
     window.$(".submit-tweet-form").submit(e => {
       e.preventDefault();
     });
@@ -191,7 +202,8 @@ export default class SubmitTweet extends Component {
       submittedTweet,
       verifiedTweet,
       retrievedVerification,
-      errMsg
+      errMsg,
+      runIntro
     } = this.state;
 
     const { isAuthenticated } = this.props;
@@ -219,6 +231,15 @@ export default class SubmitTweet extends Component {
       }
     }
 
+    const steps = [
+      {
+        target: ".balance",
+        content:
+          "You can view your testnet wallet's address and private keys here.",
+        disableBeacon: true
+      }
+    ];
+
     return (
       <div>
         <LoadingModal
@@ -226,6 +247,15 @@ export default class SubmitTweet extends Component {
           title="Submitting tweet"
           loadingText={loadingText}
           loadingPercent={loadingPercent}
+        />
+        <Joyride
+          steps={steps}
+          run={runIntro}
+          styles={{
+            options: {
+              primaryColor: "#42e8e0"
+            }
+          }}
         />
         <header className="masthead-submit">
           <div className="container h-100">

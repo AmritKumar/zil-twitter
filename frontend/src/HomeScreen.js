@@ -51,7 +51,7 @@ const HomeScreen = props => {
               >
                 <div className="shiny-button">
                   <button className="btn shiny-button-content">
-                    <i className="fab fa-twitter" />
+                    <i className="fab fa-twitter mr-2" />
                     JOIN SOCIAL PAY WITH TWITTER [DEMO]
                   </button>
                 </div>
@@ -62,7 +62,10 @@ const HomeScreen = props => {
             <img src="img/hero-img-min.svg" className="img-fluid" alt="" />
           </div>
           <div className="cta-container col-lg-12 text-center">
-            <a className="cta-link" href="">
+            <a
+              className="cta-link"
+              href="https://zilliqa.com/for-developers.html"
+            >
               Learn how to build such a blockchain application here.
             </a>
           </div>

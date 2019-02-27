@@ -27,22 +27,34 @@ const Navbar = props => {
         <div className="collapse navbar-collapse" id="navbarResponsive">
           <ul className="navbar-nav ml-auto">
             <li className="nav-item">
-              <a className="nav-link js-scroll-trigger" href="#download">
+              <a
+                className="nav-link js-scroll-trigger"
+                href="https://zilliqa.com/about-us.html"
+              >
                 About
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link js-scroll-trigger" href="#download">
+              <a
+                className="nav-link js-scroll-trigger"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfwHlcQrSzaly9Jc78cDAF-oAjJLskToZT_kGgzz2JUvy6w2A/viewform"
+              >
                 Financial Grant
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link js-scroll-trigger" href="#download">
+              <a
+                className="nav-link js-scroll-trigger"
+                href="https://zilliqa.com/for-developers.html"
+              >
                 How to build this?
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link js-scroll-trigger" href="#features">
+              <a
+                className="nav-link js-scroll-trigger"
+                href="https://forum.zilliqa.com/"
+              >
                 Contact
               </a>
             </li>

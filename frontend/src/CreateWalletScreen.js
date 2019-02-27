@@ -190,6 +190,10 @@ export default class CreateWalletScreen extends Component {
                 <h2>
                   You'll also need a Zilliqa testnet wallet address to store the
                   testnet tokens you have.
+                  <br />
+                  <br />
+                  We will get you started with a wallet, loaded with 50 testnet
+                  ZIL tokens.
                 </h2>
                 <br />
                 <p className="warning">
