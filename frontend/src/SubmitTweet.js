@@ -35,11 +35,14 @@ export default class SubmitTweet extends Component {
   }
 
   async updateBalance() {
-    const address = CP.getAddressFromPrivateKey(this.getPrivateKey());
-    const data = await zilliqa.blockchain.getBalance(address);
-    const { balance } = data.result;
-    const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-    this.setState({ balance: zilBalance });
+    const privateKey = this.getPrivateKey();
+    if (privateKey) {
+      const address = CP.getAddressFromPrivateKey(privateKey);
+      const data = await zilliqa.blockchain.getBalance(address);
+      const { balance } = data.result;
+      const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+      this.setState({ balance: zilBalance });
+    }
   }
 
   async sendTransactionId(txnId) {
@@ -283,7 +286,7 @@ export default class SubmitTweet extends Component {
                         rel="noopener noreferrer"
                         href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
-                        #BuildWithZil
+                        #BuildonZIL
                       </a>
                       .
                     </li>
