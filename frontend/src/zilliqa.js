@@ -15,7 +15,7 @@ export async function isTweetIdAlreadyRegistered(tweetId) {
   const state = await contract.getState();
   const verifyingTweets = state.find(s => s.vname === "verifying_tweets");
   const tweet = verifyingTweets.value.find(v => v.key === tweetId);
-  return !tweet;
+  return !!tweet;
 }
 
 export async function isUserRegistered(username) {
@@ -86,6 +86,7 @@ export async function getTweetVerification(txnId, tweetId) {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
     const { event_logs: eventLogs } = tx.receipt;
+    console.log(txnId, tx.receipt, eventLogs);
     const eventLog = eventLogs.find(e => e._eventname === "verify_tweet");
     const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
     const matchTweetId = tweetIdParam.value;
