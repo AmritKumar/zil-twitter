@@ -6,7 +6,7 @@ export default class Footer extends Component {
       <footer>
         <div className="container">
           <p>&copy; Zilliqa Research Pte Ltd. All Rights Reserved.</p>
-          <ul className="list-inline">
+          {/*<ul className="list-inline">
             <li className="list-inline-item">
               <a href="#">Privacy</a>
             </li>
@@ -16,7 +16,7 @@ export default class Footer extends Component {
             <li className="list-inline-item">
               <a href="#">FAQ</a>
             </li>
-          </ul>
+          </ul>*/}
         </div>
       </footer>
     );

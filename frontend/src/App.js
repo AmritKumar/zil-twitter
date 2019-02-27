@@ -82,7 +82,6 @@ class App extends Component {
           }
         }
       );
-      console.log(response.ok, isAuthenticated);
       if (!response.ok) {
         this.setState({ isAuthenticated: false });
         this.logout();
