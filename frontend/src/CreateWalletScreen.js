@@ -11,6 +11,7 @@ export default class CreateWalletScreen extends Component {
     this.generateWallet = this.generateWallet.bind(this);
     this.requestFunds = this.requestFunds.bind(this);
     this.registerUser = this.registerUser.bind(this);
+    this.existingPrivateKey = !!localStorage.getItem("privateKey");
     this.state = {
       redirectBack: false,
       successRequestFund: null,
@@ -97,12 +98,7 @@ export default class CreateWalletScreen extends Component {
         this.props.onLogout();
         // this.setState({ redirectBack: true });
       } else {
-        // refresh the state
-        this.setState({
-          successRequestFund: null,
-          successRegisterUser: null,
-          privkey: null
-        });
+        this.setState({ redirectToSubmitTweet: true });
       }
     });
   }
@@ -112,7 +108,6 @@ export default class CreateWalletScreen extends Component {
     if (successRegisterUser && successRequestFund) {
       setTimeout(() => {
         window.$("#loadingModal").modal("hide");
-        this.setState({ redirectToSubmitTweet: true });
       }, 3000);
     }
   }
@@ -132,8 +127,8 @@ export default class CreateWalletScreen extends Component {
       return <Redirect exact to="/" />;
     } else {
       // dont regenerate private keys for the user
-      const existingPrivateKey = localStorage.getItem("privateKey");
-      if (existingPrivateKey) {
+      if (this.existingPrivateKey) {
+        console.log("existingPrivateKey");
         return (
           <Redirect
             to={{

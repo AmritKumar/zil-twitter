@@ -14,7 +14,7 @@ class App extends Component {
     this.handleFailed = this.handleFailed.bind(this);
     this.logout = this.logout.bind(this);
     this.storeAuth = this.storeAuth.bind(this);
-    this.remoteValidateAuth = this.remoteValidateAuth.bind(this);
+    this.validateAuth = this.validateAuth.bind(this);
     this.state = { isAuthenticated: false, user: null, token: "" };
   }
 
@@ -50,36 +50,51 @@ class App extends Component {
     localStorage.removeItem("token");
   }
 
-  validateAuth(user, token) {
-    const isObject = typeof user === "object";
-    if (!isObject) throw new Error("user is not object");
-    if (!user.username) throw new Error("user.username is not present");
-    if (!user.id) throw new Error("user.id is not present");
-    if (!token) throw new Error("token is not present");
+  localValidateAuth(user, token) {
+    try {
+      const isObject = typeof user === "object" && user !== null;
+      if (!isObject) throw new Error("user is not object");
+      if (!user.username) throw new Error("user.username is not present");
+      if (!user.id) throw new Error("user.id is not present");
+      if (!token) throw new Error("token is not present");
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  async remoteValidateAuth(token) {
-    const { isAuthenticated } = this.state;
-    const response = await fetch("http://localhost:4000/api/v1/authenticate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token
+  async validateAuth() {
+    try {
+      const { user, token } = this.getAuth();
+      const isValid = this.localValidateAuth(user, token);
+      if (!isValid) {
+        throw new Error("Invalid auth state");
       }
-    });
-    const data = await response.text();
-    if (!response.ok && isAuthenticated) {
-      this.logout();
+      const { isAuthenticated } = this.state;
+      const response = await fetch(
+        "http://localhost:4000/api/v1/authenticate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token
+          }
+        }
+      );
+      console.log(response.ok, isAuthenticated);
+      if (!response.ok) {
+        this.setState({ isAuthenticated: false });
+        this.logout();
+      } else {
+        this.setState({ isAuthenticated: true, user, token });
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 
   componentDidMount() {
-    try {
-      const { user, token } = this.getAuth();
-      this.validateAuth(user, token);
-      this.setState({ isAuthenticated: true, user, token });
-      this.remoteValidateAuth(token);
-    } catch (e) {}
+    this.validateAuth();
   }
 
   render() {
