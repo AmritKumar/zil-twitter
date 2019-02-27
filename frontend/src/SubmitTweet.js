@@ -72,6 +72,10 @@ export default class SubmitTweet extends Component {
     }
   }
 
+  isValidTweetId(tweetId) {
+    return tweetId.length >= 18 && /^(0|[1-9]\d*)$/.test(tweetId);
+  }
+
   async submitTweet() {
     const { tweetId } = this.state;
     if (tweetId === "") {
@@ -80,7 +84,7 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    if (tweetId.length < 18) {
+    if (!this.isValidTweetId(tweetId)) {
       this.setState({
         errMsg:
           "Invalid tweet ID. Please look at instructions to see what a tweet ID is."
