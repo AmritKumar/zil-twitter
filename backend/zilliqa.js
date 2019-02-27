@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "16b7efba383e1ebabc0d6f39de6771c14fb49255";
+const contractAddress = "7f3d891ea0a5812524c6e79274e1687b27d76f53";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -142,7 +142,6 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
       value: endPos.toString()
     }
   ];
-  console.log(params);
   zilliqa.wallet.setDefault(oracleAddress);
   const tx = await deployedContract.call("verify_tweet", params, {
     version: VERSION,
