@@ -142,6 +142,7 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
       value: endPos.toString()
     }
   ];
+  console.log(params);
   zilliqa.wallet.setDefault(oracleAddress);
   const tx = await deployedContract.call("verify_tweet", params, {
     version: VERSION,

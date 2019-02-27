@@ -14,6 +14,7 @@ class App extends Component {
     this.handleFailed = this.handleFailed.bind(this);
     this.logout = this.logout.bind(this);
     this.storeAuth = this.storeAuth.bind(this);
+    this.remoteValidateAuth = this.remoteValidateAuth.bind(this);
     this.state = { isAuthenticated: false, user: null, token: "" };
   }
 
@@ -44,7 +45,6 @@ class App extends Component {
   }
 
   logout() {
-    console.log("logged out");
     this.setState({ isAuthenticated: false, token: "", user: null });
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -58,11 +58,27 @@ class App extends Component {
     if (!token) throw new Error("token is not present");
   }
 
+  async remoteValidateAuth(token) {
+    const { isAuthenticated } = this.state;
+    const response = await fetch("http://localhost:4000/api/v1/authenticate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": token
+      }
+    });
+    const data = await response.text();
+    if (!response.ok && isAuthenticated) {
+      this.logout();
+    }
+  }
+
   componentDidMount() {
     try {
       const { user, token } = this.getAuth();
       this.validateAuth(user, token);
       this.setState({ isAuthenticated: true, user, token });
+      this.remoteValidateAuth(token);
     } catch (e) {}
   }
 

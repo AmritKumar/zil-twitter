@@ -86,14 +86,14 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    // const isRegistered = await isTweetIdAlreadyRegistered();
-    // if (isRegistered) {
-    //   this.setState({
-    //     errMsg: "Tweet ID already submitted. Please submit another tweet ID."
-    //   });
-    //   window.$("#loadingModal").modal("show");
-    //   return;
-    // }
+    const isRegistered = await isTweetIdAlreadyRegistered(tweetId);
+    if (isRegistered) {
+      this.setState({
+        errMsg: "Tweet ID already submitted. Please submit another tweet ID."
+      });
+      window.$("#loadingModal").modal("show");
+      return;
+    }
 
     const privateKey = this.getPrivateKey();
     // const address = CP.getAddressFromPrivateKey(privateKey);
@@ -106,6 +106,7 @@ export default class SubmitTweet extends Component {
       const { txnId } = await _submitTweet(privateKey, tweetId);
       this.setState({ submittedTweet: true });
       const verifyTxn = await this.sendTransactionId(txnId);
+      console.log(verifyTxn);
       this.setState({ verifiedTweet: true });
       const verifyTxnId = verifyTxn.id;
       const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);

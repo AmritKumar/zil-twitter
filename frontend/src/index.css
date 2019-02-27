@@ -7,6 +7,8 @@ body {
 .twitter-login {
 	background: transparent;
 	border: none;
+	padding-left: 0;
+	padding-right: 0;
 }
 
 [type="button"]:not(:disabled).twitter-login,
