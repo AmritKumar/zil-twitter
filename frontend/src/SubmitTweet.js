@@ -125,6 +125,18 @@ export default class SubmitTweet extends Component {
     this.setState({ tweetId: e.target.value });
   }
 
+  handleInstructionsClick(e) {
+    e.preventDefault();
+    const $container = window.$("html,body");
+    const $scrollTo = window.$(".instructions-section");
+    $container.animate({
+      scrollTop:
+        $scrollTo.offset().top -
+        $container.offset().top +
+        $container.scrollTop()
+    });
+  }
+
   componentDidMount() {
     this.updateBalance();
 
@@ -257,7 +269,11 @@ export default class SubmitTweet extends Component {
                     </form>
                   </div>
                   <div className="cta-container col-lg-12 text-center">
-                    <a className="cta-link" href="">
+                    <a
+                      onClick={this.handleInstructionsClick}
+                      className="cta-link"
+                      href=""
+                    >
                       How does this work?
                     </a>
                   </div>

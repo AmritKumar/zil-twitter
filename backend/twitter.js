@@ -28,10 +28,12 @@ async function getTweetData(tweetId, accessToken, accessTokenSecret) {
     const hashtag = await getHashtag();
     const data = await getTweet(tweetId, accessToken, accessTokenSecret);
     const tweetText = data.full_text;
-    const startPos = tweetText.indexOf(hashtag);
-    let endPos = -1;
+    let startPos = tweetText.indexOf(hashtag);
+    let endPos = 0;
     if (startPos !== -1) {
       endPos = startPos + hashtag.length - 1;
+    } else {
+      startPos = 0;
     }
     const username = data.user.screen_name;
     return {

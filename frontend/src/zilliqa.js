@@ -86,6 +86,10 @@ export async function getTweetVerification(txnId, tweetId) {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
     const { event_logs: eventLogs } = tx.receipt;
+    if (!eventLogs) {
+      throw new Error("Tweet does not contain hashtag");
+    }
+
     console.log(txnId, tx.receipt, eventLogs);
     const eventLog = eventLogs.find(e => e._eventname === "verify_tweet");
     const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
@@ -98,8 +102,6 @@ export async function getTweetVerification(txnId, tweetId) {
     return true;
   } catch (e) {
     console.error(e);
-    throw new Error(
-      "Cannot retrieve tweet verification. Please refresh and try again."
-    );
+    throw e;
   }
 }
