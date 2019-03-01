@@ -212,7 +212,7 @@ export default class SubmitTweet extends Component {
       return <Redirect exact to="/" />;
     }
 
-    const msg = "\nPlease be patient, this will take a while.";
+    const msg = "\nPlease be patient, do not close this window.";
     let loadingPercent = 25;
     let loadingText = "Submitting tweet to contract..." + msg;
 
@@ -303,6 +303,8 @@ export default class SubmitTweet extends Component {
                     </form>
                   </div>
                   <div className="cta-container col-lg-12 text-center">
+                    <img src="/img/tweet-id.png" alt="Tweet ID" />
+                    <br />
                     <a
                       onClick={this.handleInstructionsClick}
                       className="cta-link"

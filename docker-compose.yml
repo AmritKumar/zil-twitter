@@ -1,0 +1,19 @@
+version: "3"
+services:
+  backend:
+    build: backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/home/node/app
+      - /home/node/app/backend/node_modules
+    depends_on:
+      - mongo
+    env_file:
+      - backend/.env
+    command: node server.js
+
+  mongo:
+    image: mongo:3.4.2
+    ports:
+      - "27017:27017"
