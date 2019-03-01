@@ -155,7 +155,7 @@ export default class CreateWalletScreen extends Component {
       );
     }
 
-    const msg = "\nPlease be patient, this will take a while.";
+    const msg = "\nPlease be patient, do not close this window.";
     let loadingPercent = 0;
     let loadingText = "Generating private key...";
     if (privkey) {

@@ -9,6 +9,7 @@ var mongoose = require("./mongoose"),
   expressJwt = require("express-jwt"),
   router = express.Router(),
   cors = require("cors"),
+  path = require("path"),
   bodyParser = require("body-parser"),
   request = require("request"),
   twitterConfig = require("./twitter.config.js");
@@ -264,6 +265,14 @@ router.route("/authenticate").post(authenticate, function(req, res, next) {
 });
 
 app.use("/api/v1", router);
+
+const frontendBuild = path.join(__dirname, "..", "frontend", "build");
+
+// app.get("/", function(req, res) {
+//   res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
+// });
+
+app.use(express.static(frontendBuild));
 
 app.listen(4000);
 module.exports = app;

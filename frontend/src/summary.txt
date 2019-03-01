@@ -1,0 +1,8 @@
+1. Script tag
+2. Create zilliqa instance
+3. Initialize contract with contract address
+4. Get state of tweets, check if tweet ID already present
+5. Display list of tweets paid out
+6. Accounts, use private key
+7. Send transactions (new_tweet)
+8. Get transactions (reading event logs)
