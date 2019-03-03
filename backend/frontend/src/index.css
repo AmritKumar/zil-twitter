@@ -48,3 +48,7 @@ button:not(:disabled).twitter-login {
 .warning {
 	color: #c62828;
 }
+
+.cta-container img {
+	max-width: 100%;
+}

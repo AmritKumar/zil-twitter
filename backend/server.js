@@ -86,7 +86,7 @@ router.route("/auth/twitter/reverse").post(function(req, res) {
     {
       url: "https://api.twitter.com/oauth/request_token",
       oauth: {
-        oauth_callback: "http%3A%2F%2Flocalhost%3A3000%2Ftwitter-callback",
+        oauth_callback: "http%3A%2F%2Flocalhost%3A4000%2Ftwitter-callback",
         consumer_key: twitterConfig.consumerKey,
         consumer_secret: twitterConfig.consumerSecret
       }
@@ -267,10 +267,6 @@ router.route("/authenticate").post(authenticate, function(req, res, next) {
 app.use("/api/v1", router);
 
 const frontendBuild = path.join(__dirname, "..", "frontend", "build");
-
-// app.get("/", function(req, res) {
-//   res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
-// });
 
 app.use(express.static(frontendBuild));
 
