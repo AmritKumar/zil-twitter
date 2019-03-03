@@ -1,6 +1,8 @@
 FROM node:10-alpine
 
-RUN mkdir -p /home/node/app/backend/node_modules && chown -R node:node /home/node/app
+RUN mkdir -p /home/node/app/backend/node_modules && \
+	mkdir -p /home/node/app/frontend/node_modules && \
+	chown -R node:node /home/node/app
 
 WORKDIR /home/node/app/backend
 
@@ -12,10 +14,18 @@ RUN apk --no-cache --virtual build-dependencies add \
     g++ \
     && npm install \
     && apk del build-dependencies
-
+ 
 
 USER node
 
 RUN npm install
 
-# COPY --chown=node:node . /home/node/app/
+WORKDIR /home/node/app/frontend
+
+COPY frontend ./
+
+RUN npm install -f
+
+RUN npm run build
+
+WORKDIR /home/node/app/backend

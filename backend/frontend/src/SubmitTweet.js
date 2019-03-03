@@ -303,7 +303,16 @@ export default class SubmitTweet extends Component {
                     </form>
                   </div>
                   <div className="cta-container col-lg-12 text-center">
-                    <img src="/img/tweet-id.png" alt="Tweet ID" />
+                    <p>
+                      A tweet ID is the series of numbers in the tweet's URL.
+                      You're able to find the tweet URL in your browser's search
+                      bar.
+                    </p>
+                    <img
+                      className="mb-5"
+                      src="/img/tweet-id.png"
+                      alt="Tweet ID"
+                    />
                     <br />
                     <a
                       onClick={this.handleInstructionsClick}
