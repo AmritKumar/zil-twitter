@@ -7,7 +7,8 @@ services:
     volumes:
       - .:/home/node/app
       - /home/node/app/backend/node_modules
-      - /home/node/app/frontend/node_modules
+      - /home/node/app/backend/frontend/node_modules
+      - /home/node/app/backend/frontend/build
     depends_on:
       - mongo
     env_file:
