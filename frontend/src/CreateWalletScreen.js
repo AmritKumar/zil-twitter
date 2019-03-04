@@ -65,18 +65,21 @@ export default class CreateWalletScreen extends Component {
     const address = CP.getAddressFromPrivateKey(privkey);
 
     try {
-      const response = await fetch("http://localhost/api/v1/request-funds", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
-        },
-        body: JSON.stringify({
-          username,
-          address,
-          twitterToken
-        })
-      });
+      const response = await fetch(
+        "http://34.214.190.158/api/v1/request-funds",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token
+          },
+          body: JSON.stringify({
+            username,
+            address,
+            twitterToken
+          })
+        }
+      );
       const receipt = await response.json();
       console.log(receipt);
       this.setState({ successRequestFund: receipt.success });

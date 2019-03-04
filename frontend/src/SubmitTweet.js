@@ -53,18 +53,21 @@ export default class SubmitTweet extends Component {
     const { token, user } = this.props.location.state;
     // const { username } = user;
     try {
-      const response = await fetch("http://localhost/api/v1/submit-tweet", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
-        },
-        body: JSON.stringify({
-          txnId,
-          username: user.username,
-          twitterToken: user.token
-        })
-      });
+      const response = await fetch(
+        "http://34.214.190.158/api/v1/submit-tweet",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token
+          },
+          body: JSON.stringify({
+            txnId,
+            username: user.username,
+            twitterToken: user.token
+          })
+        }
+      );
       const data = await response.json();
       return data;
     } catch (e) {
