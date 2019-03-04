@@ -264,12 +264,13 @@ router.route("/authenticate").post(authenticate, function(req, res, next) {
   res.status(200).send(JSON.stringify("success"));
 });
 
-app.use("/api/v1", router);
+app.use("/", router);
+// app.use("/api/v1", router);
 
-const frontendBuild = path.join(__dirname, "frontend", "build");
-console.log(frontendBuild);
+// const frontendBuild = path.join(__dirname, "frontend", "build");
+// console.log(frontendBuild);
 
-app.use(express.static(frontendBuild));
+// app.use(express.static(frontendBuild));
 
 app.listen(4000);
 module.exports = app;

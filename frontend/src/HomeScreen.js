@@ -43,10 +43,10 @@ const HomeScreen = props => {
               <h2>Demo blockchain application by Zilliqa</h2>
               <br />
               <TwitterLogin
-                loginUrl="http://localhost:4000/api/v1/auth/twitter"
+                loginUrl="http://localhost/api/v1/auth/twitter"
                 onFailure={props.onLoginFail}
                 onSuccess={props.onLoginSuccess}
-                requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
+                requestTokenUrl="http://localhost/api/v1/auth/twitter/reverse"
                 className="twitter-login"
               >
                 <div className="shiny-button">

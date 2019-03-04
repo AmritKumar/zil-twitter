@@ -1,10 +1,8 @@
 FROM node:10-alpine
 
-RUN mkdir -p /home/node/app/backend/node_modules && \
-	mkdir -p /home/node/app/backend/frontend/node_modules && \
-	chown -R node:node /home/node/app
+RUN mkdir -p /home/node/app/node_modules
 
-WORKDIR /home/node/app/backend
+WORKDIR /home/node/app
 
 COPY package*.json ./
 
@@ -16,22 +14,12 @@ RUN apk --no-cache --virtual build-dependencies add \
     zlib-dev \
     && npm install
 
-USER node
+RUN npm install forever -g
 
-RUN npm install
+#USER node
 
-WORKDIR /home/node/app/backend/frontend
+RUN npm install -f --unsafe-perm
 
-COPY frontend ./
-
-#RUN cat src/SubmitTweet.js
-
-# RUN chown -R node:node /home/node/app/frontend
-
-RUN npm install -f
+RUN npm install scrypt
 
 RUN ls
-
-RUN npm run build
-
-WORKDIR /home/node/app/backend

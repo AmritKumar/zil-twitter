@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@zilliqa-js/zilliqa": "^0.5.1",
-    "fsevents": "1.1.1",
     "rc-progress": "^2.3.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",

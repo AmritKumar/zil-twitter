@@ -66,10 +66,10 @@ const Navbar = props => {
             {!props.isAuthenticated ? (
               <li className="nav-item">
                 <TwitterLogin
-                  loginUrl="http://localhost:4000/api/v1/auth/twitter"
+                  loginUrl="http://localhost/api/v1/auth/twitter"
                   onFailure={props.onLoginFail}
                   onSuccess={props.onLoginSuccess}
-                  requestTokenUrl="http://localhost:4000/api/v1/auth/twitter/reverse"
+                  requestTokenUrl="http://localhost/api/v1/auth/twitter/reverse"
                   className="twitter-login"
                 >
                   <a className="nav-link js-scroll-trigger" href="#sign-in">
