@@ -266,7 +266,8 @@ router.route("/authenticate").post(authenticate, function(req, res, next) {
 
 app.use("/api/v1", router);
 
-const frontendBuild = path.join(__dirname, "..", "frontend", "build");
+const frontendBuild = path.join(__dirname, "frontend", "build");
+console.log(frontendBuild);
 
 app.use(express.static(frontendBuild));
 
