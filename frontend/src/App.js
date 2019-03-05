@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import CreateWalletScreen from "./CreateWalletScreen";
 import SubmitTweet from "./SubmitTweet";
 import WalletScreen from "./WalletScreen";
+import { CURRENT_URI } from "./utils";
 
 class App extends Component {
   constructor() {
@@ -72,16 +73,13 @@ class App extends Component {
         throw new Error("Invalid auth state");
       }
       const { isAuthenticated } = this.state;
-      const response = await fetch(
-        "http://34.214.190.158/api/v1/authenticate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-auth-token": token
-          }
+      const response = await fetch(`${CURRENT_URI}/api/v1/authenticate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token
         }
-      );
+      });
       if (!response.ok) {
         this.setState({ isAuthenticated: false });
         this.logout();

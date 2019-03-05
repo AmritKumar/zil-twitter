@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 const CP = require("@zilliqa-js/crypto");
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
@@ -66,7 +66,13 @@ export default class Wallet extends Component {
               <div className="header-content mx-auto">
                 <div className="card">
                   <div className="card-body">
-                    <h1 className="mb-5">Wallet address</h1>
+                    <div style={{ marginBottom: 30 }}>
+                      <Link to="/submit">
+                        <i className="fas fa-arrow-left mr-2" />
+                        Back to Submitting Tweet
+                      </Link>
+                    </div>
+                    <h1>Wallet address</h1>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
@@ -80,6 +86,18 @@ export default class Wallet extends Component {
                             onClick={e => this.copyToClipboard(this.address)}
                             className="fas fa-paste pl-2"
                           />
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-lg-3">Explorer</div>
+                        <div className="col-lg-7">
+                          <a
+                            href={`https://viewblock.io/zilliqa/address/${
+                              this.address
+                            }?network=testnet`}
+                          >
+                            View on ViewBlock.io
+                          </a>
                         </div>
                       </div>
                       <div className="row">

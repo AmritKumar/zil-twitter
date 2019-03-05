@@ -2,6 +2,10 @@ import TwitterLogin from "react-twitter-auth";
 import { Redirect } from "react-router-dom";
 import React from "react";
 import LoadingModal from "./LoadingModal";
+import { CURRENT_URI } from "./utils";
+
+const loginUrl = `${CURRENT_URI}/api/v1/auth/twitter`;
+const requestTokenUrl = `${CURRENT_URI}/api/v1/auth/twitter/reverse`;
 
 const HomeScreen = props => {
   const { isAuthenticated, user, token } = props;
@@ -43,10 +47,10 @@ const HomeScreen = props => {
               <h2>Demo blockchain application by Zilliqa</h2>
               <br />
               <TwitterLogin
-                loginUrl="http://34.214.190.158/api/v1/auth/twitter"
+                loginUrl={loginUrl}
                 onFailure={props.onLoginFail}
                 onSuccess={props.onLoginSuccess}
-                requestTokenUrl="http://34.214.190.158/api/v1/auth/twitter/reverse"
+                requestTokenUrl={requestTokenUrl}
                 className="twitter-login"
               >
                 <div className="shiny-button">

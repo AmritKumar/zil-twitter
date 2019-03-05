@@ -3,6 +3,7 @@ import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
 import { registerUser as _registerUser, isUserRegistered } from "./zilliqa";
 import LoadingModal from "./LoadingModal";
+import { CURRENT_URI } from "./utils";
 const CP = require("@zilliqa-js/crypto");
 
 export default class CreateWalletScreen extends Component {
@@ -65,21 +66,18 @@ export default class CreateWalletScreen extends Component {
     const address = CP.getAddressFromPrivateKey(privkey);
 
     try {
-      const response = await fetch(
-        "http://34.214.190.158/api/v1/request-funds",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-auth-token": token
-          },
-          body: JSON.stringify({
-            username,
-            address,
-            twitterToken
-          })
-        }
-      );
+      const response = await fetch(`${CURRENT_URI}/api/v1/request-funds`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token
+        },
+        body: JSON.stringify({
+          username,
+          address,
+          twitterToken
+        })
+      });
       const receipt = await response.json();
       console.log(receipt);
       this.setState({ successRequestFund: receipt.success });
@@ -156,20 +154,25 @@ export default class CreateWalletScreen extends Component {
     }
 
     const msg = "\nPlease be patient, do not close this window.";
-    let loadingPercent = 0;
+    const loadingPercentages = [0, 33.33, 66.66, 100];
+    let fromLoadingPercent = loadingPercentages[0];
+    let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Generating private key...";
     if (privkey) {
       loadingText = "Requesting funds for wallet..." + msg;
-      loadingPercent = 33.33;
+      fromLoadingPercent = loadingPercentages[1];
+      toLoadingPercent = loadingPercentages[2];
 
       if (successRequestFund) {
         loadingText = "Registering wallet in contract..." + msg;
-        loadingPercent = 66.66;
+        fromLoadingPercent = loadingPercentages[2];
+        toLoadingPercent = loadingPercentages[3];
 
         if (successRegisterUser) {
           loadingText =
             "Successfully registered wallet in contract. Redirecting you...";
-          loadingPercent = 100;
+          fromLoadingPercent = loadingPercentages[3];
+          toLoadingPercent = loadingPercentages[3];
         }
       }
     }
@@ -178,7 +181,8 @@ export default class CreateWalletScreen extends Component {
       <header className="masthead-create">
         <LoadingModal
           title="Your Testnet Wallet"
-          loadingPercent={loadingPercent}
+          fromLoadingPercent={fromLoadingPercent}
+          toLoadingPercent={toLoadingPercent}
           loadingText={loadingText}
           errorText={errMsg}
         />
