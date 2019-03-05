@@ -246,6 +246,7 @@ async function fulfillSubmitTweet(req, res, next) {
     const tokenSecret = user.twitterProvider.tokenSecret;
     const tweetData = await getTweetData(tweetId, twitterToken, tokenSecret);
     const { tweetText, startPos, endPos } = tweetData;
+    console.log(tweetData);
     console.log("verifyTweet...");
     const tx = await verifyTweet(sender, tweetId, tweetText, startPos, endPos);
     res.status(200).send(JSON.stringify(tx));
