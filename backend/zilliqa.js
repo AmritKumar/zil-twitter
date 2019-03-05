@@ -212,8 +212,8 @@ async function depositToContract(contract) {
 async function main() {
   // const hashtag = await getHashtag();
   // console.log(hashtag);
-  const contract = await deployTestContract();
-  await depositToContract(contract);
+  // const contract = await deployTestContract();
+  // await depositToContract(contract);
   // await registerUser(contract, oracleAddress, "kenchangh");
   // await fundAccount(contractAddress);
   // const tx = await verifyTweet(
