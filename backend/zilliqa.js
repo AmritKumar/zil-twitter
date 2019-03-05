@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "61841cd4366f44f15123d9dc4ec315ea2a21360f";
+const contractAddress = "26cd36b9e6def353650c0dba55914b5c5ab5c3a3";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -56,7 +56,7 @@ const initParams = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#BuildonZIL"
+    value: "#buildonzil"
   }
 ];
 
@@ -212,8 +212,8 @@ async function depositToContract(contract) {
 async function main() {
   // const hashtag = await getHashtag();
   // console.log(hashtag);
-  // const contract = await deployTestContract();
-  // await depositToContract(contract);
+  const contract = await deployTestContract();
+  await depositToContract(contract);
   // await registerUser(contract, oracleAddress, "kenchangh");
   // await fundAccount(contractAddress);
   // const tx = await verifyTweet(

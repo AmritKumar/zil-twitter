@@ -1,6 +1,10 @@
 import React from "react";
 import TwitterLogin from "react-twitter-auth";
 import { Link } from "react-router-dom";
+import { CURRENT_URI } from "./utils";
+
+const loginUrl = `${CURRENT_URI}/api/v1/auth/twitter`;
+const requestTokenUrl = `${CURRENT_URI}/api/v1/auth/twitter/reverse`;
 
 const Navbar = props => {
   return (
@@ -10,7 +14,7 @@ const Navbar = props => {
     >
       <div className="container">
         <Link className="navbar-brand js-scroll-trigger" to="/">
-          SocialPlay
+          SocialPay
         </Link>
         <button
           className="navbar-toggler navbar-toggler-right"
@@ -66,10 +70,10 @@ const Navbar = props => {
             {!props.isAuthenticated ? (
               <li className="nav-item">
                 <TwitterLogin
-                  loginUrl="http://34.214.190.158/api/v1/auth/twitter"
+                  loginUrl={loginUrl}
                   onFailure={props.onLoginFail}
                   onSuccess={props.onLoginSuccess}
-                  requestTokenUrl="http://34.214.190.158/api/v1/auth/twitter/reverse"
+                  requestTokenUrl={requestTokenUrl}
                   className="twitter-login"
                 >
                   <a className="nav-link js-scroll-trigger" href="#sign-in">

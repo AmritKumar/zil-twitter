@@ -8,6 +8,8 @@ import {
   zilliqa
 } from "./zilliqa";
 import { Link, Redirect } from "react-router-dom";
+import { TwitterTweetEmbed } from "react-twitter-embed";
+import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
 const CP = require("@zilliqa-js/crypto");
 // const privkey =
@@ -53,21 +55,18 @@ export default class SubmitTweet extends Component {
     const { token, user } = this.props.location.state;
     // const { username } = user;
     try {
-      const response = await fetch(
-        "http://34.214.190.158/api/v1/submit-tweet",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-auth-token": token
-          },
-          body: JSON.stringify({
-            txnId,
-            username: user.username,
-            twitterToken: user.token
-          })
-        }
-      );
+      const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token
+        },
+        body: JSON.stringify({
+          txnId,
+          username: user.username,
+          twitterToken: user.token
+        })
+      });
       const data = await response.json();
       return data;
     } catch (e) {
@@ -203,29 +202,36 @@ export default class SubmitTweet extends Component {
       verifiedTweet,
       retrievedVerification,
       errMsg,
-      runIntro
+      runIntro,
+      tweetId
     } = this.state;
 
-    const { isAuthenticated } = this.props;
+    const { isAuthenticated, user } = this.props;
+    const validTweetId = this.isValidTweetId(tweetId);
 
-    if (!isAuthenticated) {
-      return <Redirect exact to="/" />;
-    }
+    // if (!isAuthenticated) {
+    //   return <Redirect exact to="/" />;
+    // }
 
+    const loadingPercentages = [25, 50, 75, 100];
     const msg = "\nPlease be patient, do not close this window.";
-    let loadingPercent = 25;
+    let fromLoadingPercent = loadingPercentages[0];
+    let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Submitting tweet to contract..." + msg;
 
     if (submittedTweet) {
-      loadingPercent = 50;
+      fromLoadingPercent = loadingPercentages[1];
+      toLoadingPercent = loadingPercentages[2];
       loadingText = "Verifying tweet hashtag..." + msg;
 
       if (verifiedTweet) {
-        loadingPercent = 75;
+        fromLoadingPercent = loadingPercentages[2];
+        toLoadingPercent = loadingPercentages[3];
         loadingText = "Retrieving verification..." + msg;
 
         if (retrievedVerification) {
-          loadingPercent = 100;
+          fromLoadingPercent = loadingPercentages[3];
+          toLoadingPercent = loadingPercentages[3];
           loadingText = "Tweet is verified. Rewarded 10 ZILs!";
         }
       }
@@ -246,7 +252,8 @@ export default class SubmitTweet extends Component {
           errorText={errMsg}
           title="Submitting tweet"
           loadingText={loadingText}
-          loadingPercent={loadingPercent}
+          fromLoadingPercent={fromLoadingPercent}
+          toLoadingPercent={toLoadingPercent}
         />
         <Joyride
           steps={steps}
@@ -303,24 +310,32 @@ export default class SubmitTweet extends Component {
                     </form>
                   </div>
                   <div className="cta-container col-lg-12 text-center">
-                    <p>
-                      A tweet ID is the series of numbers in the tweet's URL.
-                      You're able to find the tweet URL in your browser's search
-                      bar.
-                    </p>
-                    <img
-                      className="mb-5"
-                      src="/img/tweet-id.png"
-                      alt="Tweet ID"
-                    />
-                    <br />
-                    <a
-                      onClick={this.handleInstructionsClick}
-                      className="cta-link"
-                      href=""
-                    >
-                      How does this work?
-                    </a>
+                    {validTweetId ? (
+                      <span>
+                        <TwitterTweetEmbed tweetId={tweetId} />
+                      </span>
+                    ) : (
+                      <span>
+                        <p>
+                          A tweet ID is the series of numbers in a tweet's URL.
+                          You're able to find the tweet URL in your browser's
+                          search bar.
+                        </p>
+                        <img
+                          className="mb-5"
+                          src="/img/tweet-id.png"
+                          alt="Tweet ID"
+                        />
+                        <br />
+                        <a
+                          onClick={this.handleInstructionsClick}
+                          className="cta-link"
+                          href=""
+                        >
+                          How does this work?
+                        </a>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
