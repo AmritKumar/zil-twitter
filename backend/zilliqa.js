@@ -20,7 +20,7 @@ zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
 const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
-const contractAddress = "26cd36b9e6def353650c0dba55914b5c5ab5c3a3";
+const contractAddress = "c0b8cf610fc4b0bd6a60f3b78b0ba9519dcb1241";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
 
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
@@ -167,7 +167,7 @@ async function getTweetId(txnId) {
     const { event_logs: eventLogs } = tx.receipt;
 
     if (!eventLogs) {
-      throw new Error("Tweet not valid");
+      throw new Error("No event logs for new_tweet");
     }
 
     const eventLog = eventLogs.find(e => e._eventname === "new_tweet");

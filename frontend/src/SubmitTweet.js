@@ -189,7 +189,6 @@ export default class SubmitTweet extends Component {
       retrievedVerification,
       showLoading
     } = this.state;
-    console.log(prevState.showLoading, showLoading);
     if (submittedTweet && verifiedTweet && retrievedVerification) {
       // clear form
       setTimeout(() => {
