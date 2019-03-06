@@ -15,9 +15,8 @@ export default class LoadingModal extends Component {
   updateProgressBar() {
     clearInterval(this.updateProgressInterval);
     const { fromLoadingPercent, toLoadingPercent } = this.props;
-    console.log(fromLoadingPercent, toLoadingPercent);
 
-    const MAX_TICKS = 50;
+    const MAX_TICKS = 30;
     const incrementProgress =
       (toLoadingPercent - fromLoadingPercent) / MAX_TICKS;
 

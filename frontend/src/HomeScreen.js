@@ -36,7 +36,6 @@ const HomeScreen = props => {
 
   return (
     <header className="masthead">
-      <LoadingModal title="Login to Twitter" errorText={props.errorText} />
       <div className="container h-100">
         <div className="row h-100">
           <div className="col-lg-5 my-auto">
