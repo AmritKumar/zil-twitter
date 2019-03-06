@@ -25,6 +25,7 @@ export default class SubmitTweet extends Component {
     this.shownIntro = localStorage.getItem("shownIntro");
 
     this.state = {
+      showLoading: false,
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
@@ -82,26 +83,28 @@ export default class SubmitTweet extends Component {
   async submitTweet() {
     const { tweetId } = this.state;
     if (tweetId === "") {
-      this.setState({ errMsg: "Tweet ID cannot be empty" });
-      window.$("#loadingModal").modal("show");
+      this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
+      // window.$("#loadingModal").modal("show");
       return;
     }
 
     if (!this.isValidTweetId(tweetId)) {
       this.setState({
         errMsg:
-          "Invalid tweet ID. Please look at instructions to see what a tweet ID is."
+          "Invalid tweet ID. Please look at instructions to see what a tweet ID is.",
+        showLoading: true
       });
-      window.$("#loadingModal").modal("show");
+      // window.$("#loadingModal").modal("show");
       return;
     }
 
     const isRegistered = await isTweetIdAlreadyRegistered(tweetId);
     if (isRegistered) {
       this.setState({
-        errMsg: "Tweet ID already submitted. Please submit another tweet ID."
+        errMsg: "Tweet ID already submitted. Please submit another tweet ID.",
+        showLoading: true
       });
-      window.$("#loadingModal").modal("show");
+      // window.$("#loadingModal").modal("show");
       return;
     }
 
@@ -109,12 +112,13 @@ export default class SubmitTweet extends Component {
     // const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
-      const modal = window
-        .$("#loadingModal")
-        .modal({ backdrop: "static", keyboard: false });
-      modal.modal("show");
+      this.setState({ showLoading: true });
       const { txnId } = await _submitTweet(privateKey, tweetId);
       this.setState({ submittedTweet: true });
+      // const modal = window
+      //   .$("#loadingModal")
+      //   .modal({ backdrop: "static", keyboard: false });
+      // modal.modal("show");
       const verifyTxn = await this.sendTransactionId(txnId);
       console.log(verifyTxn);
       this.setState({ verifiedTweet: true });
@@ -164,6 +168,7 @@ export default class SubmitTweet extends Component {
 
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       this.setState({
+        showLoading: false,
         tweetId: "",
         errMsg: null,
         submittedTweet: false,
@@ -178,7 +183,13 @@ export default class SubmitTweet extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { submittedTweet, verifiedTweet, retrievedVerification } = this.state;
+    const {
+      submittedTweet,
+      verifiedTweet,
+      retrievedVerification,
+      showLoading
+    } = this.state;
+    console.log(prevState.showLoading, showLoading);
     if (submittedTweet && verifiedTweet && retrievedVerification) {
       // clear form
       setTimeout(() => {
@@ -193,6 +204,13 @@ export default class SubmitTweet extends Component {
         });
       }, 5000);
     }
+
+    if (showLoading && !prevState.showLoading) {
+      const modal = window
+        .$("#loadingModal")
+        .modal({ backdrop: "static", keyboard: false });
+      modal.modal("show");
+    }
   }
 
   render() {
@@ -203,7 +221,8 @@ export default class SubmitTweet extends Component {
       retrievedVerification,
       errMsg,
       runIntro,
-      tweetId
+      tweetId,
+      showLoading
     } = this.state;
 
     const { isAuthenticated, user } = this.props;
@@ -248,13 +267,15 @@ export default class SubmitTweet extends Component {
 
     return (
       <div>
-        <LoadingModal
-          errorText={errMsg}
-          title="Submitting tweet"
-          loadingText={loadingText}
-          fromLoadingPercent={fromLoadingPercent}
-          toLoadingPercent={toLoadingPercent}
-        />
+        {showLoading ? (
+          <LoadingModal
+            errorText={errMsg}
+            title="Submitting tweet"
+            loadingText={loadingText}
+            fromLoadingPercent={fromLoadingPercent}
+            toLoadingPercent={toLoadingPercent}
+          />
+        ) : null}
         <Joyride
           steps={steps}
           run={runIntro}
