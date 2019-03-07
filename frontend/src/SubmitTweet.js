@@ -53,8 +53,10 @@ export default class SubmitTweet extends Component {
   }
 
   async sendTransactionId(txnId) {
-    const { token, user } = this.props.location.state;
-    // const { username } = user;
+    // const { token, user } = this.props.location.state;
+    // TO FIX token is undefined here
+    const { token, user } = this.props;
+    // console.log(user, token);
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
@@ -149,6 +151,7 @@ export default class SubmitTweet extends Component {
   }
 
   componentDidMount() {
+    console.log(this.props.user, this.props.token);
     this.updateBalance();
 
     this.updateBalanceInterval = setInterval(() => {

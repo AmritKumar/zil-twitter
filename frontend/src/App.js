@@ -137,7 +137,12 @@ class App extends Component {
           <Route
             path="/submit"
             component={props => (
-              <SubmitTweet {...props} isAuthenticated={isAuthenticated} />
+              <SubmitTweet
+                {...props}
+                isAuthenticated={isAuthenticated}
+                user={user}
+                token={token}
+              />
             )}
           />
           <Route
