@@ -22,6 +22,7 @@ export default class SubmitTweet extends Component {
     this.submitTweet = this.submitTweet.bind(this);
     this.sendTransactionId = this.sendTransactionId.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
+    this.clearState = this.clearState.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
 
     this.state = {
@@ -151,7 +152,6 @@ export default class SubmitTweet extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props.user, this.props.token);
     this.updateBalance();
 
     this.updateBalanceInterval = setInterval(() => {
@@ -168,21 +168,21 @@ export default class SubmitTweet extends Component {
     window.$(".submit-tweet-form").submit(e => {
       e.preventDefault();
     });
-
-    window.$("#loadingModal").on("hidden.bs.modal", () => {
-      this.setState({
-        showLoading: false,
-        tweetId: "",
-        errMsg: null,
-        submittedTweet: false,
-        verifiedTweet: false,
-        retrievedVerification: false
-      });
-    });
   }
 
   componentWillUnmount() {
     clearInterval(this.updateBalanceInterval);
+  }
+
+  clearState() {
+    this.setState({
+      showLoading: false,
+      tweetId: "",
+      errMsg: null,
+      submittedTweet: false,
+      verifiedTweet: false,
+      retrievedVerification: false
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -197,13 +197,7 @@ export default class SubmitTweet extends Component {
       setTimeout(() => {
         window.$("#loadingModal").modal("hide");
         this.updateBalance();
-        this.setState({
-          tweetId: "",
-          errMsg: null,
-          submittedTweet: false,
-          verifiedTweet: false,
-          retrievedVerification: false
-        });
+        this.clearState();
       }, 5000);
     }
 
@@ -212,6 +206,7 @@ export default class SubmitTweet extends Component {
         .$("#loadingModal")
         .modal({ backdrop: "static", keyboard: false });
       modal.modal("show");
+      window.$("#loadingModal").on("hidden.bs.modal", this.clearState);
     }
   }
 
@@ -230,9 +225,9 @@ export default class SubmitTweet extends Component {
     const { isAuthenticated, user } = this.props;
     const validTweetId = this.isValidTweetId(tweetId);
 
-    // if (!isAuthenticated) {
-    //   return <Redirect exact to="/" />;
-    // }
+    if (!isAuthenticated) {
+      return <Redirect exact to="/" />;
+    }
 
     const loadingPercentages = [25, 50, 75, 100];
     const msg = "\nPlease be patient, do not close this window.";

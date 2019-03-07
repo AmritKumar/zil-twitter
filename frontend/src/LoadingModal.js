@@ -14,7 +14,12 @@ export default class LoadingModal extends Component {
 
   updateProgressBar() {
     clearInterval(this.updateProgressInterval);
+
     const { fromLoadingPercent, toLoadingPercent } = this.props;
+    this.setState({
+      loadingPercent: fromLoadingPercent,
+      loadingTicks: 0
+    });
 
     const MAX_TICKS = 30;
     const incrementProgress =
