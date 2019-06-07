@@ -18,6 +18,7 @@ let false = False
 let true = True
 let zero = Uint128 0
 let one = Uint32 1
+let zero_32_bit = Uint32 0
 
 let accepted_code = Uint32 0
 let not_owner_code = Uint32 1
@@ -227,6 +228,12 @@ transition verify_tweet(
             is_matching_address = builtin eq recipient_address user_address;
             is_valid = andb is_matching_address not_verified_tweet;
 
+            tweet_length = builtin strlen tweet_text;
+            valid_start_pos = lte zero_32_bit start_pos;
+            valid_end_pos = builtin lt end_pos tweet_text;
+            is_valid_substring = andb valid_start_pos valid_end_pos;
+            is_valid = andb is_valid_substring is_valid;
+
             match is_valid with
             | False =>
                 msg = {_tag: "";
@@ -236,10 +243,8 @@ transition verify_tweet(
                 msgs = one_msg msg;
                 send msgs
             | True =>
-
                 substr_len = builtin sub end_pos start_pos;
                 substr_len = builtin add substr_len one;
-                (* TODO: Should defend against exception where end_pos larger than string length *)
                 match_hashtag = builtin substr tweet_text start_pos substr_len;
                 is_hashtag = builtin eq match_hashtag hashtag;
 
@@ -256,9 +261,9 @@ transition verify_tweet(
                     withdrawal <- last_withdrawal[user_address];
                     current_block <- & BLOCKNUMBER;
 
-                    last_withdraw_block = fst_withdraw last_withdrawal in
-                    next_day_block = builtin badd last_withdraw_block blocks_per_day in
-                    not_next_day_yet = builtin blt current_block next_day_block in
+                    last_withdraw_block = fst_withdraw last_withdrawal;
+                    next_day_block = builtin badd last_withdraw_block blocks_per_day;
+                    not_next_day_yet = builtin blt current_block next_day_block;
 
                     match not_next_day_yet with
                     | False =>
