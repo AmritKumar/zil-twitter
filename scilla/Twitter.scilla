@@ -18,7 +18,6 @@ let false = False
 let true = True
 let zero = Uint128 0
 let one = Uint32 1
-let zero_32_bit = Uint32 0
 
 let accepted_code = Uint32 0
 let not_owner_code = Uint32 1
@@ -32,7 +31,6 @@ let tweet_valid_code = Uint32 8
 let not_oracle_code = Uint32 9
 let tweet_within_day_code = Uint32 10
 
-(* TODO: Challenge - Use this to teach students to change variables to fields *)
 let zils_per_tweet = Uint128 10000
 let blocks_per_day = Uint32 20
 let withdrawal_limit_per_day = Uint128 10000
@@ -72,8 +70,6 @@ let update_withdrawal =
             | False =>
                 none_withdrawal
             end
-
-
 
 (***************************************************)
 (*             The contract definition             *)
@@ -189,7 +185,6 @@ transition new_tweet(tweet_id: String)
             msgs = one_msg msg;
             send msgs
         end
-
     end
 end
 
@@ -229,8 +224,18 @@ transition verify_tweet(
             is_valid = andb is_matching_address not_verified_tweet;
 
             tweet_length = builtin strlen tweet_text;
-            valid_start_pos = lte zero_32_bit start_pos;
-            valid_end_pos = builtin lt end_pos tweet_text;
+            valid_start_pos =
+                let start_pos_128_option = builtin to_uint128 start_pos in
+                match start_pos_128_option with
+                | None =>
+                    False
+                | Some start_pos_128 =>
+                    let is_non_negative = lte zero start_pos_128 in
+                    is_non_negative
+                end
+            ;
+            string_length = builtin strlen tweet_text;
+            valid_end_pos = builtin lt end_pos string_length;
             is_valid_substring = andb valid_start_pos valid_end_pos;
             is_valid = andb is_valid_substring is_valid;
 
@@ -260,20 +265,27 @@ transition verify_tweet(
 
                     withdrawal <- last_withdrawal[user_address];
                     current_block <- & BLOCKNUMBER;
-
-                    last_withdraw_block = fst_withdraw last_withdrawal;
-                    next_day_block = builtin badd last_withdraw_block blocks_per_day;
-                    not_next_day_yet = builtin blt current_block next_day_block;
-
+                    not_next_day_yet =
+                        match withdrawal with
+                        | Some withdrawal =>
+                            let last_withdraw_block = fst_withdraw withdrawal in
+                            let next_day_block = builtin badd last_withdraw_block blocks_per_day in
+                            let not_next_day_yet = builtin blt current_block next_day_block in
+                            not_next_day_yet
+                        | None =>
+                            False    
+                        end
+                    ;
+                    
                     match not_next_day_yet with
-                    | False =>
+                    | True =>
                         msg = {_tag: "";
                             _recipient: user_address;
                             _amount: zero;
                             code: tweet_within_day_code};
                         msgs = one_msg msg;
                         send msgs 
-                    | True =>
+                    | False =>
                         new_tweet = Pair {ByStr20 Bool} user_address true;
                         verifying_tweets[tweet_id] := new_tweet;
                         new_withdrawal =
@@ -321,10 +333,8 @@ transition verify_tweet(
                         msgs = one_msg msg;
                         send msgs
                     end
-                end
-                
+                end       
             end
         end
     end
-
 end
