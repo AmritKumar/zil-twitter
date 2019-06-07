@@ -1,6 +1,5 @@
 const { Zilliqa } = require("@zilliqa-js/zilliqa");
-const { BN, Long, bytes, units } = require("@zilliqa-js/util");
-const contracts = require("@zilliqa-js/contract");
+const { BN, Long, bytes } = require("@zilliqa-js/util");
 
 const CHAIN_ID = 333;
 const MSG_VERSION = 1;

@@ -19,11 +19,12 @@ services:
       - "80:80"
       - "3000:3000"
     volumes:
-      - .:/code
+      - ./frontend:/code
       - /code/node_modules
     depends_on:
       - backend
-    command: nginx -g "daemon off;"
+    # command: nginx -g "daemon off;"
+    command: npm start
 
   mongo:
     image: mongo:3.4.2
