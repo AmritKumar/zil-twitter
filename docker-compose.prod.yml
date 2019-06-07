@@ -1,0 +1,33 @@
+version: "3"
+services:
+  backend:
+    build: backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - mongo
+    env_file:
+      - backend/.env
+    command: node server.js
+
+  frontend:
+    image: zil-twitter_frontend_prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/code
+      - /code/node_modules
+    depends_on:
+      - backend
+    command: nginx -g "daemon off;"
+
+  mongo:
+    image: mongo:3.4.2
+    ports:
+      - "27017:27017"
