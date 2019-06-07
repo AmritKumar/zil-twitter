@@ -25,5 +25,4 @@ RUN cp -r build /var/www
 
 EXPOSE 80
 
-#ENTRYPOINT ["nginx","-g","daemon off;"]
 
