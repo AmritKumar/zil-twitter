@@ -29,6 +29,7 @@ let tweet_exists_code = Uint32 6
 let tweet_not_valid_code = Uint32 7
 let tweet_valid_code = Uint32 8
 let not_oracle_code = Uint32 9
+let tweet_within_day_code = Uint32 10
 
 (* TODO: Challenge - Use this to teach students to change variables to fields *)
 let zils_per_tweet = Uint128 10000
@@ -54,31 +55,14 @@ let lte =
         let a_eq_b = builtin eq a b in
         orb a_lt_b a_eq_b
 
-(* Update the withdrawal time if above a day *)
-(* or, update the amount if below a day *)
 let update_withdrawal =
     fun (last_withdrawal: Pair (BNum) (Uint128)) =>
     fun (current_block: BNum) =>
     fun (withdraw_amount: Uint128) =>
-        let last_withdraw_block = fst_withdraw last_withdrawal in
         let cumulative_amount = snd_withdraw last_withdrawal in
-        let next_day_block = builtin badd last_withdraw_block blocks_per_day in
-        let not_next_day_yet = builtin blt current_block next_day_block in
         let new_amount = builtin add cumulative_amount withdraw_amount in
         let in_limit = lte new_amount withdrawal_limit_per_day in
         let none_withdrawal = None {(Pair BNum Uint128)} in
-        match not_next_day_yet with
-        | True =>
-            match in_limit with
-            | True =>
-                let new_withdrawal = Pair {BNum Uint128} last_withdraw_block new_amount in
-                let some_withdrawal = Some {(Pair (BNum) (Uint128))} new_withdrawal in
-                some_withdrawal
-            | False =>
-                none_withdrawal
-            end
-        | False =>
-            (* TODO: Buggy, this needs to be fixed, it's the same as the old stuff*)
             match in_limit with
             | True =>
                 let new_withdrawal = Pair {BNum Uint128} current_block new_amount in
@@ -87,7 +71,6 @@ let update_withdrawal =
             | False =>
                 none_withdrawal
             end
-        end
 
 
 
@@ -270,56 +253,69 @@ transition verify_tweet(
                     send msgs
                 | True =>
 
-                    new_tweet = Pair {ByStr20 Bool} user_address true;
-                    verifying_tweets[tweet_id] := new_tweet;
-
                     withdrawal <- last_withdrawal[user_address];
                     current_block <- & BLOCKNUMBER;
 
-                    new_withdrawal =
-                        match withdrawal with
-                        | None =>
-                            let new_withdrawal = Pair {BNum Uint128} current_block zils_per_tweet in
-                            new_withdrawal
-                        | Some withdrawal =>
-                            let new_withdrawal = update_withdrawal withdrawal current_block zils_per_tweet in
-                            match new_withdrawal with
+                    last_withdraw_block = fst_withdraw last_withdrawal in
+                    next_day_block = builtin badd last_withdraw_block blocks_per_day in
+                    not_next_day_yet = builtin blt current_block next_day_block in
+
+                    match not_next_day_yet with
+                    | False =>
+                        msg = {_tag: "";
+                            _recipient: user_address;
+                            _amount: zero;
+                            code: tweet_within_day_code};
+                        msgs = one_msg msg;
+                        send msgs 
+                    | True =>
+                        new_tweet = Pair {ByStr20 Bool} user_address true;
+                        verifying_tweets[tweet_id] := new_tweet;
+                        new_withdrawal =
+                            match withdrawal with
                             | None =>
-                                withdrawal
-                            | Some new_withdrawal =>
+                                let new_withdrawal = Pair {BNum Uint128} current_block zils_per_tweet in
                                 new_withdrawal
+                            | Some withdrawal =>
+                                let new_withdrawal = update_withdrawal withdrawal current_block zils_per_tweet in
+                                match new_withdrawal with
+                                | None =>
+                                    withdrawal
+                                | Some new_withdrawal =>
+                                    new_withdrawal
+                                end
                             end
-                        end
-                    ;
+                        ;
 
-                    last_withdrawal[user_address] := new_withdrawal;
+                        last_withdrawal[user_address] := new_withdrawal;
 
-                    (* Find the difference between new withdrawal and old withdrawal *)
-                    reward_amount =
-                        match withdrawal with
-                        (* No prior withdrawals, just withdraw the tweet *)
-                        | None =>
-                            zils_per_tweet
-                        | Some withdrawal =>
-                            let old_balance = snd_withdraw withdrawal in
-                            let new_balance = snd_withdraw new_withdrawal in
-                            let reward_amount = builtin sub new_balance old_balance in
-                            reward_amount
-                        end
-                    ;
+                        (* Find the difference between new withdrawal and old withdrawal *)
+                        reward_amount =
+                            match withdrawal with
+                            (* No prior withdrawals, just withdraw the tweet *)
+                            | None =>
+                                zils_per_tweet
+                            | Some withdrawal =>
+                                let old_balance = snd_withdraw withdrawal in
+                                let new_balance = snd_withdraw new_withdrawal in
+                                let reward_amount = builtin sub new_balance old_balance in
+                                reward_amount
+                            end
+                        ;
 
-                    e = {_eventname : "verify_tweet";
-                        recipient: user_address;
-                        reward_amount: reward_amount;
-                        tweet_id: tweet_id};
-                    event e;
+                        e = {_eventname : "verify_tweet";
+                            recipient: user_address;
+                            reward_amount: reward_amount;
+                            tweet_id: tweet_id};
+                        event e;
 
-                    msg = {_tag: "";
-                        _recipient: user_address;
-                        _amount: reward_amount;
-                        code: tweet_valid_code};
-                    msgs = one_msg msg;
-                    send msgs
+                        msg = {_tag: "";
+                            _recipient: user_address;
+                            _amount: reward_amount;
+                            code: tweet_valid_code};
+                        msgs = one_msg msg;
+                        send msgs
+                    end
                 end
                 
             end
