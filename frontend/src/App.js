@@ -72,7 +72,6 @@ class App extends Component {
       if (!isValid) {
         throw new Error("Invalid auth state");
       }
-      const { isAuthenticated } = this.state;
       const response = await fetch(`${CURRENT_URI}/api/v1/authenticate`, {
         method: "POST",
         headers: {

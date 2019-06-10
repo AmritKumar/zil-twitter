@@ -19,12 +19,18 @@ export default class CreateWalletScreen extends Component {
       successRegisterUser: null,
       redirectToSubmitTweet: false,
       privkey: null,
-      errMsg: null
+      errMsg: null,
+      isRegistered: null
     };
   }
 
   storePrivateKey(privateKey) {
     localStorage.setItem("privateKey", privateKey);
+  }
+
+  useOwnWallet() {
+    window.$("#loadingModal").modal("show");
+    return;
   }
 
   async generateWallet() {
@@ -90,7 +96,11 @@ export default class CreateWalletScreen extends Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const { username } = this.props.location.state.user;
+    const isRegistered = isUserRegistered(username);
+    this.setState({ isRegistered });
+
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       if (this.state.errMsg) {
         this.props.onLogout();
@@ -116,7 +126,8 @@ export default class CreateWalletScreen extends Component {
       successRequestFund,
       privkey,
       errMsg,
-      redirectToSubmitTweet
+      redirectToSubmitTweet,
+      isRegistered
     } = this.state;
 
     const { isAuthenticated } = this.props;
@@ -205,18 +216,33 @@ export default class CreateWalletScreen extends Component {
                   only handles testnet ZIL tokens. Please do not send any
                   interim ERC-20 tokens or mainnet tokens here.
                 </p>
-                <div onClick={this.generateWallet} className="shiny-button">
-                  <button
-                    type="button"
-                    className="btn shiny-button-content"
-                    data-toggle="modal"
-                    data-target="#loadingModal"
-                    data-backdrop="static"
-                    data-keyboard="false"
-                  >
-                    Generate a free testnet wallet for me
-                  </button>
-                </div>
+                {isRegistered === null ? null : isRegistered ? (
+                  <div onClick={this.useOwnWallet} className="shiny-button">
+                    <button
+                      type="button"
+                      className="btn shiny-button-content"
+                      data-toggle="modal"
+                      data-target="#loadingModal"
+                      data-backdrop="static"
+                      data-keyboard="false"
+                    >
+                      Use my own wallet
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={this.generateWallet} className="shiny-button">
+                    <button
+                      type="button"
+                      className="btn shiny-button-content"
+                      data-toggle="modal"
+                      data-target="#loadingModal"
+                      data-backdrop="static"
+                      data-keyboard="false"
+                    >
+                      Generate a free testnet wallet for me
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

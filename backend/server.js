@@ -266,7 +266,7 @@ router.route("/authenticate").post(authenticate, function(req, res, next) {
 });
 
 app.use("/", router);
-// app.use("/api/v1", router);
+app.use("/api/v1", router);
 
 // const frontendBuild = path.join(__dirname, "frontend", "build");
 // console.log(frontendBuild);
