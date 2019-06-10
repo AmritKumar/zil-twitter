@@ -1,12 +1,12 @@
 "use strict";
 
-var mongoose = require("mongoose"),
+const mongoose = require("mongoose"),
   Schema = mongoose.Schema;
 
 module.exports = function() {
-  var db = mongoose.connect("mongodb://mongo:27017/twitter-demo");
+  const db = mongoose.connect("mongodb://mongo:27017/twitter-demo");
 
-  var UserSchema = new Schema({
+  const UserSchema = new Schema({
     // email: {
     //   type: String, required: true,
     //   trim: true, unique: true,
@@ -30,15 +30,15 @@ module.exports = function() {
     profile,
     cb
   ) {
-    var that = this;
+    const that = this;
     return this.findOne(
       {
         "twitterProvider.id": profile.id
       },
-      function(err, user) {
+      (err, user) => {
         // no user was found, lets create a new one
         if (!user) {
-          var newUser = new that({
+          const newUser = new that({
             // email: profile.emails[0].value,
             twitterProvider: {
               username: profile.username,
@@ -48,7 +48,7 @@ module.exports = function() {
             }
           });
 
-          newUser.save(function(error, savedUser) {
+          newUser.save((error, savedUser) => {
             if (error) {
               console.log(error);
             }
