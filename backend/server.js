@@ -87,8 +87,7 @@ router.route("/auth/twitter/reverse").post((req, res) => {
     {
       url: "https://api.twitter.com/oauth/request_token",
       oauth: {
-        // NEED TO FIND WAY TO GET 127.0.0.1:4000 by code
-        callback: "http://127.0.0.1:4000/auth/twitter-callback",
+        oauth_callback: "http%3A%2F%2Flocalhost%3A4000%2Ftwitter-callback",
         consumer_key: process.env.TWITTER_CONSUMER_KEY,
         consumer_secret: process.env.TWITTER_CONSUMER_SECRET
       }
@@ -103,11 +102,6 @@ router.route("/auth/twitter/reverse").post((req, res) => {
       res.send(JSON.parse(jsonStr));
     }
   );
-});
-
-router.route('/auth/twitter-callback').get((req, res, next) => {
-  console.log(req.query.oauth_token);
-  console.log(req.query.oauth_verifier);
 });
 
 router.route("/auth/twitter").post(
