@@ -222,7 +222,7 @@ export default class SubmitTweet extends Component {
       showLoading
     } = this.state;
 
-    const { isAuthenticated, user } = this.props;
+    const { isAuthenticated } = this.props;
     const validTweetId = this.isValidTweetId(tweetId);
 
     if (!isAuthenticated) {

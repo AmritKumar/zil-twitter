@@ -1,54 +1,54 @@
 body {
-	margin: 0;
-	padding: 0;
-	font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
 }
 
 .twitter-login {
-	background: transparent;
-	border: none;
-	padding-left: 0;
-	padding-right: 0;
+  background: transparent;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 [type="button"]:not(:disabled).twitter-login,
 [type="reset"]:not(:disabled),
 [type="submit"]:not(:disabled),
 button:not(:disabled).twitter-login {
-	cursor: inherit;
+  cursor: inherit;
 }
 
 .loader {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	width: 90px;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  justify-content: center;
+  width: 90px;
 }
 
 .loading-modal .modal-body {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .fa-times {
-	position: absolute;
-	color: #c62828;
-	font-size: 40px;
+  position: absolute;
+  color: #c62828;
+  font-size: 40px;
 }
 
 .fa-check {
-	position: absolute;
-	color: #42e8e0;
-	font-size: 40px;
+  position: absolute;
+  color: #42e8e0;
+  font-size: 40px;
 }
 
 .warning {
-	color: #c62828;
+  color: #c62828;
 }
 
 .cta-container img {
-	max-width: 100%;
+  max-width: 100%;
 }
