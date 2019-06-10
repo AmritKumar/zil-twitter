@@ -1,39 +1,11 @@
 import TwitterLogin from "react-twitter-auth";
-import { Redirect } from "react-router-dom";
 import React from "react";
 import { CURRENT_URI } from "./utils";
 
 const loginUrl = `${CURRENT_URI}/api/v1/auth/twitter`;
 const requestTokenUrl = `${CURRENT_URI}/api/v1/auth/twitter/reverse`;
-console.log(loginUrl);
 
 const HomeScreen = props => {
-  const { isAuthenticated, user, token } = props;
-
-  const privateKey = localStorage.getItem("privateKey");
-
-  if (isAuthenticated) {
-    // if privateKey was generated before, redirect to the submitTweet page to be used
-    if (privateKey) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/submit",
-            state: { isAuthenticated, user, token }
-          }}
-        />
-      );
-    }
-    return (
-      <Redirect
-        to={{
-          pathname: "/create",
-          state: { isAuthenticated, user, token }
-        }}
-      />
-    );
-  }
-
   return (
     <header className="masthead">
       <div className="container h-100">

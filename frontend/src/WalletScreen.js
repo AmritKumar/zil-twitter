@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 const CP = require("@zilliqa-js/crypto");
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
@@ -45,19 +45,7 @@ export default class Wallet extends Component {
   }
 
   render() {
-    const { isAuthenticated } = this.props;
     const { balance } = this.state;
-
-    if (!isAuthenticated) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/"
-          }}
-        />
-      );
-    }
-
     return (
       <header className="masthead-wallet">
         <div className="container h-100">
