@@ -12,7 +12,6 @@ export default class CreateWalletScreen extends Component {
     this.generateWallet = this.generateWallet.bind(this);
     this.requestFunds = this.requestFunds.bind(this);
     this.registerUser = this.registerUser.bind(this);
-    this.existingPrivateKey = !!localStorage.getItem("privateKey");
     this.state = {
       redirectBack: false,
       successRequestFund: null,
@@ -20,7 +19,8 @@ export default class CreateWalletScreen extends Component {
       redirectToSubmitTweet: false,
       privkey: null,
       errMsg: null,
-      isRegistered: null
+      isRegistered: null,
+      showModal: false
     };
   }
 
@@ -29,16 +29,23 @@ export default class CreateWalletScreen extends Component {
   }
 
   useOwnWallet() {
-    window.$("#loadingModal").modal("show");
-    return;
+    // window.$("#loadingModal").modal("show");
+    // return;
+    this.setState({
+      showModal: true
+    });
   }
 
   async generateWallet() {
     const { username } = this.props.location.state.user;
     const isRegistered = await isUserRegistered(username);
     if (isRegistered) {
-      this.setState({ errMsg: "User is already registered." });
-      window.$("#loadingModal").modal("show");
+      // this.setState({ errMsg: "User is already registered." });
+      // window.$("#loadingModal").modal("show");
+      this.setState({ 
+        errMsg: "User is already registered.",
+        showModal: true
+      });
       return;
     }
 
@@ -101,6 +108,7 @@ export default class CreateWalletScreen extends Component {
     const isRegistered = isUserRegistered(username);
     this.setState({ isRegistered });
 
+    // WHAT IS THIS FOR??
     window.$("#loadingModal").on("hidden.bs.modal", () => {
       if (this.state.errMsg) {
         this.props.onLogout();
@@ -115,7 +123,7 @@ export default class CreateWalletScreen extends Component {
     const { successRegisterUser, successRequestFund } = this.state;
     if (successRegisterUser && successRequestFund) {
       setTimeout(() => {
-        window.$("#loadingModal").modal("hide");
+        this.setState({ showModal: false });
       }, 3000);
     }
   }
@@ -129,27 +137,6 @@ export default class CreateWalletScreen extends Component {
       redirectToSubmitTweet,
       isRegistered
     } = this.state;
-
-    const { isAuthenticated } = this.props;
-
-    if (!isAuthenticated) {
-      return <Redirect exact to="/" />;
-    } else {
-      // dont regenerate private keys for the user
-      if (this.existingPrivateKey) {
-        console.log("existingPrivateKey");
-        return (
-          <Redirect
-            to={{
-              pathname: "/submit",
-              state: {
-                ...this.props.location.state
-              }
-            }}
-          />
-        );
-      }
-    }
 
     if (redirectToSubmitTweet) {
       return (

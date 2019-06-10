@@ -94,9 +94,53 @@ class App extends Component {
     this.validateAuth();
   }
 
+  renderHomeScreen(props, isAuthenticated, user, token) {
+    return (
+      <HomeScreen
+        {...props}
+        errorText={
+          "Login with Twitter failed. Please refresh your browser and try again."
+        }
+        isAuthenticated={isAuthenticated}
+        onLoginSuccess={this.handleSuccess}
+        onLoginFail={this.handleFailed}
+        user={user}
+        token={token}
+      />
+    );
+  }
+
+  renderCreateWalletScreen(props, isAuthenticated) {
+    return (
+      <CreateWalletScreen
+        {...props}
+        isAuthenticated={isAuthenticated}
+        onLogout={this.logout}
+      />
+    );
+  }
+
+  renderSubmitScreen(props, isAuthenticated, user, token) {
+    return (
+      <SubmitTweet
+        {...props}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        token={token}
+      />
+    );
+  }
+
+  renderWalletScreen(props, isAuthenticated) {
+    return (
+      <WalletScreen {...props} isAuthenticated={isAuthenticated}/>
+    );
+  }
+
   render() {
     const { isAuthenticated, user, token } = this.state;
-
+    const privateKey = localStorage.getItem("privateKey");
+    console.log(isAuthenticated, privateKey);
     return (
       <Router>
         <span>
@@ -110,44 +154,37 @@ class App extends Component {
             exact
             path="/"
             render={props => (
-              <HomeScreen
-                {...props}
-                errorText={
-                  "Login with Twitter failed. Please refresh your browser and try again."
-                }
-                isAuthenticated={isAuthenticated}
-                onLoginSuccess={this.handleSuccess}
-                onLoginFail={this.handleFailed}
-                user={user}
-                token={token}
-              />
+              isAuthenticated && privateKey ? 
+                this.renderSubmitScreen(props, isAuthenticated, user, token) :
+                isAuthenticated ?
+                  this.renderCreateWalletScreen(props, isAuthenticated) :
+                  this.renderHomeScreen(props, isAuthenticated, user, token)  
             )}
           />
           <Route
             path="/create"
             component={props => (
-              <CreateWalletScreen
-                {...props}
-                isAuthenticated={isAuthenticated}
-                onLogout={this.logout}
-              />
+              !isAuthenticated ?
+                this.renderHomeScreen(props, isAuthenticated, user, token) :
+                !!privateKey ?
+                  this.renderSubmitScreen(props, isAuthenticated, user, token) :
+                  this.renderCreateWalletScreen(props, isAuthenticated)
             )}
           />
           <Route
             path="/submit"
             component={props => (
-              <SubmitTweet
-                {...props}
-                isAuthenticated={isAuthenticated}
-                user={user}
-                token={token}
-              />
+              isAuthenticated ?
+                this.renderSubmitScreen(props, isAuthenticated, user, token) :
+                this.renderHomeScreen(props, isAuthenticated, user, token)
             )}
           />
           <Route
             path="/wallet"
             component={props => (
-              <WalletScreen {...props} isAuthenticated={isAuthenticated} />
+              isAuthenticated ?
+                this.renderWalletScreen(props, isAuthenticated) :
+                this.renderHomeScreen(props, isAuthenticated, user, token)
             )}
           />
           <Footer />

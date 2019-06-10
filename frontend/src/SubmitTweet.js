@@ -7,7 +7,7 @@ import {
   isTweetIdAlreadyRegistered,
   zilliqa
 } from "./zilliqa";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { TwitterTweetEmbed } from "react-twitter-embed";
 import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
@@ -222,12 +222,7 @@ export default class SubmitTweet extends Component {
       showLoading
     } = this.state;
 
-    const { isAuthenticated } = this.props;
     const validTweetId = this.isValidTweetId(tweetId);
-
-    if (!isAuthenticated) {
-      return <Redirect exact to="/" />;
-    }
 
     const loadingPercentages = [25, 50, 75, 100];
     const msg = "\nPlease be patient, do not close this window.";
