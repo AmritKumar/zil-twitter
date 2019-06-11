@@ -262,9 +262,6 @@ router
   .post(authenticate, verifyTwitterToken, fulfillSubmitTweet);
 // router.route("/submit-tweet").post(authenticate, fulfillSubmitTweet);
 
-router.route("/authenticate").post(authenticate, (req, res, next) => {
-  res.status(200).send(JSON.stringify("success"));
-});
 
 app.use("/", router);
 app.use("/api/v1", router);

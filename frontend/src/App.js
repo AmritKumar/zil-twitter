@@ -6,7 +6,6 @@ import Footer from "./Footer";
 import CreateWalletScreen from "./CreateWalletScreen";
 import SubmitTweet from "./SubmitTweet";
 import WalletScreen from "./WalletScreen";
-import { CURRENT_URI } from "./utils";
 
 class App extends Component {
   constructor() {
@@ -65,28 +64,14 @@ class App extends Component {
     }
   }
 
-  async validateAuth() {
-    try {
-      const { user, token } = this.getAuth();
-      const isValid = this.localValidateAuth(user, token);
-      if (!isValid) {
-        throw new Error("Invalid auth state");
-      }
-      const response = await fetch(`${CURRENT_URI}/api/v1/authenticate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
-        }
-      });
-      if (!response.ok) {
-        this.setState({ isAuthenticated: false });
-        this.logout();
-      } else {
-        this.setState({ isAuthenticated: true, user, token });
-      }
-    } catch (e) {
-      console.error(e);
+  validateAuth() {
+    const { user, token } = this.getAuth();
+    const isValid = this.localValidateAuth(user, token);
+    if (isValid) {
+      this.setState({ isAuthenticated: true, user, token });
+    } else {
+      this.setState({ isAuthenticated: false });
+      this.logout();
     }
   }
 
@@ -140,7 +125,6 @@ class App extends Component {
   render() {
     const { isAuthenticated, user, token } = this.state;
     const privateKey = localStorage.getItem("privateKey");
-    console.log(isAuthenticated, privateKey);
     return (
       <Router>
         <span>
