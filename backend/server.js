@@ -1,19 +1,18 @@
 "use strict";
 
-//mongoose file must be loaded before all other files in order to provide
+// mongoose file must be loaded before all other files in order to provide
 // models to other modules
 const mongoose = require("./mongoose"),
   passport = require("passport"),
   express = require("express"),
   jwt = require("jsonwebtoken"),
-  expressJwt = require("express-jwt"),
   router = express.Router(),
   cors = require("cors"),
   path = require("path"),
   bodyParser = require("body-parser"),
+  cookieParser = require("cookie-parser"),
   request = require("request");
 
-const { promisify } = require("util");
 const {
   fundAccount,
   registerUser,
@@ -27,10 +26,13 @@ mongoose();
 const User = require("mongoose").model("User");
 const passportConfig = require("./passport");
 
-//setup configuration for facebook login
 passportConfig();
 
 const app = express();
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", "127.0.0.1");
+}
 
 // enable cors
 const corsOption = {
@@ -40,9 +42,7 @@ const corsOption = {
   exposedHeaders: ["x-auth-token"]
 };
 app.use(cors(corsOption));
-
-
-// app.options('*', cors());
+app.use(cookieParser());
 //rest API requirements
 app.use(
   bodyParser.urlencoded({
@@ -50,37 +50,6 @@ app.use(
   })
 );
 app.use(bodyParser.json());
-
-router.route("/health-check").get((req, res) => {
-  res.status(200);
-  res.send("Hello World");
-});
-
-const createToken = (auth) => {
-  return jwt.sign(
-    {
-      id: auth.id
-    },
-    "my-secret",
-    {
-      expiresIn: 60 * 120
-    }
-  );
-};
-
-const generateToken = (req, res, next) => {
-  req.token = createToken(req.auth);
-  return next();
-};
-
-const sendToken = (req, res) => {
-  res.setHeader("x-auth-token", req.token);
-  const { screen_name: username } = req.body;
-  const { _id: id } = req.user;
-  const { token } = req.auth;
-  const payload = { username, id, token };
-  return res.status(200).send(JSON.stringify(payload));
-};
 
 router.route("/auth/twitter/reverse").post((req, res) => {
   request.post(
@@ -92,23 +61,30 @@ router.route("/auth/twitter/reverse").post((req, res) => {
         consumer_secret: process.env.TWITTER_CONSUMER_SECRET
       }
     },
-    (err, r, body) => {
+    (err, json) => {
       if (err) {
         return res.send(500, { message: e.message });
       }
-
       const jsonStr =
-        '{ "' + body.replace(/&/g, '", "').replace(/=/g, '": "') + '"}';
+        '{ "' + json.body.replace(/&/g, '", "').replace(/=/g, '": "') + '"}';
       res.send(JSON.parse(jsonStr));
     }
   );
 });
 
+const generateAndSendToken = (req, res) => {
+  const { _id: id } = req.user;
+  const username = req.user.twitterProvider.username;
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 24 * 60 * 60 });
+  res.cookie("token", token, {httpOnly: true });
+  res.status(200).send(JSON.stringify({ username }));
+};
+
 router.route("/auth/twitter").post(
   (req, res, next) => {
     request.post(
       {
-        url: `https://api.twitter.com/oauth/access_token?oauth_verifier`,
+        url: "https://api.twitter.com/oauth/access_token?oauth_verifier",
         oauth: {
           consumer_key: process.env.TWITTER_CONSUMER_KEY,
           consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -116,13 +92,13 @@ router.route("/auth/twitter").post(
         },
         form: { oauth_verifier: req.query.oauth_verifier }
       },
-      function(err, r, body) {
+      function(err, json) {
         if (err) {
           return res.send(500, { message: err.message });
         }
 
         const bodyString =
-          '{ "' + body.replace(/&/g, '", "').replace(/=/g, '": "') + '"}';
+          '{ "' + json.body.replace(/&/g, '", "').replace(/=/g, '": "') + '"}';
         const parsedBody = JSON.parse(bodyString);
 
         req.body["oauth_token"] = parsedBody.oauth_token;
@@ -134,76 +110,45 @@ router.route("/auth/twitter").post(
       }
     );
   },
-  passport.authenticate("twitter-token", { session: false }),
+  passport.authenticate("twitter-token", {session: false }),
   (req, res, next) => {
     if (!req.user) {
       return res.send(401, "User Not Authenticated");
     }
-    const { id, twitterProvider } = req.user;
-    const { token } = twitterProvider;
-
-    // prepare token for API
-    req.auth = {
-      id,
-      token
-    };
-
     return next();
   },
-  generateToken,
-  sendToken
+  generateAndSendToken
 );
 
 //token handling middleware
-const authenticate = expressJwt({
-  secret: "my-secret",
-  requestProperty: "auth",
-  getToken: (req) => {
-    if (req.headers["x-auth-token"]) {
-      return req.headers["x-auth-token"];
-    }
-    return null;
-  }
-});
-
-const getCurrentUser = (req, res, next) => {
-  User.findById(req.auth.id, (err, user) => {
-    if (err) {
-      next(err);
-    } else {
-      req.user = user;
-      next();
-    }
-  });
-};
-
-const getOne = (req, res) => {
-  const user = req.user.toObject();
-
-  delete user["twitterProvider"];
-  delete user["__v"];
-
-  res.json(user);
-};
-
-const verifyTwitterToken = async (req, res, next) => {
-  const { username, twitterToken } = req.body;
-  const users = await User.find({
-    "twitterProvider.username": username,
-    "twitterProvider.token": twitterToken
-  });
-  if (users.length) {
-    next();
+const authenticate = (req, res, next) => {
+  const token = req.body.token ||
+    req.query.token ||
+    req.headers['x-access-token'] ||
+    req.cookies.token;
+  if (!token) {
+    res.status(401).send("Unauthorized: No token provided");
   } else {
-    throw new Error("Token does not exist");
+    jwt.verify(token, secret, function(err, decoded) {
+      if (err) {
+        res.status(401).send("Unauthorized: Invalid token");
+      } else {
+        User.findById(decoded.id, (err, user) => {
+          if (err) {
+            next(err);
+          } else {
+            req.user = user;
+            next();
+          }
+        });
+      }
+    });
   }
 };
-
-router.route("/auth/me").get(authenticate, getCurrentUser, getOne);
 
 async function fulfillFundsRequest(req, res, next) {
   // const { userId, token, tokenSecret, address } = req.body;
-  const { username, address } = req.body;
+  const { address } = req.body;
 
   try {
     // const user = await User.findById(userId);
@@ -231,20 +176,14 @@ async function fulfillFundsRequest(req, res, next) {
 
 router
   .route("/request-funds")
-  .post(authenticate, verifyTwitterToken, fulfillFundsRequest);
+  .post(authenticate, fulfillFundsRequest);
 
-const fulfillSubmitTweet = async (req, res, next) => {
-  const { txnId, username, twitterToken } = req.body;
+const fulfillSubmitTweet = async (req, res) => {
+  const { txnId } = req.body;
+  const { tokenSecret } = req.user.twitterProvider
 
   try {
     const { tweetId, sender } = await getTweetId(txnId);
-
-    const users = await User.find({
-      "twitterProvider.username": username,
-      "twitterProvider.token": twitterToken
-    });
-    const user = users[0];
-    const tokenSecret = user.twitterProvider.tokenSecret;
     const tweetData = await getTweetData(tweetId, twitterToken, tokenSecret);
     const { tweetText, startPos, endPos } = tweetData;
     console.log(tweetData);
@@ -259,7 +198,7 @@ const fulfillSubmitTweet = async (req, res, next) => {
 
 router
   .route("/submit-tweet")
-  .post(authenticate, verifyTwitterToken, fulfillSubmitTweet);
+  .post(authenticate, fulfillSubmitTweet);
 // router.route("/submit-tweet").post(authenticate, fulfillSubmitTweet);
 
 

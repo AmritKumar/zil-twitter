@@ -24,7 +24,7 @@ export default class SubmitTweet extends Component {
     this.updateBalance = this.updateBalance.bind(this);
     this.clearState = this.clearState.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
-
+    this.getPrivateKey = this.getPrivateKey.bind(this);
     this.state = {
       showLoading: false,
       tweetId: "",
@@ -38,8 +38,11 @@ export default class SubmitTweet extends Component {
   }
 
   getPrivateKey() {
-    return localStorage.getItem("privateKey");
-    // return privkey;
+    if (this.props.privateKey) {
+      return this.props.privateKey;
+    } else {
+      return "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
+    }
   }
 
   async updateBalance() {
@@ -56,21 +59,21 @@ export default class SubmitTweet extends Component {
   async sendTransactionId(txnId) {
     // const { token, user } = this.props.location.state;
     // TO FIX token is undefined here
-    const { token, user } = this.props;
     // console.log(user, token);
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-auth-token": token
         },
-        body: JSON.stringify({
-          txnId,
-          username: user.username,
-          twitterToken: user.token
-        })
+        body: JSON.stringify({ txnId }),
+        credentials: "same-origin"
       });
+      // Cookie has expired
+      if (response.status === 401) {
+        this.props.onLogout();
+        return;
+      }
       const data = await response.json();
       return data;
     } catch (e) {

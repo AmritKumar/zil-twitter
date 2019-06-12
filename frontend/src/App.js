@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
+import { isUserRegistered } from "./zilliqa";
 import Navbar from "./Navbar";
 import HomeScreen from "./HomeScreen";
 import Footer from "./Footer";
@@ -8,35 +9,48 @@ import SubmitTweet from "./SubmitTweet";
 import WalletScreen from "./WalletScreen";
 
 class App extends Component {
-  constructor() {
-    super();
+
+  constructor(props) {
+    super(props);
     this.handleSuccess = this.handleSuccess.bind(this);
     this.handleFailed = this.handleFailed.bind(this);
+    this.handlePrivateKeySet = this.handlePrivateKeySet.bind(this);
     this.logout = this.logout.bind(this);
-    this.storeAuth = this.storeAuth.bind(this);
-    this.validateAuth = this.validateAuth.bind(this);
-    this.state = { isAuthenticated: false, user: null, token: "" };
+    this.checkIfRegistered = this.checkIfRegistered.bind(this)
+    this.state = { 
+      isAuthenticated: !!localStorage.getItem("authenticatedUsername"),
+      hasWallet: !!localStorage.getItem("hasWallet"),
+      privateKey: null
+    };
+    this.checkIfRegistered();
   }
 
-  storeAuth(user, token) {
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
+  async checkIfRegistered() {
+    console.log("MM");
+    const username = localStorage.getItem("authenticatedUsername");
+    const isRegistered = await isUserRegistered(username);
+    const noChange = this.state.hasWallet === isRegistered;
+    if (noChange) {
+      return;
+    }
+    if (isRegistered) {
+      localStorage.setItem("hasWallet", "TRUE");
+    } else {
+      localStorage.removeItem("hasWallet");
+    }
+    this.setState({
+      hasWallet: isRegistered
+    });
   }
 
-  getAuth() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const token = localStorage.getItem("token");
-    return { user, token };
+  handlePrivateKeySet(key) {
+    this.setState({ privateKey: key });
   }
 
   handleSuccess(response) {
-    const token = response.headers.get("x-auth-token");
-    response.json().then(user => {
-      if (token) {
-        this.setState({ isAuthenticated: true, user: user, token: token });
-        this.storeAuth(user, token);
-        // this.props.onSuccessLogin({ user, token });
-      }
+    response.json().then(json => {
+      localStorage.setItem("authenticatedUsername", json.username);
+      this.setState({ isAuthenticated: true });
     });
   }
 
@@ -46,85 +60,55 @@ class App extends Component {
   }
 
   logout() {
-    this.setState({ isAuthenticated: false, token: "", user: null });
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("authenticatedUsername");
+    this.setState({ isAuthenticated: false });
   }
 
-  localValidateAuth(user, token) {
-    try {
-      const isObject = typeof user === "object" && user !== null;
-      if (!isObject) throw new Error("user is not object");
-      if (!user.username) throw new Error("user.username is not present");
-      if (!user.id) throw new Error("user.id is not present");
-      if (!token) throw new Error("token is not present");
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  validateAuth() {
-    const { user, token } = this.getAuth();
-    const isValid = this.localValidateAuth(user, token);
-    if (isValid) {
-      this.setState({ isAuthenticated: true, user, token });
-    } else {
-      this.setState({ isAuthenticated: false });
-      this.logout();
-    }
-  }
-
-  componentDidMount() {
-    this.validateAuth();
-  }
-
-  renderHomeScreen(props, isAuthenticated, user, token) {
+  renderHomeScreen(props) {
     return (
       <HomeScreen
         {...props}
         errorText={
           "Login with Twitter failed. Please refresh your browser and try again."
         }
-        isAuthenticated={isAuthenticated}
         onLoginSuccess={this.handleSuccess}
         onLoginFail={this.handleFailed}
-        user={user}
-        token={token}
       />
     );
   }
 
-  renderCreateWalletScreen(props, isAuthenticated) {
+  renderCreateWalletScreen(props) {
     return (
       <CreateWalletScreen
         {...props}
-        isAuthenticated={isAuthenticated}
         onLogout={this.logout}
+        checkIfRegistered={this.checkIfRegistered}
+        handlePrivateKeySet={this.handlePrivateKeySet}
       />
     );
   }
 
-  renderSubmitScreen(props, isAuthenticated, user, token) {
+  renderSubmitScreen(props) {
     return (
       <SubmitTweet
         {...props}
-        isAuthenticated={isAuthenticated}
-        user={user}
-        token={token}
+        onLogout={this.logout}
+        privateKey={this.state.privateKey}
       />
     );
   }
 
-  renderWalletScreen(props, isAuthenticated) {
+  renderWalletScreen(props) {
     return (
-      <WalletScreen {...props} isAuthenticated={isAuthenticated}/>
+      <WalletScreen 
+        {...props}
+        privateKey={this.state.privateKey}
+      />
     );
   }
 
   render() {
-    const { isAuthenticated, user, token } = this.state;
-    const privateKey = localStorage.getItem("privateKey");
+    const { isAuthenticated, hasWallet } = this.state;
     return (
       <Router>
         <span>
@@ -138,37 +122,35 @@ class App extends Component {
             exact
             path="/"
             render={props => (
-              isAuthenticated && privateKey ? 
-                this.renderSubmitScreen(props, isAuthenticated, user, token) :
+              isAuthenticated && hasWallet ?
+                this.renderSubmitScreen(props) :
                 isAuthenticated ?
-                  this.renderCreateWalletScreen(props, isAuthenticated) :
-                  this.renderHomeScreen(props, isAuthenticated, user, token)  
+                  this.renderCreateWalletScreen(props) :
+                  this.renderHomeScreen(props)  
             )}
           />
           <Route
             path="/create"
             component={props => (
-              !isAuthenticated ?
-                this.renderHomeScreen(props, isAuthenticated, user, token) :
-                !!privateKey ?
-                  this.renderSubmitScreen(props, isAuthenticated, user, token) :
-                  this.renderCreateWalletScreen(props, isAuthenticated)
+              isAuthenticated ?
+                this.renderCreateWalletScreen(props) :
+                this.renderHomeScreen(props)
             )}
           />
           <Route
             path="/submit"
             component={props => (
               isAuthenticated ?
-                this.renderSubmitScreen(props, isAuthenticated, user, token) :
-                this.renderHomeScreen(props, isAuthenticated, user, token)
+                this.renderSubmitScreen(props) :
+                this.renderHomeScreen(props)
             )}
           />
           <Route
             path="/wallet"
             component={props => (
               isAuthenticated ?
-                this.renderWalletScreen(props, isAuthenticated) :
-                this.renderHomeScreen(props, isAuthenticated, user, token)
+                this.renderWalletScreen(props) :
+                this.renderHomeScreen(props)
             )}
           />
           <Footer />

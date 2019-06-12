@@ -10,87 +10,73 @@ export default class CreateWalletScreen extends Component {
   constructor() {
     super();
     this.generateWallet = this.generateWallet.bind(this);
+    this.generateKey = this.generateKey.bind(this);
     this.requestFunds = this.requestFunds.bind(this);
     this.registerUser = this.registerUser.bind(this);
+    this.getUsername = this.getUsername.bind(this);
     this.state = {
       redirectBack: false,
       successRequestFund: null,
       successRegisterUser: null,
-      redirectToSubmitTweet: false,
-      privkey: null,
+      privateKey: null,
       errMsg: null,
-      isRegistered: null,
       showModal: false
     };
   }
 
-  storePrivateKey(privateKey) {
-    localStorage.setItem("privateKey", privateKey);
-  }
-
-  useOwnWallet() {
-    // window.$("#loadingModal").modal("show");
-    // return;
-    this.setState({
-      showModal: true
-    });
+  getUsername() {
+    const username = localStorage.getItem("authenticatedUsername");
+    if (username) {
+      return username;
+    } else {
+      this.props.onLogout();
+    }
   }
 
   async generateWallet() {
-    const { username } = this.props.location.state.user;
-    const isRegistered = await isUserRegistered(username);
-    if (isRegistered) {
-      // this.setState({ errMsg: "User is already registered." });
-      // window.$("#loadingModal").modal("show");
-      this.setState({ 
-        errMsg: "User is already registered.",
-        showModal: true
-      });
-      return;
-    }
-
-    const privkey = CP.schnorr.generatePrivateKey();
-    // delay to create illusion
-    setTimeout(() => {
-      this.setState({ privkey });
-      this.storePrivateKey(privkey);
-    }, 5000);
-    await this.requestFunds(privkey);
-    await this.registerUser(privkey, username);
+    await this.generateKey();
+    const { privateKey } = this.state;
+    await this.requestFunds(privateKey);
+    const username = this.getUsername();
+    await this.registerUser(privateKey, username);
+    this.props.handlePrivateKeySet(privateKey);
   }
 
-  async registerUser(privkey, username) {
+  async generateKey() {
+    await this.props.checkIfRegistered();
+    const privateKey = CP.schnorr.generatePrivateKey();
+    this.setState({ privateKey });
+  }
+
+  async registerUser(privateKey, username) {
     if (this.state.successRequestFund) {
-      const address = CP.getAddressFromPrivateKey(privkey);
+      const address = CP.getAddressFromPrivateKey(privateKey);
       try {
-        const tx = await _registerUser(privkey, address, username);
-        console.log(tx);
+        const tx = await _registerUser(privateKey, address, username);
+        localStorage.setItem("hasWallet", "TRUE");
         this.setState({ successRegisterUser: tx.receipt.success });
       } catch (e) {
+        console.log(e);
         this.setState({ errMsg: e.message });
-        console.error(e);
       }
     }
   }
 
-  async requestFunds(privkey) {
-    const { user, token } = this.props.location.state;
-    const { username, token: twitterToken } = user;
-    const address = CP.getAddressFromPrivateKey(privkey);
+  async requestFunds(privateKey) {
+    const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/request-funds`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
-        },
-        body: JSON.stringify({
-          username,
-          address,
-          twitterToken
-        })
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ address }),
+        credentials: "same-origin"
       });
+      // Cookie has expired
+      if (response.status === 401) {
+        this.props.onLogout();
+        return;
+      }
       const receipt = await response.json();
       console.log(receipt);
       this.setState({ successRequestFund: receipt.success });
@@ -103,60 +89,45 @@ export default class CreateWalletScreen extends Component {
     }
   }
 
-  async componentDidMount() {
-    const { username } = this.props.location.state.user;
-    const isRegistered = isUserRegistered(username);
-    this.setState({ isRegistered });
+  // async componentDidMount() {
+  //   // ONLY WHEN IT HAS BEEN HIDDEN, can we say this
+  //   window.$("#loadingModal").on("hidden.bs.modal", () => {
+  //     if (this.state.errMsg) {
+  //       this.props.onLogout();
+  //       // this.setState({ redirectBack: true });
+  //     } else {
+  //       this.setState({ redirectToSubmitTweet: true, isRegistered });
+  //     }
+  //   });
+  // }
 
-    // WHAT IS THIS FOR??
-    window.$("#loadingModal").on("hidden.bs.modal", () => {
-      if (this.state.errMsg) {
-        this.props.onLogout();
-        // this.setState({ redirectBack: true });
-      } else {
-        this.setState({ redirectToSubmitTweet: true });
-      }
-    });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { successRegisterUser, successRequestFund } = this.state;
-    if (successRegisterUser && successRequestFund) {
-      setTimeout(() => {
-        this.setState({ showModal: false });
-      }, 3000);
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   const { successRegisterUser, successRequestFund } = this.state;
+  //   if (successRegisterUser && successRequestFund) {
+  //     setTimeout(() => {
+  //       // window.$("#loadingModal").modal("hide");
+  //       this.setState({ showModal: false });
+  //     }, 3000);
+  //   }
+  // }
 
   render() {
     const {
       successRegisterUser,
       successRequestFund,
-      privkey,
       errMsg,
-      redirectToSubmitTweet,
-      isRegistered
+      privateKey,
+      showModal
     } = this.state;
-
-    if (redirectToSubmitTweet) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/submit",
-            state: {
-              ...this.props.location.state
-            }
-          }}
-        />
-      );
-    }
 
     const msg = "\nPlease be patient, do not close this window.";
     const loadingPercentages = [0, 33.33, 66.66, 100];
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Generating private key...";
-    if (privkey) {
+
+    // TODO: SHOW PRIVATE KEY HERE, PAUSE AND ASK THEM TO NOTE DOWN
+    if (privateKey) {
       loadingText = "Requesting funds for wallet..." + msg;
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];
@@ -177,13 +148,13 @@ export default class CreateWalletScreen extends Component {
 
     return (
       <header className="masthead-create">
-        <LoadingModal
+        { showModal ? (<LoadingModal
           title="Your Testnet Wallet"
           fromLoadingPercent={fromLoadingPercent}
           toLoadingPercent={toLoadingPercent}
           loadingText={loadingText}
           errorText={errMsg}
-        />
+        />) : null}
         <div className="container h-100">
           <div className="row h-100">
             <div className="col-lg-12 my-auto">
@@ -203,33 +174,18 @@ export default class CreateWalletScreen extends Component {
                   only handles testnet ZIL tokens. Please do not send any
                   interim ERC-20 tokens or mainnet tokens here.
                 </p>
-                {isRegistered === null ? null : isRegistered ? (
-                  <div onClick={this.useOwnWallet} className="shiny-button">
-                    <button
-                      type="button"
-                      className="btn shiny-button-content"
-                      data-toggle="modal"
-                      data-target="#loadingModal"
-                      data-backdrop="static"
-                      data-keyboard="false"
-                    >
-                      Use my own wallet
-                    </button>
-                  </div>
-                ) : (
-                  <div onClick={this.generateWallet} className="shiny-button">
-                    <button
-                      type="button"
-                      className="btn shiny-button-content"
-                      data-toggle="modal"
-                      data-target="#loadingModal"
-                      data-backdrop="static"
-                      data-keyboard="false"
-                    >
-                      Generate a free testnet wallet for me
-                    </button>
-                  </div>
-                )}
+                <div onClick={this.generateWallet} className="shiny-button">
+                  <button
+                    type="button"
+                    className="btn shiny-button-content"
+                    data-toggle="modal"
+                    data-target="#loadingModal"
+                    data-backdrop="static"
+                    data-keyboard="false"
+                  >
+                    Generate a free testnet wallet for me
+                  </button>
+                </div>
               </div>
             </div>
           </div>
