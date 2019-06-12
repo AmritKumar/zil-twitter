@@ -19,16 +19,16 @@ let true = True
 let zero = Uint128 0
 let one = Uint32 1
 
-let accepted_code = Uint32 0
-let not_owner_code = Uint32 1
+let not_owner_code = Uint32 0
+let deposit_success_code = Uint32 1
 let user_exists_code = Uint32 2
 let registered_success_code = Uint32 3
 let user_not_exists_code = Uint32 4
-let verifying_tweet_code = Uint32 5
-let tweet_exists_code = Uint32 6
+let tweet_exists_code = Uint32 5
+let new_tweet_success_code = Uint32 6
 let tweet_not_valid_code = Uint32 7
-let tweet_valid_code = Uint32 8
-let tweet_within_day_code = Uint32 10
+let tweet_within_day_code = Uint32 8
+let verify_tweet_success_code = Uint32 9
 
 let zils_per_tweet = Uint128 10000
 let blocks_per_day = Uint32 20
@@ -95,20 +95,16 @@ transition deposit()
     sender_is_owner = is_owner owner _sender;
     match sender_is_owner with
     | False =>
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
-                code: not_owner_code};
-        msgs = one_msg msg;
-        send msgs
+        e = {_eventname : "deposit_failed";
+                sender: _sender;
+                code: not_owner_code };
+        event e
     | True =>
         accept;
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
-                code: accepted_code};
-        msgs = one_msg msg;
-        send msgs
+        e = {_eventname : "deposit_successful";
+                sender: _sender;
+                code: deposit_success_code };
+        event e
     end
 end
 
@@ -120,27 +116,22 @@ transition register_user(user_address: ByStr20, twitter_username: String)
     already_exists = orb user_exists username_exists;
     match already_exists with
     | True =>
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
-                code: user_exists_code};
-        msgs = one_msg msg;
-        send msgs
+        e = {_eventname : "user_registration_failed";
+                user_address: user_adddress;
+                twitter_username: twitter_username;
+                sender: _sender;
+                code: user_exists_code };
+        event e
     | False =>
         users[user_address] := twitter_username;
         used_usernames[twitter_username] := true;
 
-        e = {_eventname : "register_user";
-                user: user_address;
-                username: twitter_username};
-        event e;
-
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
-                code: registered_success_code};
-        msgs = one_msg msg;
-        send msgs
+        e = {_eventname : "user_registration_successful";
+                user_address: user_adddress;
+                twitter_username: twitter_username;
+                sender: _sender;
+                code: registered_success_code };
+        event e
     end
 end
 
@@ -150,38 +141,32 @@ transition new_tweet(tweet_id: String)
 
     match username with
     | None =>
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
+        e = {_eventname : "add_new_tweet_failed";
+                sender: _sender;
+                tweet_id: tweet_id;
+                username: "";
                 code: user_not_exists_code};
-        msgs = one_msg msg;
-        send msgs
+        event e        
     | Some username =>
         tweet_exists <- exists verifying_tweets[tweet_id];
         match tweet_exists with
         | True =>
-            msg = {_tag: "";
-                    _recipient: _sender;
-                    _amount: zero;
-                    code: tweet_exists_code};
-            msgs = one_msg msg;
-            send msgs
+            e = {_eventname : "add_new_tweet_failed";
+                    _sender: sender;
+                    username: username;
+                    tweet_id: tweet_id;
+                    code: tweet_exists_code };
+            event e               
         | False =>
             tweet = Pair {ByStr20 Bool} _sender false;
             verifying_tweets[tweet_id] := tweet;
 
-            e = {_eventname : "new_tweet";
-                sender: _sender;
-                username: username;
-                tweet_id: tweet_id};
+            e = {_eventname : "add_new_tweet_sucessful";
+                    sender: _sender;
+                    username: username;
+                    tweet_id: tweet_id;
+                    code: new_tweet_success_code };
             event e;
-
-            msg = {_tag: "";
-                    _recipient: _sender;
-                    _amount: zero;
-                    code: verifying_tweet_code};
-            msgs = one_msg msg;
-            send msgs
         end
     end
 end
@@ -196,23 +181,23 @@ transition verify_tweet(
 
     match is_owner with
     | False =>
-        msg = {_tag: "";
-                _recipient: _sender;
-                _amount: zero;
-                code: not_owner_code};
-        msgs = one_msg msg;
-        send msgs
+        e = {_eventname : "verify_tweet_failed";
+                sender: _sender;
+                user_address: user_address;
+                tweet_id: tweet_id;
+                code: not_owner_code };
+        event e;            
     | True =>
         is_verifying_tweet <- verifying_tweets[tweet_id];
 
         match is_verifying_tweet with
         | None =>
-            msg = {_tag: "";
-                    _recipient: _sender;
-                    _amount: zero;
-                    code: tweet_not_valid_code};
-            msgs = one_msg msg;
-            send msgs
+            e = {_eventname : "verify_tweet_failed";
+                    sender: _sender;
+                    user_address: user_address;
+                    tweet_id: tweet_id;
+                    code: tweet_not_valid_code };
+            event e;                
         | Some tweet =>
 
             recipient_address = fst_tweet tweet;
@@ -239,12 +224,12 @@ transition verify_tweet(
 
             match is_valid with
             | False =>
-                msg = {_tag: "";
-                        _recipient: _sender;
-                        _amount: zero;
-                        code: tweet_not_valid_code};
-                msgs = one_msg msg;
-                send msgs
+                e = {_eventname : "verify_tweet_failed";
+                        sender: _sender;
+                        user_address: user_address;
+                        tweet_id: tweet_id;
+                        code: tweet_not_valid_code };
+                event e;           
             | True =>
                 substr_len = builtin sub end_pos start_pos;
                 substr_len = builtin add substr_len one;
@@ -253,12 +238,12 @@ transition verify_tweet(
 
                 match is_hashtag with
                 | False =>
-                    msg = {_tag: "";
-                        _recipient: user_address;
-                        _amount: zero;
-                        code: tweet_not_valid_code};
-                    msgs = one_msg msg;
-                    send msgs
+                    e = {_eventname : "verify_tweet_failed";
+                            sender: _sender;
+                            user_address: user_address;
+                            tweet_id: tweet_id;
+                            code: tweet_not_valid_code };
+                    event e;    
                 | True =>
 
                     withdrawal <- last_withdrawal[user_address];
@@ -277,12 +262,12 @@ transition verify_tweet(
                     
                     match not_next_day_yet with
                     | True =>
-                        msg = {_tag: "";
-                            _recipient: user_address;
-                            _amount: zero;
-                            code: tweet_within_day_code};
-                        msgs = one_msg msg;
-                        send msgs 
+                        e = {_eventname : "verify_tweet_failed";
+                                sender: _sender;
+                                user_address: user_address;
+                                tweet_id: tweet_id;
+                                code: tweet_within_day_code };
+                        event e;     
                     | False =>
                         new_tweet = Pair {ByStr20 Bool} user_address true;
                         verifying_tweets[tweet_id] := new_tweet;
@@ -317,13 +302,13 @@ transition verify_tweet(
                                 reward_amount
                             end
                         ;
-
-                        e = {_eventname : "verify_tweet";
-                            recipient: user_address;
-                            reward_amount: reward_amount;
-                            tweet_id: tweet_id};
-                        event e;
-
+                        e = {_eventname : "verify_tweet_successful";
+                                sender: _sender;
+                                recipient: user_address;
+                                reward_amount: reward_amount;
+                                tweet_id: tweet_id;
+                                code: verify_tweet_success_code };
+                        event e;     
                         msg = {_tag: "";
                             _recipient: user_address;
                             _amount: reward_amount;
