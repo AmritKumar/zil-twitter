@@ -28,7 +28,6 @@ let verifying_tweet_code = Uint32 5
 let tweet_exists_code = Uint32 6
 let tweet_not_valid_code = Uint32 7
 let tweet_valid_code = Uint32 8
-let not_oracle_code = Uint32 9
 let tweet_within_day_code = Uint32 10
 
 let zils_per_tweet = Uint128 10000
@@ -77,7 +76,6 @@ let update_withdrawal =
 
 contract Twitter
 (owner: ByStr20,
-oracle_address: ByStr20,
 hashtag: String)
 
 field users: Map ByStr20 String
@@ -188,20 +186,20 @@ transition new_tweet(tweet_id: String)
     end
 end
 
-(* this is sent by the oracle server *)
+(* this is sent by the owner *)
 transition verify_tweet(
     user_address: ByStr20,
     tweet_id: String, tweet_text: String,
     start_pos: Uint32, end_pos: Uint32
 )
-    is_oracle = builtin eq _sender oracle_address;
+    is_owner = builtin eq _sender owner;
 
-    match is_oracle with
+    match is_owner with
     | False =>
         msg = {_tag: "";
                 _recipient: _sender;
                 _amount: zero;
-                code: not_oracle_code};
+                code: not_owner_code};
         msgs = one_msg msg;
         send msgs
     | True =>

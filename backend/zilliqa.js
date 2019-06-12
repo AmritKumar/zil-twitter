@@ -13,16 +13,12 @@ const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 
 const CONTRACT_PATH = "../scilla/Twitter.scilla";
 const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY;
-const ORACLE_PRIVATE_KEY = process.env.ORACLE_PRIVATE_KEY;
 
 zilliqa.wallet.addByPrivateKey(OWNER_PRIVATE_KEY);
-zilliqa.wallet.addByPrivateKey(ORACLE_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
-const oracleAddress = CP.getAddressFromPrivateKey(ORACLE_PRIVATE_KEY);
 const contractAddress = "91121ec8f6fdd83992cd5edee29a8dbbd27d21f4";
 const deployedContract = zilliqa.contracts.at(`0x${contractAddress}`);
-
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
 const myGasPrice = new BN("1000000000");
@@ -47,11 +43,6 @@ const initParams = [
     vname: "owner",
     type: "ByStr20",
     value: `0x${ownerAddress}`
-  },
-  {
-    vname: "oracle_address",
-    type: "ByStr20",
-    value: `0x${oracleAddress}`
   },
   {
     vname: "hashtag",
@@ -142,14 +133,13 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
       value: endPos.toString()
     }
   ];
-  zilliqa.wallet.setDefault(oracleAddress);
+  zilliqa.wallet.setDefault(ownerAddress);
   const tx = await deployedContract.call("verify_tweet", params, {
     version: VERSION,
     amount: new BN(0),
     gasPrice: new BN("5000000000"),
     gasLimit: Long.fromNumber(5000)
   });
-  zilliqa.wallet.setDefault(ownerAddress);
   return tx;
 }
 
