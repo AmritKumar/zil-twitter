@@ -16,7 +16,7 @@
 		{
 			"vname": "tweet_text",
 			"type": "String",
-			"value": "This was #BuildonZIL!"
+			"value": "This was #BuildOnZIL!"
 		},
 		{
 			"vname": "start_pos",

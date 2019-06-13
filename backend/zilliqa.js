@@ -47,7 +47,7 @@ const initParams = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#buildonzil"
+    value: "#BuildOnZil"
   }
 ];
 
@@ -80,28 +80,6 @@ async function fundAccount(address) {
     })
   );
   console.log("fundAccount", tx.receipt);
-  return tx.receipt;
-}
-
-async function registerUser(userAddress, username) {
-  const tx = await deployedContract.call(
-    "register_user",
-    [
-      {
-        vname: "user_address",
-        type: "ByStr20",
-        value: `0x${userAddress}`
-      },
-      { vname: "twitter_username", type: "String", value: username }
-    ],
-    {
-      version: VERSION,
-      amount: new BN(0),
-      gasPrice: new BN("2000000000"),
-      gasLimit: Long.fromNumber(1000)
-    }
-  );
-  console.log("registerUser", tx.receipt);
   return tx.receipt;
 }
 
