@@ -35,12 +35,14 @@ button:not(:disabled).twitter-login {
 
 .fa-times {
   position: absolute;
+  margin-left: 6%;
   color: #c62828;
   font-size: 40px;
 }
 
 .fa-check {
   position: absolute;
+  margin-left: 5%;
   color: #42e8e0;
   font-size: 40px;
 }
