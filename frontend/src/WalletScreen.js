@@ -1,29 +1,19 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-const CP = require("@zilliqa-js/crypto");
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
 
 export default class Wallet extends Component {
   constructor() {
     super();
-    this.getPrivateKey = this.getPrivateKey.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
     this.state = {
       balance: 0
     };
   }
-
-  getPrivateKey() {
-    if (this.props.privateKey) {
-      return this.props.privateKey;
-    } else {
-      // NEED TO TAKE AS INPUT
-      return "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
-    }
-  }
+  
   async updateBalance() {
-    const address = CP.getAddressFromPrivateKey(this.getPrivateKey());
+    const address = this.getAddress();
     const data = await zilliqa.blockchain.getBalance(address);
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
@@ -53,8 +43,7 @@ export default class Wallet extends Component {
 
   render() {
     const { balance } = this.state;
-    const privateKey = this.getPrivateKey();
-    const address = CP.getAddressFromPrivateKey();
+    const address = this.props.getAddress();
     return (
       <header className="masthead-wallet">
         <div className="container h-100">
@@ -95,23 +84,6 @@ export default class Wallet extends Component {
                           >
                             View on ViewBlock.io
                           </a>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-lg-3">Private Key</div>
-                        <div className="col-lg-7">
-                          <span>{privateKey}</span>
-                          <i
-                            onClick={e => this.copyToClipboard(privateKey)}
-                            className="fas fa-paste pl-2"
-                          />
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-lg-12">
-                          <span className="warning">
-                            Keep your private keys to yourself!
-                          </span>
                         </div>
                       </div>
                     </div>

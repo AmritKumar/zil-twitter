@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 import { TwitterTweetEmbed } from "react-twitter-embed";
 import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
-const CP = require("@zilliqa-js/crypto");
 // const privkey =
 //   "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
 
@@ -24,7 +23,6 @@ export default class SubmitTweet extends Component {
     this.updateBalance = this.updateBalance.bind(this);
     this.clearState = this.clearState.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
-    this.getPrivateKey = this.getPrivateKey.bind(this);
     this.state = {
       showLoading: false,
       tweetId: "",
@@ -37,23 +35,12 @@ export default class SubmitTweet extends Component {
     };
   }
 
-  getPrivateKey() {
-    if (this.props.privateKey) {
-      return this.props.privateKey;
-    } else {
-      return "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
-    }
-  }
-
   async updateBalance() {
-    const privateKey = this.getPrivateKey();
-    if (privateKey) {
-      const address = CP.getAddressFromPrivateKey(privateKey);
-      const data = await zilliqa.blockchain.getBalance(address);
-      const { balance } = data.result;
-      const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-      this.setState({ balance: zilBalance });
-    }
+    const address = this.props.getAddress();
+    const data = await zilliqa.blockchain.getBalance(address);
+    const { balance } = data.result;
+    const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+    this.setState({ balance: zilBalance });
   }
 
   async sendTransactionId(txnId) {
@@ -67,11 +54,10 @@ export default class SubmitTweet extends Component {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ txnId }),
-        credentials: "same-origin"
+        credentials: "include"
       });
-      // Cookie has expired
       if (response.status === 401) {
-        this.props.onLogout();
+        this.props.onLogout(true);
         return;
       }
       const data = await response.json();
@@ -114,7 +100,7 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    const privateKey = this.getPrivateKey();
+    const privateKey = this.props.getPrivateKey();
     // const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
@@ -255,7 +241,7 @@ export default class SubmitTweet extends Component {
       {
         target: ".balance",
         content:
-          "You can view your testnet wallet's address and private keys here.",
+          "You can view your testnet wallet's address here.",
         disableBeacon: true
       }
     ];
@@ -296,7 +282,7 @@ export default class SubmitTweet extends Component {
                       rel="noopener noreferrer"
                       href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                     >
-                      #BuildonZIL
+                      #BuildOnZIL
                     </a>
                   </h2>
                   <div className="row my-auto w-100">
@@ -363,7 +349,7 @@ export default class SubmitTweet extends Component {
           <div className="container">
             <div className="row h-100">
               <div className="col-lg-7 mx-auto my-auto">
-                <p className="heading">
+                <div className="heading">
                   <strong className="ml-4">Instructions</strong>
                   <ol>
                     <li>Register or Sign in with your Twitter account.</li>
@@ -378,14 +364,14 @@ export default class SubmitTweet extends Component {
                         rel="noopener noreferrer"
                         href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
-                        #BuildonZIL
+                        #BuildOnZIL
                       </a>
                       .
                     </li>
                     <li>Submit the tweet ID here for verification.</li>
                     <li>Get test tokens for our test blockchain!</li>
                   </ol>
-                </p>
+                </div>
               </div>
             </div>
           </div>

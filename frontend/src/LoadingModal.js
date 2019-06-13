@@ -48,7 +48,7 @@ export default class LoadingModal extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.updateProgress);
+    clearInterval(this.updateProgressInterval);
   }
 
   render() {

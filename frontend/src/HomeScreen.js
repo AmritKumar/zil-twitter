@@ -22,7 +22,8 @@ const HomeScreen = props => {
                 onFailure={props.onLoginFail}
                 onSuccess={props.onLoginSuccess}
                 requestTokenUrl={requestTokenUrl}
-                className="twitter-login"
+                credentials="include"
+                className="twitter-login btn shiny-button-content"
               >
                 <div className="shiny-button">
                   <button className="btn shiny-button-content">

@@ -15,7 +15,6 @@ const mongoose = require("./mongoose"),
 
 const {
   fundAccount,
-  registerUser,
   getTweetId,
   verifyTweet
 } = require("./zilliqa");
@@ -37,9 +36,9 @@ if (process.env.NODE_ENV === "production") {
 // enable cors
 const corsOption = {
   origin: true,
+  // methods: "GET,HEAD",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-  exposedHeaders: ["x-auth-token"]
+  credentials: true
 };
 app.use(cors(corsOption));
 app.use(cookieParser());
@@ -56,7 +55,7 @@ router.route("/auth/twitter/reverse").post((req, res) => {
     {
       url: "https://api.twitter.com/oauth/request_token",
       oauth: {
-        oauth_callback: "http%3A%2F%2Flocalhost%3A4000%2Ftwitter-callback",
+        oauth_callback: "https%3A%2F%2Flocalhost%3A4000%2Ftwitter-callback",
         consumer_key: process.env.TWITTER_CONSUMER_KEY,
         consumer_secret: process.env.TWITTER_CONSUMER_SECRET
       }
@@ -129,7 +128,7 @@ const authenticate = (req, res, next) => {
   if (!token) {
     res.status(401).send("Unauthorized: No token provided");
   } else {
-    jwt.verify(token, secret, function(err, decoded) {
+    jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
       if (err) {
         res.status(401).send("Unauthorized: Invalid token");
       } else {

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
 import "whatwg-fetch";
 import { registerUser as _registerUser, isUserRegistered } from "./zilliqa";
 import LoadingModal from "./LoadingModal";
 import { CURRENT_URI } from "./utils";
+import { throws } from "assert";
 const CP = require("@zilliqa-js/crypto");
 
 export default class CreateWalletScreen extends Component {
@@ -19,8 +19,7 @@ export default class CreateWalletScreen extends Component {
       successRequestFund: null,
       successRegisterUser: null,
       privateKey: null,
-      errMsg: null,
-      showModal: false
+      errMsg: null
     };
   }
 
@@ -29,36 +28,40 @@ export default class CreateWalletScreen extends Component {
     if (username) {
       return username;
     } else {
-      this.props.onLogout();
+      this.props.onLogout(true);
     }
   }
 
   async generateWallet() {
-    await this.generateKey();
-    const { privateKey } = this.state;
-    await this.requestFunds(privateKey);
-    const username = this.getUsername();
-    await this.registerUser(privateKey, username);
-    this.props.handlePrivateKeySet(privateKey);
+    try {
+      const username = await this.getUsername();
+      const isRegistered = await isUserRegistered(username);
+      if (!isRegistered) {
+        await this.generateKey();
+        const { privateKey } = this.state;
+        localStorage.setItem("walletAddress", CP.getAddressFromPrivateKey(privateKey));
+        await this.requestFunds(privateKey);
+        await this.registerUser(privateKey, username);
+      }
+      window.$('#loadingModal').modal('toggle');
+      this.props.handleWalletStateChange(true);
+    } catch (e) {
+      this.setState({errMsg: e.message});
+    }
   }
 
   async generateKey() {
-    await this.props.checkIfRegistered();
     const privateKey = CP.schnorr.generatePrivateKey();
+    // TODO: Need to display modal
     this.setState({ privateKey });
   }
 
   async registerUser(privateKey, username) {
     if (this.state.successRequestFund) {
       const address = CP.getAddressFromPrivateKey(privateKey);
-      try {
-        const tx = await _registerUser(privateKey, address, username);
-        localStorage.setItem("hasWallet", "TRUE");
-        this.setState({ successRegisterUser: tx.receipt.success });
-      } catch (e) {
-        console.log(e);
-        this.setState({ errMsg: e.message });
-      }
+      // const tx = await _registerUser(privateKey, address, username);
+      // this.setState({ successRegisterUser: tx.receipt.success });
+      this.setState({ successRegisterUser: true });
     }
   }
 
@@ -66,58 +69,32 @@ export default class CreateWalletScreen extends Component {
     const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
-      const response = await fetch(`${CURRENT_URI}/api/v1/request-funds`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ address }),
-        credentials: "same-origin"
-      });
-      // Cookie has expired
-      if (response.status === 401) {
-        this.props.onLogout();
-        return;
-      }
-      const receipt = await response.json();
-      console.log(receipt);
-      this.setState({ successRequestFund: receipt.success });
-      return receipt;
+      // const response = fetch(`${CURRENT_URI}/api/v1/request-funds`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json"},
+      //   body: JSON.stringify({ address }),
+      //   credentials: "include"
+      // });
+      // // Cookie has expired
+      // if (response.status === 401) {
+      //   this.props.onLogout();
+      //   return;
+      // }
+      // const receipt = response.json();
+      // console.log(receipt);
+      // this.setState({ successRequestFund: receipt.success });
+      this.setState({ successRequestFund: true });
     } catch (e) {
-      console.log(e);
-      this.setState({
-        errMsg: "Failed in requesting funds.\nPlease refresh and try again."
-      });
+      throw Error("Failed in requesting funds.\nPlease refresh and try again.");
     }
   }
-
-  // async componentDidMount() {
-  //   // ONLY WHEN IT HAS BEEN HIDDEN, can we say this
-  //   window.$("#loadingModal").on("hidden.bs.modal", () => {
-  //     if (this.state.errMsg) {
-  //       this.props.onLogout();
-  //       // this.setState({ redirectBack: true });
-  //     } else {
-  //       this.setState({ redirectToSubmitTweet: true, isRegistered });
-  //     }
-  //   });
-  // }
-
-  // componentDidUpdate(prevProps, prevState) {
-  //   const { successRegisterUser, successRequestFund } = this.state;
-  //   if (successRegisterUser && successRequestFund) {
-  //     setTimeout(() => {
-  //       // window.$("#loadingModal").modal("hide");
-  //       this.setState({ showModal: false });
-  //     }, 3000);
-  //   }
-  // }
 
   render() {
     const {
       successRegisterUser,
       successRequestFund,
       errMsg,
-      privateKey,
-      showModal
+      privateKey
     } = this.state;
 
     const msg = "\nPlease be patient, do not close this window.";
@@ -126,35 +103,28 @@ export default class CreateWalletScreen extends Component {
     let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Generating private key...";
 
-    // TODO: SHOW PRIVATE KEY HERE, PAUSE AND ASK THEM TO NOTE DOWN
-    if (privateKey) {
+    if (successRegisterUser && successRequestFund && privateKey) {
+      loadingText = "Successfully registered wallet in contract. Redirecting you...";
+      fromLoadingPercent = loadingPercentages[3];
+      toLoadingPercent = loadingPercentages[3];
+    } else if (successRequestFund && privateKey) {
+      loadingText = "Registering wallet in contract..." + msg;
+      fromLoadingPercent = loadingPercentages[2];
+      toLoadingPercent = loadingPercentages[3];
+    } else {
       loadingText = "Requesting funds for wallet..." + msg;
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];
-
-      if (successRequestFund) {
-        loadingText = "Registering wallet in contract..." + msg;
-        fromLoadingPercent = loadingPercentages[2];
-        toLoadingPercent = loadingPercentages[3];
-
-        if (successRegisterUser) {
-          loadingText =
-            "Successfully registered wallet in contract. Redirecting you...";
-          fromLoadingPercent = loadingPercentages[3];
-          toLoadingPercent = loadingPercentages[3];
-        }
-      }
     }
-
     return (
       <header className="masthead-create">
-        { showModal ? (<LoadingModal
+        <LoadingModal
           title="Your Testnet Wallet"
           fromLoadingPercent={fromLoadingPercent}
           toLoadingPercent={toLoadingPercent}
           loadingText={loadingText}
           errorText={errMsg}
-        />) : null}
+        />
         <div className="container h-100">
           <div className="row h-100">
             <div className="col-lg-12 my-auto">
