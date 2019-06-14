@@ -5,26 +5,26 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "91121ec8f6fdd83992cd5edee29a8dbbd27d21f4";
+const contractAddress = "ee6c71e89752ac95ceafb08a8a07d86dfb4f30b9";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("5000000000");
 
-export async function isTweetIdAlreadyRegistered(tweetId) {
+export const isTweetIdAlreadyRegistered = async (tweetId) => {
   const state = await contract.getState();
   const verifyingTweets = state.find(s => s.vname === "verifying_tweets");
   const tweet = verifyingTweets.value.find(v => v.key === tweetId);
   return !!tweet;
-}
+};
 
-export async function isUserRegistered(username) {
+export const isUserRegistered = async (username) => {
   const state = await contract.getState();
   const usedUsernames = state.find(s => s.vname === "used_usernames");
   const isUsed = usedUsernames.value.find(u => u.key === username);
   return !!isUsed;
-}
+};
 
-export async function registerUser(privateKey, userAddress, username) {
+export const registerUser = async (privateKey, userAddress, username) => {
   zilliqa.wallet.addByPrivateKey(privateKey);
   const tx = await contract.call(
     "register_user",
@@ -50,9 +50,9 @@ export async function registerUser(privateKey, userAddress, username) {
     );
   }
   return tx;
-}
+};
 
-export async function submitTweet(privateKey, tweetId) {
+export const submitTweet = async (privateKey, tweetId) => {
   zilliqa.wallet.addByPrivateKey(privateKey);
 
   try {
@@ -79,9 +79,9 @@ export async function submitTweet(privateKey, tweetId) {
     console.error(e);
     throw new Error("Failed to submit tweet. Please try again.");
   }
-}
+};
 
-export async function getTweetVerification(txnId, tweetId) {
+export const getTweetVerification = async (txnId, tweetId) => {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
     const { event_logs: eventLogs } = tx.receipt;
@@ -103,4 +103,4 @@ export async function getTweetVerification(txnId, tweetId) {
     console.error(e);
     throw e;
   }
-}
+};
