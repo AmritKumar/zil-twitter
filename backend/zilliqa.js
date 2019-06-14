@@ -17,13 +17,13 @@ const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY;
 zilliqa.wallet.addByPrivateKey(OWNER_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
-const contractAddress = "91121ec8f6fdd83992cd5edee29a8dbbd27d21f4";
+const contractAddress = "ee6c71e89752ac95ceafb08a8a07d86dfb4f30b9";
 const deployedContract = zilliqa.contracts.at(contractAddress);
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
 const myGasPrice = new BN("1000000000");
 
-async function readContractFile(filepath) {
+const readContractFile = async (filepath) => {
   const readfile = promisify(fs.readFile);
   try {
     const content = await readfile(filepath);
@@ -31,7 +31,7 @@ async function readContractFile(filepath) {
   } catch (e) {
     console.error(e);
   }
-}
+};
 
 const initParams = [
   {
@@ -47,11 +47,11 @@ const initParams = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#BuildOnZil"
+    value: "#BuildOnZIL"
   }
 ];
 
-async function deployTestContract() {
+const deployTestContract = async () => {
   console.log("deploying contract...");
   const code = await readContractFile(CONTRACT_PATH);
   const contract = zilliqa.contracts.new(code, initParams);
@@ -69,7 +69,7 @@ async function deployTestContract() {
   }
 }
 
-async function fundAccount(address) {
+const fundAccount = async (address) => {
   const tx = await zilliqa.blockchain.createTransaction(
     zilliqa.transactions.new({
       version: VERSION,
@@ -81,9 +81,9 @@ async function fundAccount(address) {
   );
   console.log("fundAccount", tx.receipt);
   return tx.receipt;
-}
+};
 
-async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
+const verifyTweet = async => (userAddress, tweetId, tweetText, startPos, endPos) {
   const params = [
     {
       vname: "user_address",
@@ -119,16 +119,9 @@ async function verifyTweet(userAddress, tweetId, tweetText, startPos, endPos) {
     gasLimit: Long.fromNumber(5000)
   });
   return tx;
-}
+};
 
-async function getBalance() {
-  const balance = await zilliqa.blockchain.getBalance(ownerAddress);
-  const minGasPrice = await zilliqa.blockchain.getMinimumGasPrice();
-  console.log(balance, minGasPrice);
-  return balance;
-}
-
-async function getTweetId(txnId) {
+const getTweetId = async (txnId) => {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
     console.log(tx);
@@ -138,7 +131,8 @@ async function getTweetId(txnId) {
       throw new Error("No event logs for new_tweet");
     }
 
-    const eventLog = eventLogs.find(e => e._eventname === "new_tweet");
+    const eventLog = eventLogs.find(e => e._eventname === "add_new_tweet_sucessful");
+    console.log(eventLog);
     const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
     const tweetId = tweetIdParam.value;
     const senderParam = eventLog.params.find(p => p.vname === "sender");
@@ -148,9 +142,9 @@ async function getTweetId(txnId) {
     console.error(e);
     throw e;
   }
-}
+};
 
-async function getHashtag() {
+const getHashtag = async() => {
   try {
     const init = await zilliqa.blockchain.getSmartContractInit(contractAddress);
     const initParam = init.result.find(
@@ -161,9 +155,9 @@ async function getHashtag() {
   } catch (e) {
     console.error(e);
   }
-}
+};
 
-async function depositToContract(contract) {
+const depositToContract = async (contract) => {
   try {
     const tx = await contract.call("deposit", [], {
       version: VERSION,
@@ -175,28 +169,10 @@ async function depositToContract(contract) {
   } catch (e) {
     console.error(e);
   }
-}
-
-async function main() {
-  // const hashtag = await getHashtag();
-  // console.log(hashtag);
-  // const contract = await deployTestContract();
-  // await depositToContract(contract);
-  // await registerUser(contract, oracleAddress, "kenchangh");
-  // await fundAccount(contractAddress);
-  // const tx = await verifyTweet(
-  //   "0x2a89b69ec1d4f23e7c2109f117adcd4f415a1a0a",
-  //   "1098114537063014401",
-  //   "hey yolo #BuildonZIL",
-  //   9,
-  //   21
-  // );
-}
-main();
+};
 
 module.exports = {
   fundAccount,
-  registerUser,
   getTweetId,
   getHashtag,
   verifyTweet,
