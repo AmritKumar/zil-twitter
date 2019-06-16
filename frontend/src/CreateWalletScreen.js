@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import "whatwg-fetch";
-import { registerUser as _registerUser, isUserRegistered } from "./zilliqa";
+import { registerUser, isUserRegistered } from "./zilliqa";
 import LoadingModal from "./LoadingModal";
 import { CURRENT_URI } from "./utils";
-import { throws } from "assert";
 const CP = require("@zilliqa-js/crypto");
 
 export default class CreateWalletScreen extends Component {
@@ -12,7 +11,7 @@ export default class CreateWalletScreen extends Component {
     this.generateWallet = this.generateWallet.bind(this);
     this.generateKey = this.generateKey.bind(this);
     this.requestFunds = this.requestFunds.bind(this);
-    this.registerUser = this.registerUser.bind(this);
+    this.register = this.register.bind(this);
     this.getUsername = this.getUsername.bind(this);
     this.state = {
       redirectBack: false,
@@ -33,35 +32,36 @@ export default class CreateWalletScreen extends Component {
   }
 
   async generateWallet() {
+    let privateKey = null;
     try {
-      const username = await this.getUsername();
+      const username = this.getUsername();
       const isRegistered = await isUserRegistered(username);
       if (!isRegistered) {
-        await this.generateKey();
-        const { privateKey } = this.state;
-        localStorage.setItem("walletAddress", CP.getAddressFromPrivateKey(privateKey));
+        this.generateKey();
+        privateKey = this.state.privateKey;
         await this.requestFunds(privateKey);
-        await this.registerUser(privateKey, username);
+        await this.register(privateKey, username);
+        localStorage.setItem("walletAddress", CP.getAddressFromPrivateKey(privateKey));
       }
       window.$('#loadingModal').modal('toggle');
-      this.props.handleWalletStateChange(true);
+      this.props.handleWalletStateChange(true, privateKey);
+
     } catch (e) {
       this.setState({errMsg: e.message});
     }
   }
 
-  async generateKey() {
+  generateKey() {
     const privateKey = CP.schnorr.generatePrivateKey();
-    // TODO: Need to display modal
+    console.log(privateKey);
     this.setState({ privateKey });
   }
 
-  async registerUser(privateKey, username) {
+  async register(privateKey, username) {
     if (this.state.successRequestFund) {
       const address = CP.getAddressFromPrivateKey(privateKey);
-      // const tx = await _registerUser(privateKey, address, username);
-      // this.setState({ successRegisterUser: tx.receipt.success });
-      this.setState({ successRegisterUser: true });
+      const tx = await registerUser(privateKey, address, username);
+      this.setState({ successRegisterUser: tx.receipt.success });
     }
   }
 
@@ -69,21 +69,20 @@ export default class CreateWalletScreen extends Component {
     const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
-      // const response = fetch(`${CURRENT_URI}/api/v1/request-funds`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json"},
-      //   body: JSON.stringify({ address }),
-      //   credentials: "include"
-      // });
-      // // Cookie has expired
-      // if (response.status === 401) {
-      //   this.props.onLogout();
-      //   return;
-      // }
-      // const receipt = response.json();
-      // console.log(receipt);
-      // this.setState({ successRequestFund: receipt.success });
-      this.setState({ successRequestFund: true });
+      const response = await fetch(`${CURRENT_URI}/api/v1/request-funds`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ address }),
+        credentials: "include"
+      });
+      // Cookie has expired
+      if (response.status === 401) {
+        this.props.onLogout();
+        throw Error;
+      }
+      const receipt = await response.json();
+      this.setState({ successRequestFund: receipt.success });
+      // this.setState({ successRequestFund: true });
     } catch (e) {
       throw Error("Failed in requesting funds.\nPlease refresh and try again.");
     }
@@ -98,20 +97,20 @@ export default class CreateWalletScreen extends Component {
     } = this.state;
 
     const msg = "\nPlease be patient, do not close this window.";
-    const loadingPercentages = [0, 33.33, 66.66, 100];
+    const loadingPercentages = [0, 25, 50, 75, 100];
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
-    let loadingText = "Generating private key...";
+    let loadingText = "Checking if already registered";
 
     if (successRegisterUser && successRequestFund && privateKey) {
       loadingText = "Successfully registered wallet in contract. Redirecting you...";
       fromLoadingPercent = loadingPercentages[3];
-      toLoadingPercent = loadingPercentages[3];
+      toLoadingPercent = loadingPercentages[4];
     } else if (successRequestFund && privateKey) {
       loadingText = "Registering wallet in contract..." + msg;
       fromLoadingPercent = loadingPercentages[2];
       toLoadingPercent = loadingPercentages[3];
-    } else {
+    } else if (privateKey) {
       loadingText = "Requesting funds for wallet..." + msg;
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];

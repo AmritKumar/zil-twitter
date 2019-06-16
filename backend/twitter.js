@@ -1,4 +1,3 @@
-const { promisify } = require("util");
 const Twitter = require("twitter");
 const { getHashtag } = require("./zilliqa");
 
@@ -47,11 +46,5 @@ async function getTweetData(tweetId, accessToken, accessTokenSecret) {
     console.error(e);
   }
 }
-
-async function main() {
-  const data = await getTweetData(tweetId);
-  console.log(data);
-}
-// main();
 
 module.exports = { getTweetData };

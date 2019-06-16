@@ -127,44 +127,29 @@ const authenticate = (req, res, next) => {
     req.cookies.token;
   if (!token) {
     res.status(401).send("Unauthorized: No token provided");
-  } else {
-    jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
-      if (err) {
-        res.status(401).send("Unauthorized: Invalid token");
-      } else {
-        User.findById(decoded.id, (err, user) => {
-          if (err) {
-            next(err);
-          } else {
-            req.user = user;
-            next();
-          }
-        });
-      }
-    });
+    return;
   }
+  jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+    if (err) {
+      res.status(401).send("Unauthorized: Invalid token");
+      return;
+    }
+    User.findById(decoded.id, (err, user) => {
+      if (err || !user) {
+        res.status(401).send("Unauthorized: Invalid token");
+        return;
+      }
+      req.user = user;
+      next();
+    });
+  });
 };
 
 async function fulfillFundsRequest(req, res, next) {
-  // const { userId, token, tokenSecret, address } = req.body;
   const { address } = req.body;
 
   try {
-    // const user = await User.findById(userId);
-    // const {
-    //   token: matchToken,
-    //   tokenSecret: matchTokenSecret
-    // } = user.twitterProvider;
-    // console.log("user", userId, token, tokenSecret);
-    // console.log("match", userId, matchToken, matchTokenSecret);
-    // if (token !== matchToken || tokenSecret !== matchTokenSecret) {
-    //   throw new Error("Token & token secret does not match");
-    // }
-    console.log("funding account:", address);
     const fundReceipt = await fundAccount(address);
-    // const registerReceipt = await registerUser(address, username);
-    // const promises = [fundAccount(address), registerUser(address, username)];
-    // const receipts = await Promise.all(promises);
     res.status(200).send(JSON.stringify(fundReceipt));
     next();
   } catch (e) {
@@ -178,15 +163,17 @@ router
   .post(authenticate, fulfillFundsRequest);
 
 const fulfillSubmitTweet = async (req, res) => {
-  const { txnId } = req.body;
-  const { tokenSecret } = req.user.twitterProvider
-
+  const { token, tokenSecret } = req.user.twitterProvider
+  const { address: sender } = req.body
+  let tweetId;
   try {
-    const { tweetId, sender } = await getTweetId(txnId);
-    const tweetData = await getTweetData(tweetId, twitterToken, tokenSecret);
+    if (req.body.txnId) {
+      tweetId = await getTweetId(req.body.txnId);
+    }  else {
+      tweetId = req.body.tweetId;
+    }
+    const tweetData = await getTweetData(tweetId, token, tokenSecret);
     const { tweetText, startPos, endPos } = tweetData;
-    console.log(tweetData);
-    console.log("verifyTweet...");
     const tx = await verifyTweet(sender, tweetId, tweetText, startPos, endPos);
     res.status(200).send(JSON.stringify(tx));
   } catch (e) {

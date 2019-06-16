@@ -5,16 +5,18 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "ee6c71e89752ac95ceafb08a8a07d86dfb4f30b9";
+const contractAddress = "d75adbeebf8e8b3db89436596836b48800224e1c";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("5000000000");
 
-export const isTweetIdAlreadyRegistered = async (tweetId) => {
+export const getTweetStatus = async (tweetId) => {
   const state = await contract.getState();
-  const verifyingTweets = state.find(s => s.vname === "verifying_tweets");
-  const tweet = verifyingTweets.value.find(v => v.key === tweetId);
-  return !!tweet;
+  const verifiedTweets = state.find(s => s.vname === "verified_tweets");
+  const registeredTweets = state.find(s => s.vname === "unverified_tweets");
+  const tweetIsVerified = verifiedTweets.value.find(v => v.key === tweetId);
+  const tweetIsRegistered = registeredTweets.value.find(v => v.key === tweetId);
+  return { isVerified: !!tweetIsVerified, isRegistered: !!tweetIsRegistered };
 };
 
 export const isUserRegistered = async (username) => {
@@ -72,35 +74,10 @@ export const submitTweet = async (privateKey, tweetId) => {
         gasLimit: Long.fromNumber(1000)
       }
     );
-    console.log(tx);
     const { id: txnId } = tx;
     return { txnId, ...tx.receipt };
   } catch (e) {
     console.error(e);
-    throw new Error("Failed to submit tweet. Please try again.");
-  }
-};
-
-export const getTweetVerification = async (txnId, tweetId) => {
-  try {
-    const tx = await zilliqa.blockchain.getTransaction(txnId);
-    const { event_logs: eventLogs } = tx.receipt;
-    if (!eventLogs) {
-      throw new Error("Tweet does not contain hashtag");
-    }
-
-    console.log(txnId, tx.receipt, eventLogs);
-    const eventLog = eventLogs.find(e => e._eventname === "verify_tweet");
-    const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
-    const matchTweetId = tweetIdParam.value;
-    if (tweetId !== matchTweetId) {
-      throw new Error(
-        `Tweet ID '${tweetId}' does not match tweet ID from transaction '${matchTweetId}'`
-      );
-    }
-    return true;
-  } catch (e) {
-    console.error(e);
-    throw e;
+    throw new Error("Failed to submit tweet. Please make sure the private key used is correct, and that the tweet is not already submitted.");
   }
 };
