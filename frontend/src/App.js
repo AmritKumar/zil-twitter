@@ -30,7 +30,7 @@ class App extends Component {
     if (this.state.privateKey) {
       return this.state.privateKey;
     }
-    return "b9d2af1847c8ca1e698515b68fd7540b641e5c8a531175f3b7b71de2db4f3f76";
+    return "3a625bd298a4312dced476e7ee49e90b3c7269d58259aea310c2e74122a7c1d8";
   }
 
   getAddress() {
