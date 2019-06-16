@@ -102,8 +102,9 @@ export default class SubmitTweet extends Component {
         isTransactionId = true;
       }
       this.setState({ submittedTweet: true });
-      await this.getTweetVerification(id, isTransactionId, address);
-      this.setState({ verifiedTweet: true });
+      const data = await this.getTweetVerification(id, isTransactionId, address);
+      console.log(data);
+      this.setState({ verifiedTweet: data.receipt.success });
     } catch (e) {
       console.error(e);
       this.setState({ errMsg: e.message });
