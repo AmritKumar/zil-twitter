@@ -29,15 +29,11 @@ passportConfig();
 
 const app = express();
 
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", "127.0.0.1");
-}
-
 // enable cors
 const corsOption = {
   origin: true,
-  // methods: "GET,HEAD",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  methods: "GET,HEAD",
+  // methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true
 };
 app.use(cors(corsOption));
