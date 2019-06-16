@@ -17,7 +17,7 @@ const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY;
 zilliqa.wallet.addByPrivateKey(OWNER_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
-const contractAddress = "ee6c71e89752ac95ceafb08a8a07d86dfb4f30b9";
+const contractAddress = "d75adbeebf8e8b3db89436596836b48800224e1c";
 const deployedContract = zilliqa.contracts.at(contractAddress);
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
@@ -47,7 +47,7 @@ const initParams = [
   {
     vname: "hashtag",
     type: "String",
-    value: "#BuildOnZIL"
+    value: "#buildonzil"
   }
 ];
 
@@ -79,11 +79,10 @@ const fundAccount = async (address) => {
       gasLimit: Long.fromNumber(1)
     })
   );
-  console.log("fundAccount", tx.receipt);
   return tx.receipt;
 };
 
-const verifyTweet = async => (userAddress, tweetId, tweetText, startPos, endPos) {
+const verifyTweet = async (userAddress, tweetId, tweetText, startPos, endPos) => {
   const params = [
     {
       vname: "user_address",
@@ -118,13 +117,13 @@ const verifyTweet = async => (userAddress, tweetId, tweetText, startPos, endPos)
     gasPrice: new BN("5000000000"),
     gasLimit: Long.fromNumber(5000)
   });
+  console.log("AAAA", JSON.stringify(tx.receipt));
   return tx;
 };
 
 const getTweetId = async (txnId) => {
   try {
     const tx = await zilliqa.blockchain.getTransaction(txnId);
-    console.log(tx);
     const { event_logs: eventLogs } = tx.receipt;
 
     if (!eventLogs) {
@@ -132,12 +131,8 @@ const getTweetId = async (txnId) => {
     }
 
     const eventLog = eventLogs.find(e => e._eventname === "add_new_tweet_sucessful");
-    console.log(eventLog);
     const tweetIdParam = eventLog.params.find(p => p.vname === "tweet_id");
-    const tweetId = tweetIdParam.value;
-    const senderParam = eventLog.params.find(p => p.vname === "sender");
-    const sender = senderParam.value;
-    return { tweetId, sender };
+    return tweetIdParam.value;
   } catch (e) {
     console.error(e);
     throw e;

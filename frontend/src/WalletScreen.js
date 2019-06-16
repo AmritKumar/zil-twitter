@@ -13,7 +13,7 @@ export default class Wallet extends Component {
   }
   
   async updateBalance() {
-    const address = this.getAddress();
+    const address = this.props.getAddress();
     const data = await zilliqa.blockchain.getBalance(address);
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);

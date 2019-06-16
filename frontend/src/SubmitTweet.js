@@ -3,24 +3,21 @@ import Joyride from "react-joyride";
 import LoadingModal from "./LoadingModal";
 import {
   submitTweet as _submitTweet,
-  getTweetVerification,
-  isTweetIdAlreadyRegistered,
+  getTweetStatus,
   zilliqa
 } from "./zilliqa";
 import { Link } from "react-router-dom";
 import { TwitterTweetEmbed } from "react-twitter-embed";
 import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
-// const privkey =
-//   "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
 
 export default class SubmitTweet extends Component {
   constructor() {
     super();
     this.handleChange = this.handleChange.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
-    this.sendTransactionId = this.sendTransactionId.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
+    this.getTweetVerification = this.getTweetVerification.bind(this);
     this.clearState = this.clearState.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
     this.state = {
@@ -29,7 +26,6 @@ export default class SubmitTweet extends Component {
       errMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
-      retrievedVerification: false,
       balance: 0,
       runIntro: false
     };
@@ -43,17 +39,15 @@ export default class SubmitTweet extends Component {
     this.setState({ balance: zilBalance });
   }
 
-  async sendTransactionId(txnId) {
-    // const { token, user } = this.props.location.state;
-    // TO FIX token is undefined here
-    // console.log(user, token);
+  async getTweetVerification(id, isTransactionId, address) { 
+    const requestBody = isTransactionId ? {txnId: id, address} : {tweetId: id, address};
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ txnId }),
+        body: JSON.stringify(requestBody),
         credentials: "include"
       });
       if (response.status === 401) {
@@ -76,7 +70,6 @@ export default class SubmitTweet extends Component {
     const { tweetId } = this.state;
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
@@ -86,38 +79,31 @@ export default class SubmitTweet extends Component {
           "Invalid tweet ID. Please look at instructions to see what a tweet ID is.",
         showLoading: true
       });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
-    const isRegistered = await isTweetIdAlreadyRegistered(tweetId);
-    if (isRegistered) {
+    const { isVerified, isRegistered } = await getTweetStatus(tweetId);
+    if (isVerified) {
       this.setState({
         errMsg: "Tweet ID already submitted. Please submit another tweet ID.",
         showLoading: true
       });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
     const privateKey = this.props.getPrivateKey();
-    // const address = CP.getAddressFromPrivateKey(privateKey);
 
     try {
       this.setState({ showLoading: true });
-      const { txnId } = await _submitTweet(privateKey, tweetId);
+      let id = tweetId, isTransactionId = false, address = this.props.getAddress();
+      if (!isRegistered) {
+        const { txnId } = await _submitTweet(privateKey, tweetId);
+        id = txnId;
+        isTransactionId = true;
+      }
       this.setState({ submittedTweet: true });
-      // const modal = window
-      //   .$("#loadingModal")
-      //   .modal({ backdrop: "static", keyboard: false });
-      // modal.modal("show");
-      const verifyTxn = await this.sendTransactionId(txnId);
-      console.log(verifyTxn);
+      await this.getTweetVerification(id, isTransactionId, address);
       this.setState({ verifiedTweet: true });
-      const verifyTxnId = verifyTxn.id;
-      const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);
-      this.setState({ retrievedVerification: true });
-      console.log(verifyTxn, tweetIsVerified);
     } catch (e) {
       console.error(e);
       this.setState({ errMsg: e.message });
@@ -170,18 +156,16 @@ export default class SubmitTweet extends Component {
       errMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
-      retrievedVerification: false
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevState) {
     const {
       submittedTweet,
       verifiedTweet,
-      retrievedVerification,
       showLoading
     } = this.state;
-    if (submittedTweet && verifiedTweet && retrievedVerification) {
+    if (submittedTweet && verifiedTweet) {
       // clear form
       setTimeout(() => {
         window.$("#loadingModal").modal("hide");
@@ -204,7 +188,6 @@ export default class SubmitTweet extends Component {
       balance,
       submittedTweet,
       verifiedTweet,
-      retrievedVerification,
       errMsg,
       runIntro,
       tweetId,
@@ -213,28 +196,20 @@ export default class SubmitTweet extends Component {
 
     const validTweetId = this.isValidTweetId(tweetId);
 
-    const loadingPercentages = [25, 50, 75, 100];
+    const loadingPercentages = [0, 33.33, 66.66, 100];
     const msg = "\nPlease be patient, do not close this window.";
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Submitting tweet to contract..." + msg;
 
-    if (submittedTweet) {
+    if (submittedTweet && verifiedTweet) { 
+      fromLoadingPercent = loadingPercentages[2];
+      toLoadingPercent = loadingPercentages[3];
+      loadingText = "Tweet is verified. Rewarded 10 ZILs!";
+    } else if (submittedTweet) {
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];
       loadingText = "Verifying tweet hashtag..." + msg;
-
-      if (verifiedTweet) {
-        fromLoadingPercent = loadingPercentages[2];
-        toLoadingPercent = loadingPercentages[3];
-        loadingText = "Retrieving verification..." + msg;
-
-        if (retrievedVerification) {
-          fromLoadingPercent = loadingPercentages[3];
-          toLoadingPercent = loadingPercentages[3];
-          loadingText = "Tweet is verified. Rewarded 10 ZILs!";
-        }
-      }
     }
 
     const steps = [
@@ -280,7 +255,7 @@ export default class SubmitTweet extends Component {
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                      href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                     >
                       #BuildOnZIL
                     </a>
@@ -362,7 +337,7 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
                         #BuildOnZIL
                       </a>

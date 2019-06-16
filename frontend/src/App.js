@@ -27,10 +27,10 @@ class App extends Component {
 
   getPrivateKey() {
     // TOOD: Display modal asking for input
-    if (this.props.privateKey) {
-      return this.props.privateKey;
+    if (this.state.privateKey) {
+      return this.state.privateKey;
     }
-    return "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
+    return "b9d2af1847c8ca1e698515b68fd7540b641e5c8a531175f3b7b71de2db4f3f76";
   }
 
   getAddress() {
@@ -62,14 +62,17 @@ class App extends Component {
     });
   }
 
-  handleFailed(error) {
-    // TODO: Display Modal
+  handleFailed() {
+    // TODO: Display modal 
+    return;
   }
 
-  logout(hasError) {
+  logout() {
     // TODO: Display modal
     localStorage.removeItem("authenticatedUsername");
-    this.setState({ isAuthenticated: false });
+    this.setState({
+      isAuthenticated: false
+    });
   }
 
   renderHomeScreen(props) {
@@ -101,7 +104,6 @@ class App extends Component {
       <SubmitTweet
         {...props}
         onLogout={this.logout}
-        privateKey={this.state.privateKey}
         getPrivateKey={this.getPrivateKey}
         getAddress={this.getAddress}
       />
@@ -112,7 +114,6 @@ class App extends Component {
     return (
       <WalletScreen 
         {...props}
-        privateKey={this.state.privateKey}
         getPrivateKey={this.getPrivateKey}
         getAddress={this.getAddress}
       />
