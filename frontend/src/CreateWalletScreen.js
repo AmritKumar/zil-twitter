@@ -77,7 +77,10 @@ export default class CreateWalletScreen extends Component {
       });
       // Cookie has expired
       if (response.status === 401) {
-        this.props.onLogout();
+        window.$('#loadingModal').modal("hide");
+        window.$('body').removeClass('modal-open');
+        window.$('.modal-backdrop').remove();
+        this.props.onLogout(true);
         throw Error;
       }
       const receipt = await response.json();

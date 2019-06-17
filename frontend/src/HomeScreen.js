@@ -6,11 +6,18 @@ const loginUrl = `${CURRENT_URI}/api/v1/auth/twitter`;
 const requestTokenUrl = `${CURRENT_URI}/api/v1/auth/twitter/reverse`;
 
 const HomeScreen = props => {
+  const {alertText, showAlert} = props;
   return (
     <header className="masthead">
       <div className="container h-100">
         <div className="row h-100">
           <div className="col-lg-5 my-auto">
+            {showAlert ? (<div className="alert alert-primary alert-dismissible fade show" role="alert">
+              <strong>{alertText}</strong>
+              <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>) : null}
             <div className="header-content mx-auto">
               <h1 className="mb-5">
                 Get automatically paid test tokens for tweeting

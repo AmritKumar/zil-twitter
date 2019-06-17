@@ -21,7 +21,9 @@ class App extends Component {
     this.state = { 
       isAuthenticated: !!localStorage.getItem("authenticatedUsername"),
       hasWallet: !!localStorage.getItem("walletAddress"),
-      privateKey: null
+      privateKey: null,
+      alertText: "",
+      showAlert: false
     };
   }
 
@@ -30,7 +32,7 @@ class App extends Component {
     if (this.state.privateKey) {
       return this.state.privateKey;
     }
-    return "3a625bd298a4312dced476e7ee49e90b3c7269d58259aea310c2e74122a7c1d8";
+    return "ed4a6f990a0ab82ed7e052b6aa6edcbda9a474b677ade1e84e1fba6b16bd5cc9";
   }
 
   getAddress() {
@@ -48,7 +50,9 @@ class App extends Component {
     if (privateKey) {
       this.setState({ 
         hasWallet: walletAddressExists,
-        privateKey
+        privateKey,
+        showAlert: true,
+        alertText: "Please store your private key securely! Without it you will not be able to access your wallet"
       });
     } else {
       this.setState({ hasWallet: walletAddressExists });
@@ -63,19 +67,27 @@ class App extends Component {
   }
 
   handleFailed() {
-    // TODO: Display modal 
-    return;
-  }
-
-  logout() {
-    // TODO: Display modal
-    localStorage.removeItem("authenticatedUsername");
     this.setState({
-      isAuthenticated: false
+      showAlert: true,
+      alertText: "Login failed. Please try again"
     });
   }
 
+  logout(isForced) {
+    localStorage.removeItem("authenticatedUsername");
+    if (isForced === true) {
+      this.setState({
+        showAlert: true,
+        isAuthenticated: false,
+        alertText: "Your session has expired. Please login again"
+      });
+    } else {
+      this.setState({ isAuthenticated: false });
+    }
+  }
+
   renderHomeScreen(props) {
+    const { showAlert, alertText } = this.state;
     return (
       <HomeScreen
         {...props}
@@ -84,6 +96,8 @@ class App extends Component {
         }
         onLoginSuccess={this.handleSuccess}
         onLoginFail={this.handleFailed}
+        alertText={alertText}
+        showAlert={showAlert}
       />
     );
   }
@@ -100,12 +114,15 @@ class App extends Component {
   }
 
   renderSubmitScreen(props) {
+    const { showAlert, alertText } = this.state;
     return (
       <SubmitTweet
         {...props}
         onLogout={this.logout}
         getPrivateKey={this.getPrivateKey}
         getAddress={this.getAddress}
+        alertText={alertText}
+        showAlert={showAlert}
       />
     );
   }
