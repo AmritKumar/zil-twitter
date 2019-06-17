@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import CreateWalletScreen from "./CreateWalletScreen";
 import SubmitTweet from "./SubmitTweet";
 import WalletScreen from "./WalletScreen";
+import InputModal from "./InputModal";
 const CP = require("@zilliqa-js/crypto");
 
 class App extends Component {
@@ -18,21 +19,34 @@ class App extends Component {
     this.handleWalletStateChange = this.handleWalletStateChange.bind(this);
     this.getAddress = this.getAddress.bind(this);
     this.getPrivateKey = this.getPrivateKey.bind(this);
+    this.handlePrivateKeySubmitted = this.handlePrivateKeySubmitted.bind(this);
     this.state = { 
       isAuthenticated: !!localStorage.getItem("authenticatedUsername"),
       hasWallet: !!localStorage.getItem("walletAddress"),
       privateKey: null,
       alertText: "",
-      showAlert: false
+      showAlert: false,
+      showModal: true
     };
   }
 
-  getPrivateKey() {
-    // TOOD: Display modal asking for input
+  getPrivateKey(isUrgent) {
     if (this.state.privateKey) {
       return this.state.privateKey;
+    } else if (isUrgent) {
+      window.$('#inputModal').modal("toggle");
     }
-    return "ed4a6f990a0ab82ed7e052b6aa6edcbda9a474b677ade1e84e1fba6b16bd5cc9";
+    return null;
+  }
+
+  handlePrivateKeySubmitted(privateKey) {
+    window.$('#inputModal').modal("hide");
+    window.$('body').removeClass('modal-open');
+    window.$('.modal-backdrop').remove();
+    this.setState({
+      privateKey: privateKey,
+      showModal: false
+    });
   }
 
   getAddress() {
@@ -41,6 +55,9 @@ class App extends Component {
       return address;
     } else {
       const privateKey = this.getPrivateKey();
+      if (!privateKey) {
+        return null;
+      }
       const address = CP.getAddressFromPrivateKey(privateKey);
       localStorage.setItem("walletAddress", address);
     }
@@ -131,14 +148,13 @@ class App extends Component {
     return (
       <WalletScreen 
         {...props}
-        getPrivateKey={this.getPrivateKey}
         getAddress={this.getAddress}
       />
     );
   }
 
   render() {
-    const { isAuthenticated, hasWallet } = this.state;
+    const { isAuthenticated, hasWallet, showModal } = this.state;
     return (
       <Router>
         <span>
@@ -148,6 +164,12 @@ class App extends Component {
             onLoginFail={this.handleFailed}
             onLogout={this.logout}
           />
+          {showModal ? (
+            <InputModal
+              title="Submit Private Key"
+              handleInput={this.handlePrivateKeySubmitted}
+            />
+          ) : null}
           <Route
             exact
             path="/"

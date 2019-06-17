@@ -12,8 +12,8 @@ import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
 
 export default class SubmitTweet extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.handleChange = this.handleChange.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
@@ -27,12 +27,16 @@ export default class SubmitTweet extends Component {
       submittedTweet: false,
       verifiedTweet: false,
       balance: 0,
-      runIntro: false
+      runIntro: false,
+      privateKey: props.privateKey
     };
   }
 
   async updateBalance() {
     const address = this.props.getAddress();
+    if (!address) {
+      return;
+    }
     const data = await zilliqa.blockchain.getBalance(address);
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
@@ -94,7 +98,16 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    const privateKey = this.props.getPrivateKey();
+    if (!this.state.privateKey) {
+      this.setState({
+        privateKey: this.props.getPrivateKey(true)
+      });
+      if (!this.state.privateKey) {
+        return;
+      }
+    }
+
+    const privateKey = this.state.privateKey;
 
     try {
       this.setState({ showLoading: true });
@@ -195,7 +208,8 @@ export default class SubmitTweet extends Component {
       errMsg,
       runIntro,
       tweetId,
-      showLoading
+      showLoading,
+      privateKey
     } = this.state;
 
     const validTweetId = this.isValidTweetId(tweetId);
@@ -254,7 +268,7 @@ export default class SubmitTweet extends Component {
               <div className="col-lg-12 my-auto">
                 {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" role="alert">
                   <p>{this.props.alertText}</p>
-                  <strong>{this.props.getPrivateKey()}</strong>
+                  <strong>{privateKey}</strong>
                   <button type="button" className="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
