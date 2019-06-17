@@ -19,6 +19,7 @@ export default class SubmitTweet extends Component {
     this.updateBalance = this.updateBalance.bind(this);
     this.getTweetVerification = this.getTweetVerification.bind(this);
     this.clearState = this.clearState.bind(this);
+    this.isValidUser = this.isValidUser.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
     this.state = {
       showLoading: false,
@@ -35,6 +36,7 @@ export default class SubmitTweet extends Component {
   async updateBalance() {
     const address = this.props.getAddress();
     if (!address) {
+      this.setState({ balance: "Address not specified. Please enter private key when submitting tweet" });
       return;
     }
     const data = await zilliqa.blockchain.getBalance(address);
@@ -73,6 +75,37 @@ export default class SubmitTweet extends Component {
     return tweetId.length >= 18 && /^(0|[1-9]\d*)$/.test(tweetId);
   }
 
+  async isValidUser(tweetId) {
+    const username = localStorage.getItem("authenticatedUsername");
+    if (!username) {
+      this.props.onLogout(true);
+      return false;
+    }
+    try {
+      const response = await fetch(`${CURRENT_URI}/api/v1/verify-username`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, tweetId }),
+        credentials: "include"
+      });
+      if (response.status === 401) {
+        window.$('#loadingModal').modal("hide");
+        window.$('body').removeClass('modal-open');
+        window.$('.modal-backdrop').remove();
+        this.props.onLogout(true);
+        return false;
+      } else if (response.status === 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error(e);
+      throw new Error("Failed to verify tweet. Please try again.");
+    }
+  }
+
   async submitTweet() {
     const { tweetId } = this.state;
     if (tweetId === "") {
@@ -89,6 +122,26 @@ export default class SubmitTweet extends Component {
       return;
     }
 
+    let isValidUser = false;
+    try {
+      isValidUser = await this.isValidUser(tweetId); 
+    } catch (e) {
+      console.error(e);
+      this.setState({
+        errMsg:
+          "An error occurred, please try again",
+        showLoading: true
+      });
+      return;
+    }
+    if (!isValidUser) {
+      this.setState({
+        errMsg:
+          "You cannot submit someone else's tweet!",
+        showLoading: true
+      });
+      return;
+    }
     const { isVerified, isRegistered } = await getTweetStatus(tweetId);
     if (isVerified) {
       this.setState({
@@ -209,7 +262,6 @@ export default class SubmitTweet extends Component {
       runIntro,
       tweetId,
       showLoading,
-      privateKey
     } = this.state;
 
     const validTweetId = this.isValidTweetId(tweetId);
@@ -238,7 +290,12 @@ export default class SubmitTweet extends Component {
         disableBeacon: true
       }
     ];
-
+    let privateKey;
+    if (!this.state.privateKey) {
+      privateKey = this.props.getPrivateKey();
+    } else {
+      privateKey = this.state.privateKey;
+    }
     return (
       <div>
         {showLoading ? (

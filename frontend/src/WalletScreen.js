@@ -14,6 +14,10 @@ export default class Wallet extends Component {
   
   async updateBalance() {
     const address = this.props.getAddress();
+    if (!address) {
+      this.setState({ balance: "Address not specified. Please enter private key when submitting tweet" });
+      return;
+    }
     const data = await zilliqa.blockchain.getBalance(address);
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);

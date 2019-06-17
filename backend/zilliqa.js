@@ -117,7 +117,6 @@ const verifyTweet = async (userAddress, tweetId, tweetText, startPos, endPos) =>
     gasPrice: new BN("5000000000"),
     gasLimit: Long.fromNumber(5000)
   });
-  console.log("AAAA", JSON.stringify(tx.receipt));
   return tx;
 };
 
