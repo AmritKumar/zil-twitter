@@ -18,7 +18,7 @@ const {
   getTweetId,
   verifyTweet
 } = require("./zilliqa");
-const { getTweetData } = require("./twitter");
+const { getTweetData, getTweetUsername } = require("./twitter");
 
 mongoose();
 
@@ -158,9 +158,25 @@ router
   .route("/request-funds")
   .post(authenticate, fulfillFundsRequest);
 
+
+const verifyUsername = async (req, res) => {
+  const { username: providedUsername, tweetId } = req.body;
+  const { token, tokenSecret } = req.user.twitterProvider;
+  try {
+    const actualUsername = await getTweetUsername(tweetId, token, tokenSecret);
+    if (actualUsername === providedUsername) {
+      res.status(200).send("Username valid");
+    } else {
+      res.status(400).send("Username not valid");
+    }
+  } catch (e) {
+    res.status(400).send("An error occurred");
+  }
+}
+
 const fulfillSubmitTweet = async (req, res) => {
-  const { token, tokenSecret } = req.user.twitterProvider
-  const { address: sender } = req.body
+  const { token, tokenSecret } = req.user.twitterProvider;
+  const { address: sender } = req.body;
   let tweetId;
   try {
     if (req.body.txnId) {
@@ -182,6 +198,10 @@ router
   .route("/submit-tweet")
   .post(authenticate, fulfillSubmitTweet);
 // router.route("/submit-tweet").post(authenticate, fulfillSubmitTweet);
+
+router
+  .route("/verify-username")
+  .post(authenticate, verifyUsername);
 
 
 app.use("/", router);

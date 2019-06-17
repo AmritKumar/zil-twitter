@@ -20,7 +20,14 @@ async function getTweet(tweetId, accessToken, accessTokenSecret) {
   });
 }
 
-const tweetId = "1085915996148264961";
+async function getTweetUsername(tweetId, accessToken, accessTokenSecret) {
+  try {
+    const data = await getTweet(tweetId, accessToken, accessTokenSecret);
+    return data.user.screen_name;
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 async function getTweetData(tweetId, accessToken, accessTokenSecret) {
   try {
@@ -47,4 +54,4 @@ async function getTweetData(tweetId, accessToken, accessTokenSecret) {
   }
 }
 
-module.exports = { getTweetData };
+module.exports = { getTweetData, getTweetUsername };

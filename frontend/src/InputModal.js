@@ -47,7 +47,7 @@ export default class LoadingModal extends Component {
             </div>
             <div className="modal-body">
               <form action="#"
-                className="input-form form-inline justify-content-center w-100 mt-5">
+                className="submit-tweet-form form-inline justify-content-center w-100 mt-5">
                 <input onChange={this.onChange}
                   onKeyPress={e => {
                       if (e.key === "Enter") this.handleSubmit();
@@ -56,11 +56,11 @@ export default class LoadingModal extends Component {
                   className="form-control mt-2 mb-2 mr-sm-3 pl-3"
                   type="password"
                 />
-                <div className="input-btn btn">
+                <div className="submit-tweet-btn shiny-button">
                   <button
                       type="button"
                       onClick={this.handleSubmit}
-                      className="btn"
+                      className="btn shiny-button-content"
                   >
                       Submit
                   </button>
