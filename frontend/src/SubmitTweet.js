@@ -51,6 +51,9 @@ export default class SubmitTweet extends Component {
         credentials: "include"
       });
       if (response.status === 401) {
+        window.$('#loadingModal').modal("hide");
+        window.$('body').removeClass('modal-open');
+        window.$('.modal-backdrop').remove();
         this.props.onLogout(true);
         return;
       }
@@ -206,7 +209,7 @@ export default class SubmitTweet extends Component {
     if (submittedTweet && verifiedTweet) { 
       fromLoadingPercent = loadingPercentages[2];
       toLoadingPercent = loadingPercentages[3];
-      loadingText = "Tweet is verified. Rewarded 10 ZILs!";
+      loadingText = "Tweet is verified. Rewarded ZILs!";
     } else if (submittedTweet) {
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];
@@ -249,6 +252,13 @@ export default class SubmitTweet extends Component {
                 <Link to="/wallet">Balance: {balance} ZILs</Link>
               </div>
               <div className="col-lg-12 my-auto">
+                {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" role="alert">
+                  <p>{this.props.alertText}</p>
+                  <strong>{this.props.getPrivateKey()}</strong>
+                  <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>) : null}
                 <div className="header-content mx-auto">
                   <h1 className="mb-5">Enter your tweet ID</h1>
                   <h2 className="mb-6">
