@@ -53,7 +53,6 @@ export default class CreateWalletScreen extends Component {
 
   generateKey() {
     const privateKey = CP.schnorr.generatePrivateKey();
-    console.log(privateKey);
     this.setState({ privateKey });
   }
 
