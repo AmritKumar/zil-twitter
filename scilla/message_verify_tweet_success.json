@@ -16,12 +16,12 @@
 		{
 			"vname": "tweet_text",
 			"type": "String",
-			"value": "This was #BuildOnZIL!"
+			"value": "Hello world #buildonzil via @zilliqa"
 		},
 		{
 			"vname": "start_pos",
 			"type": "Uint32",
-			"value": "9"
+			"value": "12"
 		},
 		{
 			"vname": "end_pos",
