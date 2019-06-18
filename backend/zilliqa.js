@@ -87,7 +87,7 @@ const verifyTweet = async (userAddress, tweetId, tweetText, startPos, endPos) =>
     {
       vname: "user_address",
       type: "ByStr20",
-      value: userAddress
+      value: `0x${userAddress}`
     },
     {
       vname: "tweet_id",
