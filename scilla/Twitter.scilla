@@ -30,9 +30,9 @@ let tweet_not_valid_code = Uint32 7
 let tweet_within_day_code = Uint32 8
 let verify_tweet_success_code = Uint32 9
 
-let zils_per_tweet = Uint128 10000
+let zils_per_tweet = Uint128 5
 let blocks_per_day = Uint32 20
-let withdrawal_limit_per_day = Uint128 10000
+let withdrawal_limit_per_day = Uint128 5
 
 let str_exists = @list_exists String
 let fst_tweet = @fst ByStr20 Bool

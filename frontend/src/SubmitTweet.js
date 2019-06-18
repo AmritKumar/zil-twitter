@@ -172,8 +172,12 @@ export default class SubmitTweet extends Component {
       }
       this.setState({ submittedTweet: true });
       const data = await this.getTweetVerification(id, isTransactionId, address);
-      console.log(data);
-      this.setState({ verifiedTweet: data.receipt.success });
+      const verifiedTweet = (data.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+      if (!verifiedTweet) {
+        throw Error("An error occurred while trying to verify tweet")
+      } else {
+        this.setState({ verifiedTweet });
+      }
     } catch (e) {
       console.error(e);
       this.setState({ errMsg: e.message });
