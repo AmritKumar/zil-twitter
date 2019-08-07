@@ -187,6 +187,7 @@ const fulfillSubmitTweet = async (req, res) => {
     const tweetData = await getTweetData(tweetId, token, tokenSecret);
     const { tweetText, startPos, endPos } = tweetData;
     const tx = await verifyTweet(sender, tweetId, tweetText, startPos, endPos);
+    console.log(JSON.stringify(tx));
     res.status(200).send(JSON.stringify(tx));
   } catch (e) {
     console.error(e);

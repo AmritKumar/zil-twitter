@@ -64,9 +64,10 @@ export default class SubmitTweet extends Component {
         return;
       }
       const data = await response.json();
+      console.log(data);
       return data;
     } catch (e) {
-      console.error(e);
+      console.log(e);
       throw new Error("Failed to verify tweet. Please try again.");
     }
   }
@@ -166,6 +167,7 @@ export default class SubmitTweet extends Component {
       this.setState({ showLoading: true });
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
       if (!isRegistered) {
+        console.log("AAA");
         const { txnId } = await _submitTweet(privateKey, tweetId);
         id = txnId;
         isTransactionId = true;
