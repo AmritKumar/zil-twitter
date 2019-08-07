@@ -56,24 +56,16 @@ export default class LoadingModal extends Component {
                   className="form-control mt-2 mb-2 mr-sm-3 pl-3"
                   type="password"
                 />
-                <div className="submit-tweet-btn shiny-button">
-                  <button
-                      type="button"
-                      onClick={this.handleSubmit}
-                      className="btn shiny-button-content"
-                  >
-                      Submit
-                  </button>
-                </div>
               </form>
             </div>
             <div className="modal-footer">
               <button
                 type="button"
+                onClick={this.handleSubmit}
                 className="btn btn-secondary"
                 data-dismiss="modal"
               >
-                Close
+                Submit
               </button>
             </div>
           </div>
