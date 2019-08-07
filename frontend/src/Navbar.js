@@ -14,7 +14,7 @@ const Navbar = props => {
     >
       <div className="container">
         <Link className="navbar-brand js-scroll-trigger" to="/">
-          SocialPay
+          Social<b id="pay">Pay</b>
         </Link>
         <button
           className="navbar-toggler navbar-toggler-right"
@@ -33,15 +33,7 @@ const Navbar = props => {
             <li className="nav-item">
               <a
                 className="nav-link js-scroll-trigger"
-                href="https://zilliqa.com/about-us.html"
-              >
-                About
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link js-scroll-trigger"
-                href="https://docs.google.com/forms/d/e/1FAIpQLSfwHlcQrSzaly9Jc78cDAF-oAjJLskToZT_kGgzz2JUvy6w2A/viewform"
+                href="https://blog.zilliqa.com/buildonzil-introducing-the-zilliqa-ecosystem-grant-programme-6ccb98892712"
               >
                 Financial Grant
               </a>
