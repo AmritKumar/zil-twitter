@@ -54,3 +54,7 @@ button:not(:disabled).twitter-login {
 .cta-container img {
   max-width: 100%;
 }
+
+#pay {
+  color: #42e8e0;
+}
