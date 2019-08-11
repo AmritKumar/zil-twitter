@@ -41,7 +41,7 @@ export default class LoadingModal extends Component {
     this.updateProgressBar();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.fromLoadingPercent !== this.props.fromLoadingPercent) {
       this.updateProgressBar();
     }
