@@ -15,6 +15,7 @@ export default class SubmitTweet extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.handleClose = this.handleClose.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
     this.getTweetVerification = this.getTweetVerification.bind(this);
@@ -64,10 +65,8 @@ export default class SubmitTweet extends Component {
         return;
       }
       const data = await response.json();
-      console.log(data);
       return data;
     } catch (e) {
-      console.log(e);
       throw new Error("Failed to verify tweet. Please try again.");
     }
   }
@@ -167,7 +166,6 @@ export default class SubmitTweet extends Component {
       this.setState({ showLoading: true });
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
       if (!isRegistered) {
-        console.log("AAA");
         const { txnId } = await _submitTweet(privateKey, tweetId);
         id = txnId;
         isTransactionId = true;
@@ -181,7 +179,6 @@ export default class SubmitTweet extends Component {
         this.setState({ verifiedTweet });
       }
     } catch (e) {
-      console.error(e);
       this.setState({ errMsg: e.message });
     }
   }
@@ -231,31 +228,28 @@ export default class SubmitTweet extends Component {
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
-      verifiedTweet: false,
+      verifiedTweet: false
     });
   }
 
-  componentDidUpdate(prevState) {
-    const {
-      submittedTweet,
-      verifiedTweet,
-      showLoading
-    } = this.state;
+  handleClose() {
+    const { submittedTweet, verifiedTweet } = this.state;
     if (submittedTweet && verifiedTweet) {
-      // clear form
-      setTimeout(() => {
-        window.$("#loadingModal").modal("hide");
-        this.updateBalance();
-        this.clearState();
-      }, 5000);
+      this.updateBalance();
+      this.clearState();
     }
+  }
 
+  componentDidUpdate(prevState) {
+    const { showLoading } = this.state;
     if (showLoading && !prevState.showLoading) {
       const modal = window
         .$("#loadingModal")
         .modal({ backdrop: "static", keyboard: false });
       modal.modal("show");
-      window.$("#loadingModal").on("hidden.bs.modal", this.clearState);
+      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);
+    } else if (showLoading) {
+      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);    
     }
   }
 
@@ -272,7 +266,7 @@ export default class SubmitTweet extends Component {
 
     const validTweetId = this.isValidTweetId(tweetId);
 
-    const loadingPercentages = [0, 33.33, 66.66, 100];
+    const loadingPercentages = [0, 50, 99, 100];
     const msg = "\nPlease be patient, do not close this window.";
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
