@@ -26,9 +26,10 @@ let registered_success_code = Uint32 3
 let user_not_exists_code = Uint32 4
 let tweet_exists_code = Uint32 5
 let new_tweet_success_code = Uint32 6
-let tweet_not_valid_code = Uint32 7
-let tweet_within_day_code = Uint32 8
-let verify_tweet_success_code = Uint32 9
+let tweet_not_added_code = Uint32 7
+let tweet_not_valid_code = Uint32 8
+let tweet_within_day_code = Uint32 9
+let verify_tweet_success_code = Uint32 10
 
 let zils_per_tweet = Uint128 5
 let blocks_per_day = Uint32 20
@@ -200,7 +201,7 @@ transition verify_tweet(
                     sender: _sender;
                     user_address: user_address;
                     tweet_id: tweet_id;
-                    code: tweet_not_valid_code };
+                    code: tweet_not_added_code };
             event e                
         | Some recipient_address =>
             is_verified <- exists verified_tweets[tweet_id];

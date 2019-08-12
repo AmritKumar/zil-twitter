@@ -1,7 +1,7 @@
 {
 	"_tag": "verify_tweet",
 	"_amount": "0",
-	"_sender": "0x9999999999999999999999999999999999999999",
+	"_sender": "0x1234567890123456789012345678901234567890",
 	"params": [
 		{
 			"vname": "user_address",
@@ -16,7 +16,7 @@
 		{
 			"vname": "tweet_text",
 			"type": "String",
-			"value": "Hello world #buildonzil via @zilliqa"
+			"value": "Hello world #buildonziq via @zilliqa"
 		},
 		{
 			"vname": "start_pos",

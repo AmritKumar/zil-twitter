@@ -1,0 +1,13 @@
+[
+  { "vname": "_balance", "type": "Uint128", "value": "0" },
+  {
+    "vname": "used_usernames",
+    "type": "Map (String) (Bool)",
+    "value": [
+      {
+        "key": "kenchangh",
+        "val": { "constructor": "True", "argtypes": [], "arguments": [] }
+      }
+    ]
+  }
+]
