@@ -1,0 +1,32 @@
+{
+	"_tag": "verify_tweet",
+	"_amount": "0",
+	"_sender": "0x1234567890123456789012345678901234567890",
+	"params": [
+		{
+			"vname": "user_address",
+			"type": "ByStr20",
+			"value": "0x44345668901234567890123456789012345678cd"
+		},
+		{
+			"vname": "tweet_id",
+			"type": "String",
+			"value": "1085915996148264961"
+		},
+		{
+			"vname": "tweet_text",
+			"type": "String",
+			"value": "Hello world #buildonzil via @zilliqa"
+		},
+		{
+			"vname": "start_pos",
+			"type": "Uint32",
+			"value": "12"
+		},
+		{
+			"vname": "end_pos",
+			"type": "Uint32",
+			"value": "22"
+		}
+	]
+}
