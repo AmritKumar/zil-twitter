@@ -63,6 +63,7 @@ export default class Wallet extends Component {
                       </Link>
                     </div>
                     <h1>Wallet address</h1>
+                    <p> You can use this wallet to ...... </p>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>

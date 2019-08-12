@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Joyride from "react-joyride";
 import LoadingModal from "./LoadingModal";
+import InputModal from "./InputModal";
 import {
   submitTweet as _submitTweet,
   getTweetStatus,
@@ -22,8 +23,10 @@ export default class SubmitTweet extends Component {
     this.clearState = this.clearState.bind(this);
     this.isValidUser = this.isValidUser.bind(this);
     this.shownIntro = localStorage.getItem("shownIntro");
+    this.handlePrivateKeySubmitted = this.handlePrivateKeySubmitted.bind(this);
     this.state = {
       showLoading: false,
+      showInput: false,
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
@@ -153,11 +156,9 @@ export default class SubmitTweet extends Component {
 
     if (!this.state.privateKey) {
       this.setState({
-        privateKey: this.props.getPrivateKey(true)
+        showInput: true
       });
-      if (!this.state.privateKey) {
-        return;
-      }
+      return;
     }
 
     const privateKey = this.state.privateKey;
@@ -225,6 +226,7 @@ export default class SubmitTweet extends Component {
   clearState() {
     this.setState({
       showLoading: false,
+      showInput: false,
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
@@ -236,12 +238,12 @@ export default class SubmitTweet extends Component {
     const { submittedTweet, verifiedTweet } = this.state;
     if (submittedTweet && verifiedTweet) {
       this.updateBalance();
-      this.clearState();
     }
+    this.clearState();
   }
 
   componentDidUpdate(prevState) {
-    const { showLoading } = this.state;
+    const { showLoading, showInput } = this.state;
     if (showLoading && !prevState.showLoading) {
       const modal = window
         .$("#loadingModal")
@@ -250,7 +252,26 @@ export default class SubmitTweet extends Component {
       window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);
     } else if (showLoading) {
       window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);    
+    } 
+
+    if (showInput) {
+      const modal = window
+        .$("#inputModal")
+        .modal({ backdrop: "static", keyboard: false });  
+      modal.modal("show");
+      window.$("#inputModal").on("hidden.bs.modal", this.handleClose)
     }
+  }
+
+  handlePrivateKeySubmitted(privateKey) {
+    window.$('#inputModal').modal("hide");
+    window.$('body').removeClass('modal-open');
+    window.$('.modal-backdrop').remove();
+    this.setState({
+      showInput: false,
+      privateKey: privateKey
+    });
+    this.submitTweet()
   }
 
   render() {
@@ -262,11 +283,12 @@ export default class SubmitTweet extends Component {
       runIntro,
       tweetId,
       showLoading,
+      showInput
     } = this.state;
 
     const validTweetId = this.isValidTweetId(tweetId);
 
-    const loadingPercentages = [0, 50, 99, 100];
+    const loadingPercentages = [0, 50, 100];
     const msg = "\nPlease be patient, do not close this window.";
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
@@ -274,7 +296,7 @@ export default class SubmitTweet extends Component {
 
     if (submittedTweet && verifiedTweet) { 
       fromLoadingPercent = loadingPercentages[2];
-      toLoadingPercent = loadingPercentages[3];
+      toLoadingPercent = loadingPercentages[2];
       loadingText = "Tweet is verified. Rewarded ZILs!";
     } else if (submittedTweet) {
       fromLoadingPercent = loadingPercentages[1];
@@ -298,6 +320,12 @@ export default class SubmitTweet extends Component {
     }
     return (
       <div>
+        {showInput ? (
+          <InputModal
+            title="Submit Private Key"
+            handleInput={this.handlePrivateKeySubmitted}
+          />
+        ) : null}
         {showLoading ? (
           <LoadingModal
             errorText={errMsg}
