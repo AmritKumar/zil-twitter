@@ -5,13 +5,14 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "7be6c0472f8737afe4a2240376a16d7e61bffd35";
+const contractAddress = "6ad4e58fdbc46cd4290a73b20cef50dc054d95da";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
 const myGasPrice = new BN("5000000000");
 
 export const getTweetStatus = async (tweetId) => {
   const state = await contract.getState();
+  console.log(state);
   const verifiedTweets = state.find(s => s.vname === "verified_tweets");
   const registeredTweets = state.find(s => s.vname === "unverified_tweets");
   const tweetIsVerified = verifiedTweets.value.find(v => v.key === tweetId);
