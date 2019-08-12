@@ -9,15 +9,5 @@
         "val": "kenchangh"
       }
     ]
-  },
-  {
-    "vname": "used_usernames",
-    "type": "Map (String) (Bool)",
-    "value": [
-      {
-        "key": "kenchangh",
-        "val": { "constructor": "True", "argtypes": [], "arguments": [] }
-      }
-    ]
   }
 ]
