@@ -32,15 +32,7 @@ let tweet_within_day_code = Uint32 9
 let verify_tweet_success_code = Uint32 10
 
 let zils_per_tweet = Uint128 5
-let blocks_per_day = Uint32 20
-let withdrawal_limit_per_day = Uint128 5
-
-let str_exists = @list_exists String
-let fst_tweet = @fst ByStr20 Bool
-let snd_tweet = @snd ByStr20 Bool
-
-let fst_withdraw = @fst BNum Uint128
-let snd_withdraw = @snd BNum Uint128
+let blocks_per_day = Uint32 1103
 
 let is_owner =
     fun (owner_address: ByStr20) =>
@@ -53,23 +45,6 @@ let lte =
         let a_lt_b = builtin lt a b in
         let a_eq_b = builtin eq a b in
         orb a_lt_b a_eq_b
-
-let update_withdrawal =
-    fun (last_withdrawal: Pair (BNum) (Uint128)) =>
-    fun (current_block: BNum) =>
-    fun (withdraw_amount: Uint128) =>
-        let cumulative_amount = snd_withdraw last_withdrawal in
-        let new_amount = builtin add cumulative_amount withdraw_amount in
-        let in_limit = lte new_amount withdrawal_limit_per_day in
-        let none_withdrawal = None {(Pair BNum Uint128)} in
-            match in_limit with
-            | True =>
-                let new_withdrawal = Pair {BNum Uint128} current_block new_amount in
-                let some_withdrawal = Some {(Pair (BNum) (Uint128))} new_withdrawal in
-                some_withdrawal
-            | False =>
-                none_withdrawal
-            end
 
 (***************************************************)
 (*             The contract definition             *)
@@ -91,8 +66,8 @@ field unverified_tweets: Map String ByStr20
 field verified_tweets: Map String ByStr20
     = Emp String ByStr20
 
-field last_withdrawal: Map (ByStr20) (Pair (BNum) (Uint128))
-    = Emp (ByStr20) (Pair (BNum) (Uint128))
+field last_withdrawal: Map ByStr20 BNum 
+    = Emp ByStr20 BNum
 
 (* Only owner can deposit ZIL *)
 transition deposit()
@@ -264,7 +239,7 @@ transition verify_tweet(
                     not_next_day_yet =
                         match withdrawal with
                         | Some withdrawal =>
-                            let last_withdraw_block = fst_withdraw withdrawal in
+                            let last_withdraw_block = withdrawal in
                             let next_day_block = builtin badd last_withdraw_block blocks_per_day in
                             let not_next_day_yet = builtin blt current_block next_day_block in
                             not_next_day_yet
@@ -284,47 +259,17 @@ transition verify_tweet(
                     | False =>
                         verified_tweets[tweet_id] := user_address;
                         delete unverified_tweets[tweet_id];
-                        new_withdrawal =
-                            match withdrawal with
-                            | None =>
-                                let new_withdrawal = Pair {BNum Uint128} current_block zils_per_tweet in
-                                new_withdrawal
-                            | Some withdrawal =>
-                                let new_withdrawal = update_withdrawal withdrawal current_block zils_per_tweet in
-                                match new_withdrawal with
-                                | None =>
-                                    withdrawal
-                                | Some new_withdrawal =>
-                                    new_withdrawal
-                                end
-                            end
-                        ;
-
-                        last_withdrawal[user_address] := new_withdrawal;
-
-                        (* Find the difference between new withdrawal and old withdrawal *)
-                        reward_amount =
-                            match withdrawal with
-                            (* No prior withdrawals, just withdraw the tweet *)
-                            | None =>
-                                zils_per_tweet
-                            | Some withdrawal =>
-                                let old_balance = snd_withdraw withdrawal in
-                                let new_balance = snd_withdraw new_withdrawal in
-                                let reward_amount = builtin sub new_balance old_balance in
-                                reward_amount
-                            end
-                        ;
+                        last_withdrawal[user_address] := current_block;
                         e = {_eventname : "verify_tweet_successful";
                                 sender: _sender;
                                 recipient: user_address;
-                                reward_amount: reward_amount;
+                                reward_amount: zils_per_tweet;
                                 tweet_id: tweet_id;
                                 code: verify_tweet_success_code };
                         event e;    
                         msg = {_tag: "";
                                 _recipient: user_address;
-                                _amount: reward_amount;
+                                _amount: zils_per_tweet;
                                 code: verify_tweet_success_code };
                         msgs = one_msg msg;
                         send msgs

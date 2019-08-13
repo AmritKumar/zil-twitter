@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "6594",
+  "gas_remaining": "6463",
   "_accepted": "false",
   "message": {
     "_tag": "",
@@ -17,16 +17,6 @@
         {
           "key": "1085915996148264961",
           "val": "0x44345678901234567890123456789012345678cd"
-        }
-      ]
-    },
-    {
-      "vname": "last_withdrawal",
-      "type": "Map (ByStr20) (BNum)",
-      "value": [
-        {
-          "key": "0x44345678901234567890123456789012345678cd",
-          "val": "60000"
         }
       ]
     },
@@ -52,6 +42,16 @@
         {
           "key": "kenchangh",
           "val": { "constructor": "True", "argtypes": [], "arguments": [] }
+        }
+      ]
+    },
+    {
+      "vname": "last_withdrawal",
+      "type": "Map (ByStr20) (BNum)",
+      "value": [
+        {
+          "key": "0x44345678901234567890123456789012345678cd",
+          "val": "60000"
         }
       ]
     }
