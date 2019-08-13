@@ -12,7 +12,6 @@ const myGasPrice = new BN("5000000000");
 
 export const getTweetStatus = async (tweetId) => {
   const state = await contract.getState();
-  console.log(state);
   const verifiedTweets = state.find(s => s.vname === "verified_tweets");
   const registeredTweets = state.find(s => s.vname === "unverified_tweets");
   const tweetIsVerified = verifiedTweets.value.find(v => v.key === tweetId);
@@ -75,8 +74,7 @@ export const submitTweet = async (privateKey, tweetId) => {
         gasLimit: Long.fromNumber(1000)
       }
     );
-    const { id: txnId } = tx;
-    return { txnId, ...tx.receipt };
+    return tx;
   } catch (e) {
     console.error(e);
     throw new Error("Failed to submit tweet. Please make sure the private key used is correct, and that the tweet is not already submitted.");

@@ -17,8 +17,10 @@ class App extends Component {
     this.logout = this.logout.bind(this);
     this.handleWalletStateChange = this.handleWalletStateChange.bind(this);
     this.getAddress = this.getAddress.bind(this);
+    this.handleAlertClose = this.handleAlertClose.bind(this);
     this.getPrivateKey = this.getPrivateKey.bind(this);
-    this.state = { 
+    this.getMessage = this.getMessage.bind(this);
+    this.state = {
       isAuthenticated: !!localStorage.getItem("authenticatedUsername"),
       hasWallet: !!localStorage.getItem("walletAddress"),
       privateKey: null,
@@ -34,6 +36,13 @@ class App extends Component {
   handlePrivateKeySubmitted(privateKey) {
     this.setState({
       privateKey: privateKey
+    });
+  }
+
+  handleAlertClose() {
+    this.setState({
+      showAlert: false,
+      alertText: ""
     });
   }
 
@@ -71,6 +80,27 @@ class App extends Component {
     });
   }
 
+  getMessage(data) {
+    const code = parseInt(data.receipt.event_logs[0].params.filter(
+      param => param["vname"] === "code")[0]["value"]);
+    switch(code) {
+      case 0:
+        return "This account is not an owner.";
+      case 2:
+        return "This user already has a wallet.";
+      case 4:
+        return "This user does not have a wallet.";
+      case 5:
+        return "This tweet has already been registered";
+      case 7:
+        return "This tweet does has not been registered";
+      case 8:
+        return "This tweet is invalid. Please make sure you have fulfilled all requirements.";
+      case 9:
+        return "You can only submit one tweet every 24 hours.";
+    }
+  }
+
   handleFailed() {
     this.setState({
       showAlert: true,
@@ -103,6 +133,7 @@ class App extends Component {
         onLoginFail={this.handleFailed}
         alertText={alertText}
         showAlert={showAlert}
+        handleAlertClose={this.handleAlertClose}
       />
     );
   }
@@ -114,6 +145,7 @@ class App extends Component {
         onLogout={this.logout}
         checkIfRegistered={this.checkIfRegistered}
         handleWalletStateChange={this.handleWalletStateChange}
+        getMessage={this.getMessage}
       />
     );
   }
@@ -128,6 +160,8 @@ class App extends Component {
         getAddress={this.getAddress}
         alertText={alertText}
         showAlert={showAlert}
+        handleAlertClose={this.handleAlertClose}
+        getMessage={this.getMessage}
       />
     );
   }
