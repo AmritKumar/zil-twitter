@@ -167,15 +167,19 @@ export default class SubmitTweet extends Component {
       this.setState({ showLoading: true });
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
       if (!isRegistered) {
-        const { txnId } = await _submitTweet(privateKey, tweetId);
-        id = txnId;
+        const submitData = await _submitTweet(privateKey, tweetId);
+        id = submitData.id;
         isTransactionId = true;
+        const submittedTweet = (submitData.receipt.event_logs[0]._eventname === "add_new_tweet_sucessful");
+        if (!submittedTweet) {
+          throw Error(this.props.getMessage(submitData));
+        }
       }
       this.setState({ submittedTweet: true });
       const data = await this.getTweetVerification(id, isTransactionId, address);
       const verifiedTweet = (data.receipt.event_logs[0]._eventname === "verify_tweet_successful");
       if (!verifiedTweet) {
-        throw Error("An error occurred while trying to verify tweet")
+        throw Error(this.props.getMessage(data));
       } else {
         this.setState({ verifiedTweet });
       }
@@ -260,6 +264,10 @@ export default class SubmitTweet extends Component {
         .modal({ backdrop: "static", keyboard: false });  
       modal.modal("show");
       window.$("#inputModal").on("hidden.bs.modal", this.handleClose)
+    }
+
+    if (this.props.showAlert) {
+      window.$("#alert").on("closed.bs.alert", this.props.handleAlertClose);
     }
   }
 
@@ -351,7 +359,7 @@ export default class SubmitTweet extends Component {
                 <Link to="/wallet">Balance: {balance} ZILs</Link>
               </div>
               <div className="col-lg-12 my-auto">
-                {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" role="alert">
+                {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">
                   <p>{this.props.alertText}</p>
                   <strong>{privateKey}</strong>
                   <button type="button" className="close" data-dismiss="alert" aria-label="Close">
