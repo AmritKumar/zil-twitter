@@ -1,10 +1,10 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7615",
+  "gas_remaining": "7645",
   "_accepted": "true",
   "message": null,
   "states": [
-    { "vname": "_balance", "type": "Uint128", "value": "1000" },
+    { "vname": "_balance", "type": "Uint128", "value": "2000" },
     { "vname": "users", "type": "Map (ByStr20) (String)", "value": [] },
     { "vname": "used_usernames", "type": "Map (String) (Bool)", "value": [] },
     {
@@ -19,7 +19,7 @@
     },
     {
       "vname": "last_withdrawal",
-      "type": "Map (ByStr20) (Pair (BNum) (Uint128))",
+      "type": "Map (ByStr20) (BNum)",
       "value": []
     }
   ],
