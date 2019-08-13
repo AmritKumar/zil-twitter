@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7438",
+  "gas_remaining": "7468",
   "_accepted": "false",
   "message": null,
   "states": [
@@ -13,7 +13,7 @@
     },
     {
       "vname": "last_withdrawal",
-      "type": "Map (ByStr20) (Pair (BNum) (Uint128))",
+      "type": "Map (ByStr20) (BNum)",
       "value": []
     },
     {
