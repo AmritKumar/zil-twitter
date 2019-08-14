@@ -22,7 +22,6 @@ export default class SubmitTweet extends Component {
     this.getTweetVerification = this.getTweetVerification.bind(this);
     this.clearState = this.clearState.bind(this);
     this.isValidUser = this.isValidUser.bind(this);
-    this.shownIntro = localStorage.getItem("shownIntro");
     this.handlePrivateKeySubmitted = this.handlePrivateKeySubmitted.bind(this);
     this.state = {
       showLoading: false,
@@ -32,7 +31,6 @@ export default class SubmitTweet extends Component {
       submittedTweet: false,
       verifiedTweet: false,
       balance: 0,
-      runIntro: false,
       privateKey: props.privateKey
     };
   }
@@ -211,13 +209,6 @@ export default class SubmitTweet extends Component {
       this.updateBalance();
     }, 10000);
 
-    if (!this.shownIntro) {
-      setTimeout(() => {
-        this.setState({ runIntro: true });
-        localStorage.setItem("shownIntro", JSON.stringify(true));
-      }, 1000);
-    }
-
     window.$(".submit-tweet-form").submit(e => {
       e.preventDefault();
     });
@@ -288,7 +279,6 @@ export default class SubmitTweet extends Component {
       submittedTweet,
       verifiedTweet,
       errMsg,
-      runIntro,
       tweetId,
       showLoading,
       showInput
@@ -343,20 +333,12 @@ export default class SubmitTweet extends Component {
             toLoadingPercent={toLoadingPercent}
           />
         ) : null}
-        <Joyride
-          steps={steps}
-          run={runIntro}
-          styles={{
-            options: {
-              primaryColor: "#42e8e0"
-            }
-          }}
-        />
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
               <div className="balance">
-                <Link to="/wallet">Balance: {balance} ZILs</Link>
+                <p> Balance: {balance} ZILs</p>
+                <Link to="/wallet"> Click here for account details</Link>
               </div>
               <div className="col-lg-12 my-auto">
                 {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">
