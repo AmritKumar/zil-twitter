@@ -95,15 +95,14 @@ a:focus {
   color: #030a17;
 }
 #mainNav .navbar-toggler {
-  font-size: 12px;
+  font-size: 15px;
   padding: 8px 10px;
   color: #222222;
 }
 #mainNav .navbar-nav > li a {
-  font-size: 11px;
-  font-family: "Lato", "Helvetica", "Arial", "sans-serif";
+  font-size: 15px;
+  font-family: "Helvetica", "Arial", "sans-serif";
   letter-spacing: 2px;
-  text-transform: uppercase;
 }
 #mainNav .navbar-nav > li a.active {
   color: #0a1e43 !important;
@@ -138,7 +137,7 @@ a:focus {
   }
   #mainNav .navbar-nav > li a,
   #mainNav .navbar-nav > li a:focus {
-    font-size: 12px;
+    font-size: 15px;
     color: rgba(255, 255, 255, 0.9);
   }
   #mainNav .navbar-nav > li a:hover,
