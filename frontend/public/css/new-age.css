@@ -191,7 +191,8 @@ header.masthead .header-content h2 {
 header.masthead .header-content .shiny-button {
   max-width: 300px;
   position: relative;
-  background: #ffffff;
+  background: transparent;
+  border-color: #42e8e0;
   padding: 2px;
   border-radius: 10px;
   text-align: center;
@@ -199,14 +200,15 @@ header.masthead .header-content .shiny-button {
 header.masthead .header-content .shiny-button:hover,
 header.masthead .header-content .shiny-button:active,
 header.masthead .header-content .shiny-button:focus {
-  box-shadow: 0 5px 20px #42e8e0;
+  background: #42e8e0;
 }
 header.masthead .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  background: #0a1e43;
+  border-color: #42e8e0;
+  box-shadow: 0 5px 20px #42e8e0;
   color: white;
-  padding: 1.2rem;
+  padding: 1rem;
 }
 header.masthead .cta-container {
   margin-top: 50px;
@@ -269,7 +271,7 @@ header.masthead-create .header-content h2 {
 header.masthead-create .header-content .shiny-button {
   max-width: 300px;
   position: relative;
-  background: #0a1e43;
+  /*background: #0a1e43;*/
   padding: 2px;
   border-radius: 10px;
   text-align: center;
@@ -277,12 +279,12 @@ header.masthead-create .header-content .shiny-button {
 header.masthead-create .header-content .shiny-button:hover,
 header.masthead-create .header-content .shiny-button:active,
 header.masthead-create .header-content .shiny-button:focus {
-  box-shadow: 0 5px 20px #42e8e0;
+  background: #42e8e0;
 }
 header.masthead-create .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  background: #0a1e43;
+  /*background: #0a1e43;*/
   color: white;
   padding: 1rem;
 }
@@ -365,12 +367,12 @@ header.masthead-submit .header-content .shiny-button {
 header.masthead-submit .header-content .shiny-button:hover,
 header.masthead-submit .header-content .shiny-button:active,
 header.masthead-submit .header-content .shiny-button:focus {
-  box-shadow: 0 5px 20px #ffffff;
+  background: #42e8e0;
 }
 header.masthead-submit .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  background: #0a1e43;
+  /*background: #0a1e43;*/
   color: white;
   padding: 0.5rem;
 }
@@ -446,12 +448,12 @@ header.masthead-wallet .header-content .shiny-button {
 header.masthead-wallet .header-content .shiny-button:hover,
 header.masthead-wallet .header-content .shiny-button:active,
 header.masthead-wallet .header-content .shiny-button:focus {
-  box-shadow: 0 5px 20px #42e8e0;
+  background: #42e8e0;
 }
 header.masthead-wallet .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  background: #0a1e43;
+  /*background: #0a1e43;*/
   color: white;
   padding: 1rem;
 }
