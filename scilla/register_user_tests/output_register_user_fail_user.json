@@ -1,0 +1,58 @@
+{
+  "scilla_major_version": "0",
+  "gas_remaining": "7380",
+  "_accepted": "false",
+  "message": null,
+  "states": [
+    { "vname": "_balance", "type": "Uint128", "value": "0" },
+    { "vname": "used_usernames", "type": "Map (String) (Bool)", "value": [] },
+    {
+      "vname": "unverified_tweets",
+      "type": "Map (String) (ByStr20)",
+      "value": []
+    },
+    {
+      "vname": "verified_tweets",
+      "type": "Map (String) (ByStr20)",
+      "value": []
+    },
+    {
+      "vname": "last_withdrawal",
+      "type": "Map (ByStr20) (BNum)",
+      "value": []
+    },
+    {
+      "vname": "users",
+      "type": "Map (ByStr20) (String)",
+      "value": [
+        {
+          "key": "0x44345678901234567890123456789012345678cd",
+          "val": "kenchangh"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "_eventname": "user_registration_failed",
+      "params": [
+        {
+          "vname": "user_address",
+          "type": "ByStr20",
+          "value": "0x44345678901234567890123456789012345678cd"
+        },
+        {
+          "vname": "twitter_username",
+          "type": "String",
+          "value": "kenchangh"
+        },
+        {
+          "vname": "sender",
+          "type": "ByStr20",
+          "value": "0x1234567890123456789012345678901234567890"
+        },
+        { "vname": "code", "type": "Uint32", "value": "2" }
+      ]
+    }
+  ]
+}

@@ -1,19 +1,12 @@
 [
-  { "vname": "_balance", "type": "Uint128", "value": "0" },
+  { "vname": "_balance", "type": "Uint128", "value": "10000" },
   {
-    "vname": "verifying_tweets",
-    "type": "Map (String) (Pair (ByStr20) (Bool))",
+    "vname": "unverified_tweets",
+    "type": "Map (String) (ByStr20)",
     "value": [
       {
         "key": "1085915996148264961",
-        "val": {
-          "constructor": "Pair",
-          "argtypes": ["ByStr20", "Bool"],
-          "arguments": [
-            "0x44345678901234567890123456789012345678cd",
-            { "constructor": "True", "argtypes": [], "arguments": [] }
-          ]
-        }
+        "val": "0x44345678901234567890123456789012345678cd"
       }
     ]
   },

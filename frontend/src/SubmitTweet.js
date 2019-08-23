@@ -1,80 +1,73 @@
 import React, { Component } from "react";
 import Joyride from "react-joyride";
 import LoadingModal from "./LoadingModal";
+import InputModal from "./InputModal";
 import {
   submitTweet as _submitTweet,
-  getTweetVerification,
-  isTweetIdAlreadyRegistered,
+  getTweetStatus,
   zilliqa
 } from "./zilliqa";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { TwitterTweetEmbed } from "react-twitter-embed";
 import { CURRENT_URI } from "./utils";
 const { units, BN } = require("@zilliqa-js/util");
-const CP = require("@zilliqa-js/crypto");
-// const privkey =
-//   "7906a5bdccf93556b8f2bc326d9747ad5252a303b9e064412e32e8feadff8a08";
 
 export default class SubmitTweet extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.handleClose = this.handleClose.bind(this);
     this.submitTweet = this.submitTweet.bind(this);
-    this.sendTransactionId = this.sendTransactionId.bind(this);
     this.updateBalance = this.updateBalance.bind(this);
+    this.getTweetVerification = this.getTweetVerification.bind(this);
     this.clearState = this.clearState.bind(this);
-    this.shownIntro = localStorage.getItem("shownIntro");
-
+    this.isValidUser = this.isValidUser.bind(this);
+    this.handlePrivateKeySubmitted = this.handlePrivateKeySubmitted.bind(this);
     this.state = {
       showLoading: false,
+      showInput: false,
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
       verifiedTweet: false,
-      retrievedVerification: false,
       balance: 0,
-      runIntro: false
+      privateKey: props.privateKey
     };
   }
 
-  getPrivateKey() {
-    return localStorage.getItem("privateKey");
-    // return privkey;
-  }
-
   async updateBalance() {
-    const privateKey = this.getPrivateKey();
-    if (privateKey) {
-      const address = CP.getAddressFromPrivateKey(privateKey);
-      const data = await zilliqa.blockchain.getBalance(address);
-      const { balance } = data.result;
-      const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-      this.setState({ balance: zilBalance });
+    const address = this.props.getAddress();
+    if (!address) {
+      this.setState({ balance: "Address not specified. Please enter private key when submitting tweet" });
+      return;
     }
+    const data = await zilliqa.blockchain.getBalance(address);
+    const { balance } = data.result;
+    const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+    this.setState({ balance: zilBalance });
   }
 
-  async sendTransactionId(txnId) {
-    // const { token, user } = this.props.location.state;
-    // TO FIX token is undefined here
-    const { token, user } = this.props;
-    // console.log(user, token);
+  async getTweetVerification(id, isTransactionId, address) { 
+    const requestBody = isTransactionId ? {txnId: id, address} : {tweetId: id, address};
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-auth-token": token
         },
-        body: JSON.stringify({
-          txnId,
-          username: user.username,
-          twitterToken: user.token
-        })
+        body: JSON.stringify(requestBody),
+        credentials: "include"
       });
+      if (response.status === 401) {
+        window.$('#loadingModal').modal("hide");
+        window.$('body').removeClass('modal-open');
+        window.$('.modal-backdrop').remove();
+        this.props.onLogout(true);
+        return;
+      }
       const data = await response.json();
       return data;
     } catch (e) {
-      console.error(e);
       throw new Error("Failed to verify tweet. Please try again.");
     }
   }
@@ -83,11 +76,41 @@ export default class SubmitTweet extends Component {
     return tweetId.length >= 18 && /^(0|[1-9]\d*)$/.test(tweetId);
   }
 
+  async isValidUser(tweetId) {
+    const username = localStorage.getItem("authenticatedUsername");
+    if (!username) {
+      this.props.onLogout(true);
+      return false;
+    }
+    try {
+      const response = await fetch(`${CURRENT_URI}/api/v1/verify-username`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, tweetId }),
+        credentials: "include"
+      });
+      if (response.status === 401) {
+        window.$('#loadingModal').modal("hide");
+        window.$('body').removeClass('modal-open');
+        window.$('.modal-backdrop').remove();
+        this.props.onLogout(true);
+        return false;
+      } else if (response.status === 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error(e);
+      throw new Error("Failed to verify tweet. Please try again.");
+    }
+  }
+
   async submitTweet() {
     const { tweetId } = this.state;
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
@@ -97,40 +120,68 @@ export default class SubmitTweet extends Component {
           "Invalid tweet ID. Please look at instructions to see what a tweet ID is.",
         showLoading: true
       });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
-    const isRegistered = await isTweetIdAlreadyRegistered(tweetId);
-    if (isRegistered) {
+    let isValidUser = false;
+    try {
+      isValidUser = await this.isValidUser(tweetId); 
+    } catch (e) {
+      console.error(e);
+      this.setState({
+        errMsg:
+          "An error occurred, please try again",
+        showLoading: true
+      });
+      return;
+    }
+    if (!isValidUser) {
+      this.setState({
+        errMsg:
+          "You cannot submit someone else's tweet!",
+        showLoading: true
+      });
+      return;
+    }
+    const { isVerified, isRegistered } = await getTweetStatus(tweetId);
+    if (isVerified) {
       this.setState({
         errMsg: "Tweet ID already submitted. Please submit another tweet ID.",
         showLoading: true
       });
-      // window.$("#loadingModal").modal("show");
       return;
     }
 
-    const privateKey = this.getPrivateKey();
-    // const address = CP.getAddressFromPrivateKey(privateKey);
+    if (!this.state.privateKey) {
+      this.setState({
+        showInput: true
+      });
+      return;
+    }
+
+    const privateKey = this.state.privateKey;
 
     try {
       this.setState({ showLoading: true });
-      const { txnId } = await _submitTweet(privateKey, tweetId);
+      let id = tweetId, isTransactionId = false, address = this.props.getAddress();
+      if (!isRegistered) {
+        const submitData = await _submitTweet(privateKey, tweetId);
+        id = submitData.id;
+        isTransactionId = true;
+        const submittedTweet = (submitData.receipt.event_logs[0]._eventname === "add_new_tweet_sucessful");
+        if (!submittedTweet) {
+          throw Error(this.props.getMessage(submitData));
+        }
+      }
       this.setState({ submittedTweet: true });
-      // const modal = window
-      //   .$("#loadingModal")
-      //   .modal({ backdrop: "static", keyboard: false });
-      // modal.modal("show");
-      const verifyTxn = await this.sendTransactionId(txnId);
-      console.log(verifyTxn);
-      this.setState({ verifiedTweet: true });
-      const verifyTxnId = verifyTxn.id;
-      const tweetIsVerified = await getTweetVerification(verifyTxnId, tweetId);
-      this.setState({ retrievedVerification: true });
-      console.log(verifyTxn, tweetIsVerified);
+      const data = await this.getTweetVerification(id, isTransactionId, address);
+      const verifiedTweet = (data.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+      if (!verifiedTweet) {
+        throw Error(this.props.getMessage(data));
+      } else {
+        this.setState({ verifiedTweet });
+      }
     } catch (e) {
-      console.error(e);
       this.setState({ errMsg: e.message });
     }
   }
@@ -158,13 +209,6 @@ export default class SubmitTweet extends Component {
       this.updateBalance();
     }, 10000);
 
-    if (!this.shownIntro) {
-      setTimeout(() => {
-        this.setState({ runIntro: true });
-        localStorage.setItem("shownIntro", JSON.stringify(true));
-      }, 1000);
-    }
-
     window.$(".submit-tweet-form").submit(e => {
       e.preventDefault();
     });
@@ -177,37 +221,56 @@ export default class SubmitTweet extends Component {
   clearState() {
     this.setState({
       showLoading: false,
+      showInput: false,
       tweetId: "",
       errMsg: null,
       submittedTweet: false,
-      verifiedTweet: false,
-      retrievedVerification: false
+      verifiedTweet: false
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      submittedTweet,
-      verifiedTweet,
-      retrievedVerification,
-      showLoading
-    } = this.state;
-    if (submittedTweet && verifiedTweet && retrievedVerification) {
-      // clear form
-      setTimeout(() => {
-        window.$("#loadingModal").modal("hide");
-        this.updateBalance();
-        this.clearState();
-      }, 5000);
+  handleClose() {
+    const { submittedTweet, verifiedTweet } = this.state;
+    if (submittedTweet && verifiedTweet) {
+      this.updateBalance();
     }
+    this.clearState();
+  }
 
+  componentDidUpdate(prevState) {
+    const { showLoading, showInput } = this.state;
     if (showLoading && !prevState.showLoading) {
       const modal = window
         .$("#loadingModal")
         .modal({ backdrop: "static", keyboard: false });
       modal.modal("show");
-      window.$("#loadingModal").on("hidden.bs.modal", this.clearState);
+      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);
+    } else if (showLoading) {
+      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);    
+    } 
+
+    if (showInput) {
+      const modal = window
+        .$("#inputModal")
+        .modal({ backdrop: "static", keyboard: false });  
+      modal.modal("show");
+      window.$("#inputModal").on("hidden.bs.modal", this.handleClose)
     }
+
+    if (this.props.showAlert) {
+      window.$("#alert").on("closed.bs.alert", this.props.handleAlertClose);
+    }
+  }
+
+  handlePrivateKeySubmitted(privateKey) {
+    window.$('#inputModal').modal("hide");
+    window.$('body').removeClass('modal-open');
+    window.$('.modal-backdrop').remove();
+    this.setState({
+      showInput: false,
+      privateKey: privateKey
+    });
+    this.submitTweet()
   }
 
   render() {
@@ -215,55 +278,52 @@ export default class SubmitTweet extends Component {
       balance,
       submittedTweet,
       verifiedTweet,
-      retrievedVerification,
       errMsg,
-      runIntro,
       tweetId,
-      showLoading
+      showLoading,
+      showInput
     } = this.state;
 
-    const { isAuthenticated } = this.props;
     const validTweetId = this.isValidTweetId(tweetId);
 
-    if (!isAuthenticated) {
-      return <Redirect exact to="/" />;
-    }
-
-    const loadingPercentages = [25, 50, 75, 100];
+    const loadingPercentages = [0, 50, 100];
     const msg = "\nPlease be patient, do not close this window.";
     let fromLoadingPercent = loadingPercentages[0];
     let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Submitting tweet to contract..." + msg;
 
-    if (submittedTweet) {
+    if (submittedTweet && verifiedTweet) { 
+      fromLoadingPercent = loadingPercentages[2];
+      toLoadingPercent = loadingPercentages[2];
+      loadingText = "Tweet is verified. Rewarded ZILs!";
+    } else if (submittedTweet) {
       fromLoadingPercent = loadingPercentages[1];
       toLoadingPercent = loadingPercentages[2];
       loadingText = "Verifying tweet hashtag..." + msg;
-
-      if (verifiedTweet) {
-        fromLoadingPercent = loadingPercentages[2];
-        toLoadingPercent = loadingPercentages[3];
-        loadingText = "Retrieving verification..." + msg;
-
-        if (retrievedVerification) {
-          fromLoadingPercent = loadingPercentages[3];
-          toLoadingPercent = loadingPercentages[3];
-          loadingText = "Tweet is verified. Rewarded 10 ZILs!";
-        }
-      }
     }
 
     const steps = [
       {
         target: ".balance",
         content:
-          "You can view your testnet wallet's address and private keys here.",
+          "You can view your testnet wallet's address here.",
         disableBeacon: true
       }
     ];
-
+    let privateKey;
+    if (!this.state.privateKey) {
+      privateKey = this.props.getPrivateKey();
+    } else {
+      privateKey = this.state.privateKey;
+    }
     return (
       <div>
+        {showInput ? (
+          <InputModal
+            title="Submit Private Key"
+            handleInput={this.handlePrivateKeySubmitted}
+          />
+        ) : null}
         {showLoading ? (
           <LoadingModal
             errorText={errMsg}
@@ -273,22 +333,21 @@ export default class SubmitTweet extends Component {
             toLoadingPercent={toLoadingPercent}
           />
         ) : null}
-        <Joyride
-          steps={steps}
-          run={runIntro}
-          styles={{
-            options: {
-              primaryColor: "#42e8e0"
-            }
-          }}
-        />
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
               <div className="balance">
-                <Link to="/wallet">Balance: {balance} ZILs</Link>
+                <p> Balance: {balance} ZILs</p>
+                <Link to="/wallet"> Click here for account details</Link>
               </div>
               <div className="col-lg-12 my-auto">
+                {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">
+                  <p>{this.props.alertText}</p>
+                  <strong>{privateKey}</strong>
+                  <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>) : null}
                 <div className="header-content mx-auto">
                   <h1 className="mb-5">Enter your tweet ID</h1>
                   <h2 className="mb-6">
@@ -296,9 +355,9 @@ export default class SubmitTweet extends Component {
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                      href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                     >
-                      #BuildonZIL
+                      #BuildOnZIL
                     </a>
                   </h2>
                   <div className="row my-auto w-100">
@@ -365,7 +424,7 @@ export default class SubmitTweet extends Component {
           <div className="container">
             <div className="row h-100">
               <div className="col-lg-7 mx-auto my-auto">
-                <p className="heading">
+                <div className="heading">
                   <strong className="ml-4">Instructions</strong>
                   <ol>
                     <li>Register or Sign in with your Twitter account.</li>
@@ -378,16 +437,16 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuildonZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
                       >
-                        #BuildonZIL
+                        #BuildOnZIL
                       </a>
                       .
                     </li>
                     <li>Submit the tweet ID here for verification.</li>
                     <li>Get test tokens for our test blockchain!</li>
                   </ol>
-                </p>
+                </div>
               </div>
             </div>
           </div>

@@ -1,22 +1,23 @@
 import React, { Component } from "react";
-import { Link, Redirect } from "react-router-dom";
-const CP = require("@zilliqa-js/crypto");
+import { Link } from "react-router-dom";
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
 
 export default class Wallet extends Component {
   constructor() {
     super();
-    this.privateKey = localStorage.getItem("privateKey");
-    this.address = CP.getAddressFromPrivateKey(this.privateKey);
     this.updateBalance = this.updateBalance.bind(this);
     this.state = {
       balance: 0
     };
   }
-
+  
   async updateBalance() {
-    const address = CP.getAddressFromPrivateKey(this.privateKey);
+    const address = this.props.getAddress();
+    if (!address) {
+      this.setState({ balance: "Address not specified. Please enter private key when submitting tweet" });
+      return;
+    }
     const data = await zilliqa.blockchain.getBalance(address);
     const { balance } = data.result;
     const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
@@ -45,19 +46,8 @@ export default class Wallet extends Component {
   }
 
   render() {
-    const { isAuthenticated } = this.props;
     const { balance } = this.state;
-
-    if (!isAuthenticated) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/"
-          }}
-        />
-      );
-    }
-
+    const address = this.props.getAddress();
     return (
       <header className="masthead-wallet">
         <div className="container h-100">
@@ -73,6 +63,7 @@ export default class Wallet extends Component {
                       </Link>
                     </div>
                     <h1>Wallet address</h1>
+                    <p> You can use this wallet to ...... </p>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
@@ -81,9 +72,9 @@ export default class Wallet extends Component {
                       <div className="row">
                         <div className="col-lg-3">Address</div>
                         <div className="col-lg-7">
-                          <span>{this.address}</span>
+                          <span>{address}</span>
                           <i
-                            onClick={e => this.copyToClipboard(this.address)}
+                            onClick={e => this.copyToClipboard(address)}
                             className="fas fa-paste pl-2"
                           />
                         </div>
@@ -93,28 +84,11 @@ export default class Wallet extends Component {
                         <div className="col-lg-7">
                           <a
                             href={`https://viewblock.io/zilliqa/address/${
-                              this.address
+                              address
                             }?network=testnet`}
                           >
                             View on ViewBlock.io
                           </a>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-lg-3">Private Key</div>
-                        <div className="col-lg-7">
-                          <span>{this.privateKey}</span>
-                          <i
-                            onClick={e => this.copyToClipboard(this.privateKey)}
-                            className="fas fa-paste pl-2"
-                          />
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-lg-12">
-                          <span className="warning">
-                            Keep your private keys to yourself!
-                          </span>
                         </div>
                       </div>
                     </div>

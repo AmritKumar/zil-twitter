@@ -1,0 +1,83 @@
+{
+  "scilla_major_version": "0",
+  "gas_remaining": "6463",
+  "_accepted": "false",
+  "message": {
+    "_tag": "",
+    "_amount": "5",
+    "_recipient": "0x44345678901234567890123456789012345678cd",
+    "params": [ { "vname": "code", "type": "Uint32", "value": "10" } ]
+  },
+  "states": [
+    { "vname": "_balance", "type": "Uint128", "value": "9995" },
+    {
+      "vname": "verified_tweets",
+      "type": "Map (String) (ByStr20)",
+      "value": [
+        {
+          "key": "1085915996148264961",
+          "val": "0x44345678901234567890123456789012345678cd"
+        }
+      ]
+    },
+    {
+      "vname": "unverified_tweets",
+      "type": "Map (String) (ByStr20)",
+      "value": []
+    },
+    {
+      "vname": "users",
+      "type": "Map (ByStr20) (String)",
+      "value": [
+        {
+          "key": "0x44345678901234567890123456789012345678cd",
+          "val": "kenchangh"
+        }
+      ]
+    },
+    {
+      "vname": "used_usernames",
+      "type": "Map (String) (Bool)",
+      "value": [
+        {
+          "key": "kenchangh",
+          "val": { "constructor": "True", "argtypes": [], "arguments": [] }
+        }
+      ]
+    },
+    {
+      "vname": "last_withdrawal",
+      "type": "Map (ByStr20) (BNum)",
+      "value": [
+        {
+          "key": "0x44345678901234567890123456789012345678cd",
+          "val": "60000"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "_eventname": "verify_tweet_successful",
+      "params": [
+        {
+          "vname": "sender",
+          "type": "ByStr20",
+          "value": "0x1234567890123456789012345678901234567890"
+        },
+        {
+          "vname": "recipient",
+          "type": "ByStr20",
+          "value": "0x44345678901234567890123456789012345678cd"
+        },
+        { "vname": "reward_amount", "type": "Uint128", "value": "5" },
+        {
+          "vname": "tweet_id",
+          "type": "String",
+          "value": "1085915996148264961"
+        },
+        { "vname": "code", "type": "Uint32", "value": "10" }
+      ]
+    }
+  ]
+}

@@ -41,14 +41,14 @@ export default class LoadingModal extends Component {
     this.updateProgressBar();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.fromLoadingPercent !== this.props.fromLoadingPercent) {
       this.updateProgressBar();
     }
   }
 
   componentWillUnmount() {
-    clearInterval(this.updateProgress);
+    clearInterval(this.updateProgressInterval);
   }
 
   render() {
@@ -94,15 +94,6 @@ export default class LoadingModal extends Component {
               <span className="text-center mr-5 ml-5">
                 {props.errorText ? props.errorText : props.loadingText}
               </span>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
