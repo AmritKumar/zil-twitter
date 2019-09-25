@@ -33,15 +33,7 @@ const Navbar = props => {
             <li className="nav-item">
               <a
                 className="nav-link js-scroll-trigger"
-                href="https://blog.zilliqa.com/buildonzil-introducing-the-zilliqa-ecosystem-grant-programme-6ccb98892712"
-              >
-                Financial Grant
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link js-scroll-trigger"
-                href="https://zilliqa.com/for-developers.html"
+                href="https://learnscilla.com/home"
               >
                 How to build this?
               </a>
@@ -49,9 +41,9 @@ const Navbar = props => {
             <li className="nav-item">
               <a
                 className="nav-link js-scroll-trigger"
-                href="https://forum.zilliqa.com/"
+                href="https://discord.gg/8tpGXrB"
               >
-                Contact
+                Discord
               </a>
             </li>
             {/*<li className="nav-item">
