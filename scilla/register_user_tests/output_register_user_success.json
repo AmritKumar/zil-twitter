@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7363",
+  "gas_remaining": "7364",
   "_accepted": "false",
   "message": null,
   "states": [
@@ -17,13 +17,8 @@
     },
     {
       "vname": "used_usernames",
-      "type": "Map (String) (Bool)",
-      "value": [
-        {
-          "key": "kenchangh",
-          "val": { "constructor": "True", "argtypes": [], "arguments": [] }
-        }
-      ]
+      "type": "Map (String) (Uint32)",
+      "value": [ { "key": "kenchangh", "val": "1" } ]
     },
     {
       "vname": "unverified_tweets",

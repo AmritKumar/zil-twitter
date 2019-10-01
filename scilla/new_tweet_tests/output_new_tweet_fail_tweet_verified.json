@@ -1,11 +1,15 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7478",
+  "gas_remaining": "7482",
   "_accepted": "false",
   "message": null,
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "0" },
-    { "vname": "used_usernames", "type": "Map (String) (Bool)", "value": [] },
+    {
+      "vname": "used_usernames",
+      "type": "Map (String) (Uint32)",
+      "value": []
+    },
     {
       "vname": "unverified_tweets",
       "type": "Map (String) (ByStr20)",

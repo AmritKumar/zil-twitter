@@ -14,8 +14,6 @@ let one_msg =
     let nil_msg = Nil {Message} in
     Cons {Message} msg nil_msg
 
-let false = False
-let true = True
 let one = Uint32 1
 
 let not_owner_code = Uint32 0
@@ -44,8 +42,8 @@ blocks_per_day : Uint32)
 field users: Map ByStr20 String
     = Emp ByStr20 String
 
-field used_usernames: Map String Bool
-    = Emp String Bool
+field used_usernames: Map String Uint32
+    = Emp String Uint32
 
 field unverified_tweets: Map String ByStr20
     = Emp String ByStr20
@@ -90,7 +88,7 @@ transition register_user(user_address: ByStr20, twitter_username: String)
         event e
     | False =>
         users[user_address] := twitter_username;
-        used_usernames[twitter_username] := true;
+        used_usernames[twitter_username] := one;
 
         e = {_eventname : "user_registration_successful";
                 user_address: user_address;

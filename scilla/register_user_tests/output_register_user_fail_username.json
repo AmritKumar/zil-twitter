@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7390",
+  "gas_remaining": "7394",
   "_accepted": "false",
   "message": null,
   "states": [
@@ -23,13 +23,8 @@
     },
     {
       "vname": "used_usernames",
-      "type": "Map (String) (Bool)",
-      "value": [
-        {
-          "key": "kenchangh",
-          "val": { "constructor": "True", "argtypes": [], "arguments": [] }
-        }
-      ]
+      "type": "Map (String) (Uint32)",
+      "value": [ { "key": "kenchangh", "val": "1" } ]
     }
   ],
   "events": [
