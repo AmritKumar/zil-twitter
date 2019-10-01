@@ -1,4 +1,8 @@
+#!/usr/bin/python3
+
 import os
+import sys
+
 testsuite = [
     {
         "dir": "deposit_tests",
@@ -111,7 +115,14 @@ testsuite = [
         ]
     }
 ]
-SCILLA_DIR = "/Users/advaypal/Desktop/Repos/zilliqa/scilla"
+
+SCILLA_DIR = ""
+if len(sys.argv) != 2:
+    print (f"Usage: {sys.argv[0]} scilla_dir")
+    exit (1)
+else:
+    SCILLA_DIR = sys.argv[1]
+
 for test in testsuite:
     test_directory = test["dir"]
     for test in test["tests"]:
