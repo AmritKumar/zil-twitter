@@ -30,20 +30,6 @@ let tweet_not_valid_code = Uint32 8
 let tweet_within_day_code = Uint32 9
 let verify_tweet_success_code = Uint32 10
 
-let blocks_per_day = Uint32 1103
-
-let is_owner =
-    fun (owner_address: ByStr20) =>
-    fun (address: ByStr20) =>
-        builtin eq owner_address address
-
-let lte =
-    fun (a: Uint128) =>
-    fun (b: Uint128) =>
-        let a_lt_b = builtin lt a b in
-        let a_eq_b = builtin eq a b in
-        orb a_lt_b a_eq_b
-
 (***************************************************)
 (*             The contract definition             *)
 (***************************************************)
@@ -72,7 +58,7 @@ field last_withdrawal: Map ByStr20 BNum
 
 (* Only owner can deposit ZIL *)
 transition deposit()
-    sender_is_owner = is_owner owner _sender;
+    sender_is_owner = builtin eq owner _sender;
     match sender_is_owner with
     | False =>
         e = {_eventname : "deposit_failed";
