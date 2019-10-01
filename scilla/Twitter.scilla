@@ -116,7 +116,6 @@ transition register_user(user_address: ByStr20, twitter_username: String)
 end
 
 (* Tweets are added to pending verification *)
-(**))
 transition new_tweet(tweet_id: String)
     username <- users[_sender];
 
