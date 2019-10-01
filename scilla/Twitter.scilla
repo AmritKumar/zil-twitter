@@ -16,7 +16,6 @@ let one_msg =
 
 let false = False
 let true = True
-let zero = Uint128 0
 let one = Uint32 1
 
 let not_owner_code = Uint32 0
@@ -186,18 +185,9 @@ transition verify_tweet(
             is_valid_address = builtin eq recipient_address user_address;
             is_valid = andb is_valid_address not_is_verified;
             tweet_length = builtin strlen tweet_text;
-            valid_start_pos =
-                let start_pos_128_option = builtin to_uint128 start_pos in
-                match start_pos_128_option with
-                | None =>
-                    False
-                | Some start_pos_128 =>
-                    let is_non_negative = lte zero start_pos_128 in
-                    is_non_negative
-                end
-            ;
             string_length = builtin strlen tweet_text;
             valid_end_pos = builtin lt end_pos string_length;
+            valid_start_pos = builtin lt start_pos end_pos;
             is_valid_substring = andb valid_start_pos valid_end_pos;
             is_valid = andb is_valid_substring is_valid;
 
