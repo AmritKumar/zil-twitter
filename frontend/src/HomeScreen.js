@@ -57,12 +57,9 @@ export default class HomeScreen extends Component {
               <img src="img/hero-img-min.svg" className="img-fluid" alt="" />
             </div>
             <div className="cta-container col-lg-12 text-center">
-              <a
-                className="cta-link"
-                href="https://zilliqa.com/for-developers.html"
-              >
-                Learn how to build such a blockchain application here.
-              </a>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wxZl507iBf0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
             </div>
           </div>
         </div>

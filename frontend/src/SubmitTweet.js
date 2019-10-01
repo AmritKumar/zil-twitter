@@ -47,7 +47,7 @@ export default class SubmitTweet extends Component {
     this.setState({ balance: zilBalance });
   }
 
-  async getTweetVerification(id, isTransactionId, address) { 
+  async getTweetVerification(id, isTransactionId, address) {
     const requestBody = isTransactionId ? {txnId: id, address} : {tweetId: id, address};
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
@@ -125,7 +125,7 @@ export default class SubmitTweet extends Component {
 
     let isValidUser = false;
     try {
-      isValidUser = await this.isValidUser(tweetId); 
+      isValidUser = await this.isValidUser(tweetId);
     } catch (e) {
       console.error(e);
       this.setState({
@@ -246,13 +246,13 @@ export default class SubmitTweet extends Component {
       modal.modal("show");
       window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);
     } else if (showLoading) {
-      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);    
-    } 
+      window.$("#loadingModal").on("hidden.bs.modal", this.handleClose);
+    }
 
     if (showInput) {
       const modal = window
         .$("#inputModal")
-        .modal({ backdrop: "static", keyboard: false });  
+        .modal({ backdrop: "static", keyboard: false });
       modal.modal("show");
       window.$("#inputModal").on("hidden.bs.modal", this.handleClose)
     }
@@ -292,7 +292,7 @@ export default class SubmitTweet extends Component {
     let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Submitting tweet to contract..." + msg;
 
-    if (submittedTweet && verifiedTweet) { 
+    if (submittedTweet && verifiedTweet) {
       fromLoadingPercent = loadingPercentages[2];
       toLoadingPercent = loadingPercentages[2];
       loadingText = "Tweet is verified. Rewarded ZILs!";
@@ -338,7 +338,7 @@ export default class SubmitTweet extends Component {
             <div className="row h-100">
               <div className="balance">
                 <p> Balance: {balance} ZILs</p>
-                <Link to="/wallet"> Click here for account details</Link>
+                <Link to="/wallet" id="link"> Click here for account details</Link>
               </div>
               <div className="col-lg-12 my-auto">
                 {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">
@@ -373,7 +373,7 @@ export default class SubmitTweet extends Component {
                         value={this.state.tweetId}
                         className="form-control mt-2 mb-2 mr-sm-3 pl-3"
                         type="text"
-                        placeholder="1083722408815546368"
+                        placeholder="Enter the last number in your tweet’s url"
                       />
                       <div className="submit-tweet-btn shiny-button">
                         <button

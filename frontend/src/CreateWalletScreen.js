@@ -148,12 +148,7 @@ export default class CreateWalletScreen extends Component {
                 <div onClick={this.generateWallet} className="shiny-button">
                   <button
                     type="button"
-                    className="btn shiny-button-content"
-                    data-toggle="modal"
-                    data-target="#loadingModal"
-                    data-backdrop="static"
-                    data-keyboard="false"
-                  >
+                    className="btn shiny-button-content">
                     Generate a free testnet wallet for me
                   </button>
                 </div>
