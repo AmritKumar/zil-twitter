@@ -14,9 +14,6 @@ let one_msg =
     let nil_msg = Nil {Message} in
     Cons {Message} msg nil_msg
 
-let false = False
-let true = True
-let zero = Uint128 0
 let one = Uint32 1
 
 let not_owner_code = Uint32 0
@@ -31,35 +28,22 @@ let tweet_not_valid_code = Uint32 8
 let tweet_within_day_code = Uint32 9
 let verify_tweet_success_code = Uint32 10
 
-let zils_per_tweet = Uint128 1000
-let blocks_per_day = Uint32 1103
-
-let is_owner =
-    fun (owner_address: ByStr20) =>
-    fun (address: ByStr20) =>
-        builtin eq owner_address address
-
-let lte =
-    fun (a: Uint128) =>
-    fun (b: Uint128) =>
-        let a_lt_b = builtin lt a b in
-        let a_eq_b = builtin eq a b in
-        orb a_lt_b a_eq_b
-
 (***************************************************)
 (*             The contract definition             *)
 (***************************************************)
 
 contract Twitter
 (owner: ByStr20,
-hashtag: String)
+hashtag: String,
+zils_per_tweet : Uint128,
+blocks_per_day : Uint32)
 
 
 field users: Map ByStr20 String
     = Emp ByStr20 String
 
-field used_usernames: Map String Bool
-    = Emp String Bool
+field used_usernames: Map String Uint32
+    = Emp String Uint32
 
 field unverified_tweets: Map String ByStr20
     = Emp String ByStr20
@@ -72,7 +56,7 @@ field last_withdrawal: Map ByStr20 BNum
 
 (* Only owner can deposit ZIL *)
 transition deposit()
-    sender_is_owner = is_owner owner _sender;
+    sender_is_owner = builtin eq owner _sender;
     match sender_is_owner with
     | False =>
         e = {_eventname : "deposit_failed";
@@ -104,7 +88,7 @@ transition register_user(user_address: ByStr20, twitter_username: String)
         event e
     | False =>
         users[user_address] := twitter_username;
-        used_usernames[twitter_username] := true;
+        used_usernames[twitter_username] := one;
 
         e = {_eventname : "user_registration_successful";
                 user_address: user_address;
@@ -185,18 +169,9 @@ transition verify_tweet(
             is_valid_address = builtin eq recipient_address user_address;
             is_valid = andb is_valid_address not_is_verified;
             tweet_length = builtin strlen tweet_text;
-            valid_start_pos =
-                let start_pos_128_option = builtin to_uint128 start_pos in
-                match start_pos_128_option with
-                | None =>
-                    False
-                | Some start_pos_128 =>
-                    let is_non_negative = lte zero start_pos_128 in
-                    is_non_negative
-                end
-            ;
             string_length = builtin strlen tweet_text;
             valid_end_pos = builtin lt end_pos string_length;
+            valid_start_pos = builtin lt start_pos end_pos;
             is_valid_substring = andb valid_start_pos valid_end_pos;
             is_valid = andb is_valid_substring is_valid;
 

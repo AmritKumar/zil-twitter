@@ -20,6 +20,16 @@
     "value": "#buildonzil"
   },
   {
+        "vname" : "zils_per_tweet",
+        "type" : "Uint128",
+        "value" : "1000"
+  },
+  {
+        "vname" : "blocks_per_day",
+        "type" : "Uint32",
+        "value" : "1103"
+  },
+  {
     "vname": "_creation_block",
     "type": "BNum",
     "value": "1"
