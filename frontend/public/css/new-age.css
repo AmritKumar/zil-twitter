@@ -74,6 +74,12 @@ a:focus {
   color: #555555;
 }
 
+#link {
+  display : block;
+  width:100px;
+  height:40px;
+}
+
 #mainNav {
   border-color: rgba(34, 34, 34, 0.05);
   background-color: white;

@@ -338,7 +338,7 @@ export default class SubmitTweet extends Component {
             <div className="row h-100">
               <div className="balance">
                 <p> Balance: {balance} ZILs</p>
-                <Link to="/wallet"> Click here for account details</Link>
+                <Link to="/wallet" id="link"> Click here for account details</Link>
               </div>
               <div className="col-lg-12 my-auto">
                 {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">

@@ -43,7 +43,7 @@ const Navbar = props => {
                 className="nav-link js-scroll-trigger"
                 href="https://discord.gg/8tpGXrB"
               >
-                Discord
+                Ask us on Discord
               </a>
             </li>
             {/*<li className="nav-item">

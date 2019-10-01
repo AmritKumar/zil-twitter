@@ -9,8 +9,8 @@ import BoolUtils ListUtils PairUtils
 (***************************************************)
 library Twitter
 
-let one_msg = 
-    fun (msg : Message) => 
+let one_msg =
+    fun (msg : Message) =>
     let nil_msg = Nil {Message} in
     Cons {Message} msg nil_msg
 
@@ -31,7 +31,7 @@ let tweet_not_valid_code = Uint32 8
 let tweet_within_day_code = Uint32 9
 let verify_tweet_success_code = Uint32 10
 
-let zils_per_tweet = Uint128 5
+let zils_per_tweet = Uint128 1000
 let blocks_per_day = Uint32 1103
 
 let is_owner =
@@ -54,6 +54,7 @@ contract Twitter
 (owner: ByStr20,
 hashtag: String)
 
+
 field users: Map ByStr20 String
     = Emp ByStr20 String
 
@@ -66,7 +67,7 @@ field unverified_tweets: Map String ByStr20
 field verified_tweets: Map String ByStr20
     = Emp String ByStr20
 
-field last_withdrawal: Map ByStr20 BNum 
+field last_withdrawal: Map ByStr20 BNum
     = Emp ByStr20 BNum
 
 (* Only owner can deposit ZIL *)
@@ -91,7 +92,7 @@ end
 transition register_user(user_address: ByStr20, twitter_username: String)
     user_exists <- exists users[user_address];
     username_exists <- exists used_usernames[twitter_username];
-    
+
     already_exists = orb user_exists username_exists;
     match already_exists with
     | True =>
@@ -115,6 +116,7 @@ transition register_user(user_address: ByStr20, twitter_username: String)
 end
 
 (* Tweets are added to pending verification *)
+(**))
 transition new_tweet(tweet_id: String)
     username <- users[_sender];
 
@@ -125,7 +127,7 @@ transition new_tweet(tweet_id: String)
                 username: "";
                 tweet_id: tweet_id;
                 code: user_not_exists_code };
-        event e        
+        event e
     | Some username =>
         tweet_unverified <- exists unverified_tweets[tweet_id];
         tweet_verified <- exists verified_tweets[tweet_id];
@@ -137,7 +139,7 @@ transition new_tweet(tweet_id: String)
                     username: username;
                     tweet_id: tweet_id;
                     code: tweet_exists_code };
-            event e               
+            event e
         | False =>
             unverified_tweets[tweet_id] := _sender;
 
@@ -166,7 +168,7 @@ transition verify_tweet(
                 user_address: user_address;
                 tweet_id: tweet_id;
                 code: not_owner_code };
-        event e            
+        event e
     | True =>
         is_unverified_tweet <- unverified_tweets[tweet_id];
 
@@ -177,7 +179,7 @@ transition verify_tweet(
                     user_address: user_address;
                     tweet_id: tweet_id;
                     code: tweet_not_added_code };
-            event e                
+            event e
         | Some recipient_address =>
             is_verified <- exists verified_tweets[tweet_id];
             not_is_verified = negb is_verified;
@@ -231,7 +233,7 @@ transition verify_tweet(
                             user_address: user_address;
                             tweet_id: tweet_id;
                             code: tweet_not_valid_code };
-                    event e    
+                    event e
                 | True =>
 
                     withdrawal <- last_withdrawal[user_address];
@@ -244,10 +246,10 @@ transition verify_tweet(
                             let not_next_day_yet = builtin blt current_block next_day_block in
                             not_next_day_yet
                         | None =>
-                            False    
+                            False
                         end
                     ;
-                    
+
                     match not_next_day_yet with
                     | True =>
                         e = {_eventname : "verify_tweet_failed";
@@ -255,7 +257,7 @@ transition verify_tweet(
                                 user_address: user_address;
                                 tweet_id: tweet_id;
                                 code: tweet_within_day_code };
-                        event e   
+                        event e
                     | False =>
                         verified_tweets[tweet_id] := user_address;
                         delete unverified_tweets[tweet_id];
@@ -266,7 +268,7 @@ transition verify_tweet(
                                 reward_amount: zils_per_tweet;
                                 tweet_id: tweet_id;
                                 code: verify_tweet_success_code };
-                        event e;    
+                        event e;
                         msg = {_tag: "";
                                 _recipient: user_address;
                                 _amount: zils_per_tweet;
@@ -274,7 +276,7 @@ transition verify_tweet(
                         msgs = one_msg msg;
                         send msgs
                     end
-                end       
+                end
             end
         end
     end

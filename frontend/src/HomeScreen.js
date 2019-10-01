@@ -56,6 +56,11 @@ export default class HomeScreen extends Component {
             <div className="col-lg-7 my-auto">
               <img src="img/hero-img-min.svg" className="img-fluid" alt="" />
             </div>
+            <div className="cta-container col-lg-12 text-center">
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wxZl507iBf0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+            </div>
           </div>
         </div>
       </header>

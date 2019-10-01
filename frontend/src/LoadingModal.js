@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Circle } from "rc-progress";
+//import { Circle } from "rc-progress";
 
 export default class LoadingModal extends Component {
   constructor(props) {
@@ -85,11 +85,7 @@ export default class LoadingModal extends Component {
               <div className="loader mb-3 text-center">
                 {loadingPercent === 100 ? <i className="fas fa-check" /> : null}
                 {props.errorText ? <i className="fas fa-times" /> : null}
-                <Circle
-                  percent={props.errorText ? 100 : loadingPercent}
-                  strokeWidth="5"
-                  strokeColor={props.errorText ? ERROR_COLOR : LOADING_COLOR}
-                />
+                <img src="img/hourglass.gif" alt="" />
               </div>
               <span className="text-center mr-5 ml-5">
                 {props.errorText ? props.errorText : props.loadingText}

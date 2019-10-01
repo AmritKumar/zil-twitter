@@ -11,7 +11,7 @@ export default class Wallet extends Component {
       balance: 0
     };
   }
-  
+
   async updateBalance() {
     const address = this.props.getAddress();
     if (!address) {
@@ -63,7 +63,7 @@ export default class Wallet extends Component {
                       </Link>
                     </div>
                     <h1>Wallet address</h1>
-                    <p> You can use this wallet to ...... </p>
+                    <p> You can use this wallet to send funds associated from this wallet from here use your private key <a href="https://dev-wallet.zilliqa.com/send">here</a></p>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
