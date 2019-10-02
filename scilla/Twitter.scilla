@@ -93,116 +93,111 @@ end
 
 (* this is sent by the owner *)
 transition verify_tweet_pay (
-  twitter_username: String,
-  tweet_id: String, tweet_text: String,
-  start_pos: Uint32, end_pos: Uint32)
+    twitter_username: String,
+    tweet_id: String, tweet_text: String,
+    start_pos: Uint32, end_pos: Uint32)
 
-  is_owner = builtin eq _sender owner;
+    is_owner = builtin eq _sender owner;
 
-  match is_owner with
-  | False =>
-      e = {_eventname : "verify_tweet_failed";
+    match is_owner with
+    | False =>
+        e = {_eventname : "verify_tweet_failed";
               sender: _sender;
               twitter_username: twitter_username;
               tweet_id: tweet_id;
               code: not_owner_code };
-      event e
-  | True =>
-      recipient_address_opt <- users[twitter_username];
-
-      match recipient_address_opt with
-      | None =>
-          e = {_eventname : "verify_tweet_failed";
+        event e
+    | True =>
+        recipient_address_opt <- users[twitter_username];
+        match recipient_address_opt with
+        | None =>
+            e = {_eventname : "verify_tweet_failed";
                   sender: _sender;
                   twitter_username: twitter_username;
                   tweet_id: tweet_id;
                   code: user_not_exists_code };
-          event e
-      | Some recipient_address =>
-          already_verified <- exists verified_tweets[tweet_id];
-          not_already_verified = negb already_verified;
-          tweet_length = builtin strlen tweet_text;
-          string_length = builtin strlen tweet_text;
-          valid_end_pos = builtin lt end_pos string_length;
-          valid_start_pos = builtin lt start_pos end_pos;
-          is_valid_substring = andb valid_start_pos valid_end_pos;
-          is_valid = andb is_valid_substring not_already_verified;
-
-          match is_valid with
-          | False =>
-              match already_verified with
-              | True =>
-                  e = {_eventname : "verify_tweet_failed";
+            event e
+        | Some recipient_address =>
+            already_verified <- exists verified_tweets[tweet_id];
+            not_already_verified = negb already_verified;
+            tweet_length = builtin strlen tweet_text;
+            string_length = builtin strlen tweet_text;
+            valid_end_pos = builtin lt end_pos string_length;
+            valid_start_pos = builtin lt start_pos end_pos;
+            is_valid_substring = andb valid_start_pos valid_end_pos;
+            is_valid = andb is_valid_substring not_already_verified;
+            match is_valid with
+            | False =>
+                match already_verified with
+                | True =>
+                    e = {_eventname : "verify_tweet_failed";
                           sender: _sender;
                           twitter_username: twitter_username;
                           tweet_id: tweet_id;
                           code: tweet_exists_code };
-                  event e
-              | False =>
-                  e = {_eventname : "verify_tweet_failed";
+                    event e
+                | False =>
+                    e = {_eventname : "verify_tweet_failed";
                           sender: _sender;
                           twitter_username: twitter_username;
                           tweet_id: tweet_id;
                           code: tweet_not_valid_code };
-                  event e
-              end
-          | True =>
-              substr_len = builtin sub end_pos start_pos;
-              substr_len = builtin add substr_len one;
-              match_hashtag = builtin substr tweet_text start_pos substr_len;
-              is_hashtag = builtin eq match_hashtag hashtag;
-
-              match is_hashtag with
-              | False =>
-                  e = {_eventname : "verify_tweet_failed";
+                    event e
+                end
+            | True =>
+                substr_len = builtin sub end_pos start_pos;
+                substr_len = builtin add substr_len one;
+                match_hashtag = builtin substr tweet_text start_pos substr_len;
+                is_hashtag = builtin eq match_hashtag hashtag;
+                match is_hashtag with
+                | False =>
+                    e = {_eventname : "verify_tweet_failed";
                           sender: _sender;
                           twitter_username: twitter_username;
                           tweet_id: tweet_id;
                           code: tweet_not_valid_code };
-                  event e
-              | True =>
-
-                  withdrawal <- last_withdrawal[recipient_address];
-                  current_block <- & BLOCKNUMBER;
-                  not_next_day_yet =
-                      match withdrawal with
-                      | Some withdrawal =>
-                          let last_withdraw_block = withdrawal in
-                          let next_day_block = builtin badd last_withdraw_block blocks_per_day in
-                          let not_next_day_yet = builtin blt current_block next_day_block in
-                          not_next_day_yet
-                      | None =>
-                          False
-                      end
-                  ;
-
-                  match not_next_day_yet with
-                  | True =>
-                      e = {_eventname : "verify_tweet_failed";
+                    event e
+                | True =>
+                    withdrawal <- last_withdrawal[recipient_address];
+                    current_block <- & BLOCKNUMBER;
+                    not_next_day_yet =
+                    match withdrawal with
+                    | Some withdrawal =>
+                        let last_withdraw_block = withdrawal in
+                        let next_day_block = builtin badd last_withdraw_block blocks_per_day in
+                        let not_next_day_yet = builtin blt current_block next_day_block in
+                        not_next_day_yet
+                    | None =>
+                      False
+                    end
+                    ;
+                    match not_next_day_yet with
+                    | True =>
+                        e = {_eventname : "verify_tweet_failed";
                               sender: _sender;
                               twitter_username: twitter_username;
                               tweet_id: tweet_id;
                               code: tweet_within_day_code };
-                      event e
-                  | False =>
-                      verified_tweets[tweet_id] := recipient_address;
-                      last_withdrawal[recipient_address] := current_block;
-                      e = {_eventname : "verify_tweet_successful";
+                        event e
+                    | False =>
+                        verified_tweets[tweet_id] := recipient_address;
+                        last_withdrawal[recipient_address] := current_block;
+                        e = {_eventname : "verify_tweet_successful";
                               sender: _sender;
                               recipient: recipient_address;
                               reward_amount: zils_per_tweet;
                               tweet_id: tweet_id;
                               code: verify_tweet_success_code };
-                      event e;
-                      msg = {_tag: "";
-                              _recipient: recipient_address;
-                              _amount: zils_per_tweet;
-                              code: verify_tweet_success_code };
-                      msgs = one_msg msg;
-                      send msgs
-                  end
-              end
-          end
-      end
-  end
+                        event e;
+                        msg = {_tag: "";
+                               _recipient: recipient_address;
+                               _amount: zils_per_tweet;
+                               code: verify_tweet_success_code };
+                        msgs = one_msg msg;
+                        send msgs
+                    end
+                end
+            end
+        end
+    end
 end
