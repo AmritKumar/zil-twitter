@@ -36,8 +36,6 @@ hashtag: String,
 zils_per_tweet : Uint128,
 blocks_per_day : Uint32)
 
-field hashtag_length : Uint32 = builtin strlen hashtag
-
 field users: Map String ByStr20
     = Emp String ByStr20
 
@@ -120,7 +118,6 @@ transition verify_tweet_pay (
         | Some recipient_address =>
             already_verified <- exists verified_tweets[tweet_id];
             not_already_verified = negb already_verified;
-            tweet_length = builtin strlen tweet_text;
             string_length = builtin strlen tweet_text;
             valid_end_pos = builtin lt end_pos string_length;
             valid_start_pos = builtin lt start_pos end_pos;

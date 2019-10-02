@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "6735",
+  "gas_remaining": "6783",
   "_accepted": "false",
   "message": {
     "_tag": "",
@@ -10,7 +10,6 @@
   },
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "9000" },
-    { "vname": "hashtag_length", "type": "Uint32", "value": "11" },
     {
       "vname": "verified_tweets",
       "type": "Map (String) (ByStr20)",

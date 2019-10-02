@@ -1,11 +1,10 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7062",
+  "gas_remaining": "7110",
   "_accepted": "false",
   "message": null,
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "10000" },
-    { "vname": "hashtag_length", "type": "Uint32", "value": "11" },
     {
       "vname": "last_withdrawal",
       "type": "Map (ByStr20) (BNum)",
