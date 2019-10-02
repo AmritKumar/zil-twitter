@@ -1,29 +1,20 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7364",
+  "gas_remaining": "6988",
   "_accepted": "false",
   "message": null,
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "0" },
+    { "vname": "hashtag_length", "type": "Uint32", "value": "11" },
     {
       "vname": "users",
-      "type": "Map (ByStr20) (String)",
+      "type": "Map (String) (ByStr20)",
       "value": [
         {
-          "key": "0x44345678901234567890123456789012345678cd",
-          "val": "kenchangh"
+          "key": "kenchangh",
+          "val": "0x44345678901234567890123456789012345678cd"
         }
       ]
-    },
-    {
-      "vname": "used_usernames",
-      "type": "Map (String) (Uint32)",
-      "value": [ { "key": "kenchangh", "val": "1" } ]
-    },
-    {
-      "vname": "unverified_tweets",
-      "type": "Map (String) (ByStr20)",
-      "value": []
     },
     {
       "vname": "verified_tweets",

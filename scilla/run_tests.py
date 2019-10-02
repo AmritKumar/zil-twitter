@@ -20,31 +20,6 @@ testsuite = [
         ]
     },
     {
-        "dir": "new_tweet_tests",
-        "tests": [
-            {
-                "message": "new_tweet",
-                "output": "new_tweet_fail_tweet_verified",
-                "state": "new_tweet_fail_tweet_verified"
-            },
-            {
-                "message": "new_tweet",
-                "output": "new_tweet_fail_tweet_unverified",
-                "state": "new_tweet_fail_tweet_unverified"
-            },
-            {
-                "message": "new_tweet",
-                "output": "new_tweet_success",
-                "state": "new_tweet_success"
-            },
-            {
-                "message": "new_tweet",
-                "output": "new_tweet_fail_user",
-                "state": "new_tweet_fail_user"
-            }
-        ]
-    },
-    {
         "dir": "register_user_tests",
         "tests": [
             {

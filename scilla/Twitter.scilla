@@ -20,8 +20,11 @@ let not_owner_code = Uint32 0
 let deposit_success_code = Uint32 1
 let registration_error_code = Uint32 2
 let registered_success_code = Uint32 3
-let invalid_submission = Uint32 4
-let verify_tweet_success_code = Uint32 5
+let user_not_exists_code = Uint32 4
+let tweet_exists_code = Uint32 5
+let tweet_not_valid_code = Uint32 6
+let tweet_within_day_code = Uint32 7
+let verify_tweet_success_code = Uint32 8
 
 (***************************************************)
 (*             The contract definition             *)
@@ -94,71 +97,112 @@ transition verify_tweet_pay (
   tweet_id: String, tweet_text: String,
   start_pos: Uint32, end_pos: Uint32)
 
-  hashtag_length <- hashtag_length;
   is_owner = builtin eq _sender owner;
-  is_already_verified <- exists verified_tweets[tweet_id];
-  is_not_already_verified = negb is_already_verified;
-  (* Check if described substring of tweet is valid (to avoid errors). *)
-  tweet_length = builtin strlen tweet_text;
-  valid_end_pos = builtin lt end_pos tweet_length;
-  valid_start_pos = builtin lt start_pos end_pos;
-  valid_substr = uint32_le tweet_length hashtag_length;
-  is_valid_substring = let t = andb valid_start_pos valid_end_pos in andb t valid_substr;
-  is_valid = let t = andb is_valid_substring is_owner in andb t is_not_already_verified;
 
-  registered_address <- users[twitter_username];
-  is_valid_registered_address = Pair {Bool (Option ByStr20)} is_valid registered_address;
-
-  match is_valid_registered_address with
-  | Pair True (Some regaddr) =>
-    (* We know that substr will not raise an exception since we checked earlier. *)
-    match_hashtag = builtin substr tweet_text start_pos hashtag_length;
-    is_hashtag = builtin eq match_hashtag hashtag;
-    (* Has it been a day since previous award?. *)
-    withdrawal <- last_withdrawal[regaddr];
-    current_block <- & BLOCKNUMBER;
-    it_has_been_a_day =
-      match withdrawal with
-      | Some withdrawal =>
-        let last_withdraw_block = withdrawal in
-        let next_day_block = builtin badd last_withdraw_block blocks_per_day in
-        let not_next_day_yet = builtin blt current_block next_day_block in
-        negb not_next_day_yet
-      | None => True
-      end
-    ;
-    good_to_award = andb is_hashtag it_has_been_a_day;
-    match good_to_award with
-    | False =>
-      e = {_eventname : "verify_tweet_pay_failed";
-           sender: _sender;
-           twitter_username: twitter_username;
-           tweet_id: tweet_id;
-           code: invalid_submission };
+  match is_owner with
+  | False =>
+      e = {_eventname : "verify_tweet_failed";
+              sender: _sender;
+              twitter_username: twitter_username;
+              tweet_id: tweet_id;
+              code: not_owner_code };
       event e
-    | True =>
-      verified_tweets[tweet_id] := regaddr;
-      last_withdrawal[regaddr] := current_block;
-      e = {_eventname : "verify_tweet_pay_successful";
-           sender: _sender;
-           recipient: regaddr;
-           reward_amount: zils_per_tweet;
-           tweet_id: tweet_id;
-           code: verify_tweet_success_code };
-      event e;
-      msg = {_tag: "";
-             _recipient: regaddr;
-             _amount: zils_per_tweet;
-             code: verify_tweet_success_code };
-      msgs = one_msg msg;
-      send msgs
-    end
-  | _ =>
-    e = {_eventname : "verify_tweet_pay_failed";
-         sender: _sender;
-         twitter_username: twitter_username;
-         tweet_id: tweet_id;
-         code: invalid_submission };
-    event e
+  | True =>
+      recipient_address_opt <- users[twitter_username];
+
+      match recipient_address_opt with
+      | None =>
+          e = {_eventname : "verify_tweet_failed";
+                  sender: _sender;
+                  twitter_username: twitter_username;
+                  tweet_id: tweet_id;
+                  code: user_not_exists_code };
+          event e
+      | Some recipient_address =>
+          already_verified <- exists verified_tweets[tweet_id];
+          not_already_verified = negb already_verified;
+          tweet_length = builtin strlen tweet_text;
+          string_length = builtin strlen tweet_text;
+          valid_end_pos = builtin lt end_pos string_length;
+          valid_start_pos = builtin lt start_pos end_pos;
+          is_valid_substring = andb valid_start_pos valid_end_pos;
+          is_valid = andb is_valid_substring not_already_verified;
+
+          match is_valid with
+          | False =>
+              match already_verified with
+              | True =>
+                  e = {_eventname : "verify_tweet_failed";
+                          sender: _sender;
+                          twitter_username: twitter_username;
+                          tweet_id: tweet_id;
+                          code: tweet_exists_code };
+                  event e
+              | False =>
+                  e = {_eventname : "verify_tweet_failed";
+                          sender: _sender;
+                          twitter_username: twitter_username;
+                          tweet_id: tweet_id;
+                          code: tweet_not_valid_code };
+                  event e
+              end
+          | True =>
+              substr_len = builtin sub end_pos start_pos;
+              substr_len = builtin add substr_len one;
+              match_hashtag = builtin substr tweet_text start_pos substr_len;
+              is_hashtag = builtin eq match_hashtag hashtag;
+
+              match is_hashtag with
+              | False =>
+                  e = {_eventname : "verify_tweet_failed";
+                          sender: _sender;
+                          twitter_username: twitter_username;
+                          tweet_id: tweet_id;
+                          code: tweet_not_valid_code };
+                  event e
+              | True =>
+
+                  withdrawal <- last_withdrawal[recipient_address];
+                  current_block <- & BLOCKNUMBER;
+                  not_next_day_yet =
+                      match withdrawal with
+                      | Some withdrawal =>
+                          let last_withdraw_block = withdrawal in
+                          let next_day_block = builtin badd last_withdraw_block blocks_per_day in
+                          let not_next_day_yet = builtin blt current_block next_day_block in
+                          not_next_day_yet
+                      | None =>
+                          False
+                      end
+                  ;
+
+                  match not_next_day_yet with
+                  | True =>
+                      e = {_eventname : "verify_tweet_failed";
+                              sender: _sender;
+                              twitter_username: twitter_username;
+                              tweet_id: tweet_id;
+                              code: tweet_within_day_code };
+                      event e
+                  | False =>
+                      verified_tweets[tweet_id] := recipient_address;
+                      last_withdrawal[recipient_address] := current_block;
+                      e = {_eventname : "verify_tweet_successful";
+                              sender: _sender;
+                              recipient: recipient_address;
+                              reward_amount: zils_per_tweet;
+                              tweet_id: tweet_id;
+                              code: verify_tweet_success_code };
+                      event e;
+                      msg = {_tag: "";
+                              _recipient: recipient_address;
+                              _amount: zils_per_tweet;
+                              code: verify_tweet_success_code };
+                      msgs = one_msg msg;
+                      send msgs
+                  end
+              end
+          end
+      end
   end
 end

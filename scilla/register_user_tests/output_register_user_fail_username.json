@@ -1,15 +1,20 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7394",
+  "gas_remaining": "6988",
   "_accepted": "false",
   "message": null,
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "0" },
-    { "vname": "users", "type": "Map (ByStr20) (String)", "value": [] },
+    { "vname": "hashtag_length", "type": "Uint32", "value": "11" },
     {
-      "vname": "unverified_tweets",
+      "vname": "users",
       "type": "Map (String) (ByStr20)",
-      "value": []
+      "value": [
+        {
+          "key": "kenchangh",
+          "val": "0x44345678901234567890123456789012345678cd"
+        }
+      ]
     },
     {
       "vname": "verified_tweets",
@@ -20,16 +25,11 @@
       "vname": "last_withdrawal",
       "type": "Map (ByStr20) (BNum)",
       "value": []
-    },
-    {
-      "vname": "used_usernames",
-      "type": "Map (String) (Uint32)",
-      "value": [ { "key": "kenchangh", "val": "1" } ]
     }
   ],
   "events": [
     {
-      "_eventname": "user_registration_failed",
+      "_eventname": "user_registration_successful",
       "params": [
         {
           "vname": "user_address",
@@ -46,7 +46,7 @@
           "type": "ByStr20",
           "value": "0x1234567890123456789012345678901234567890"
         },
-        { "vname": "code", "type": "Uint32", "value": "2" }
+        { "vname": "code", "type": "Uint32", "value": "3" }
       ]
     }
   ]

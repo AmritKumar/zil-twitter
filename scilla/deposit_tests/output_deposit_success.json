@@ -1,21 +1,12 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "7661",
+  "gas_remaining": "7304",
   "_accepted": "true",
   "message": null,
   "states": [
     { "vname": "_balance", "type": "Uint128", "value": "2000" },
-    { "vname": "users", "type": "Map (ByStr20) (String)", "value": [] },
-    {
-      "vname": "used_usernames",
-      "type": "Map (String) (Uint32)",
-      "value": []
-    },
-    {
-      "vname": "unverified_tweets",
-      "type": "Map (String) (ByStr20)",
-      "value": []
-    },
+    { "vname": "hashtag_length", "type": "Uint32", "value": "11" },
+    { "vname": "users", "type": "Map (String) (ByStr20)", "value": [] },
     {
       "vname": "verified_tweets",
       "type": "Map (String) (ByStr20)",
