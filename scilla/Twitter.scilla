@@ -63,7 +63,7 @@ transition deposit()
     end
 end
 
-(* Only user that has not registered can register *)
+(* The owner can register a user (twitter_username) with an address *)
 transition register_user(user_address: ByStr20, twitter_username: String)
     sender_is_owner = builtin eq owner _sender;
     user_exists <- exists users[twitter_username];
