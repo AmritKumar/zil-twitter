@@ -1,34 +1,19 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "6845",
+  "gas_remaining": "7264",
   "_accepted": "false",
-  "message": {
-    "_tag": "",
-    "_amount": "1000",
-    "_recipient": "0x44345678901234567890123456789012345678cd",
-    "params": [ { "vname": "code", "type": "Uint32", "value": "8" } ]
-  },
+  "message": null,
   "states": [
-    { "vname": "_balance", "type": "Uint128", "value": "9000" },
+    { "vname": "_balance", "type": "Uint128", "value": "10000" },
     {
       "vname": "verified_tweets",
       "type": "Map (String) (ByStr20)",
-      "value": [
-        {
-          "key": "1085915996148264961",
-          "val": "0x44345678901234567890123456789012345678cd"
-        }
-      ]
+      "value": []
     },
     {
       "vname": "last_withdrawal",
       "type": "Map (ByStr20) (BNum)",
-      "value": [
-        {
-          "key": "0x44345678901234567890123456789012345678cd",
-          "val": "60000"
-        }
-      ]
+      "value": []
     },
     {
       "vname": "users",
@@ -43,7 +28,7 @@
   ],
   "events": [
     {
-      "_eventname": "verify_tweet_successful",
+      "_eventname": "verify_tweet_failed",
       "params": [
         {
           "vname": "sender",
@@ -51,17 +36,16 @@
           "value": "0x1234567890123456789012345678901234567890"
         },
         {
-          "vname": "recipient",
-          "type": "ByStr20",
-          "value": "0x44345678901234567890123456789012345678cd"
+          "vname": "twitter_username",
+          "type": "String",
+          "value": "kenchangh_420"
         },
-        { "vname": "reward_amount", "type": "Uint128", "value": "1000" },
         {
           "vname": "tweet_id",
           "type": "String",
           "value": "1085915996148264961"
         },
-        { "vname": "code", "type": "Uint32", "value": "8" }
+        { "vname": "code", "type": "Uint32", "value": "4" }
       ]
     }
   ]
