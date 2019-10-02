@@ -90,6 +90,13 @@ end
 
 
 (* this is sent by the owner *)
+(* The following conditions are checked for (in that order): *)
+(*   1. Owner initiates the transition. *)
+(*   2. The tweeter is already registered before. *)
+(*   3. The tweet hasn't been awarded before. *)
+(*   4. Substring specs (start and end pos) are valid. *)
+(*   5. The substring matches the preset hashtag. *)
+(*   6. Sufficient time (blocks) have passed since the user was awarded before. *)
 transition verify_tweet_pay (
     twitter_username: String,
     tweet_id: String, tweet_text: String,
