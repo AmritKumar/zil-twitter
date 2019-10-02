@@ -1,6 +1,6 @@
 scilla_version 0
 
-import BoolUtils IntUtils PairUtils
+import BoolUtils
 
 (* Twitter contract *)
 
