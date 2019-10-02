@@ -47,12 +47,7 @@ testsuite = [
                 "output": "verify_tweet_fail_hashtag",
                 "state": "verify_tweet_success"
             },
-            {
-                "message": "verify_tweet_fail_invalid_end_pos",
-                "output": "verify_tweet_fail_invalid_end_pos",
-                "state": "verify_tweet_success"
-            },
-            {
+             {
                 "message": "verify_tweet_fail_invalid_user",
                 "output": "verify_tweet_fail_invalid_user",
                 "state": "verify_tweet_success"

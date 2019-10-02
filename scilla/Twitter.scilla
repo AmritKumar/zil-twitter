@@ -94,13 +94,13 @@ end
 (*   1. Owner initiates the transition. *)
 (*   2. The tweeter is already registered before. *)
 (*   3. The tweet hasn't been awarded before. *)
-(*   4. Substring specs (start and end pos) are valid. *)
+(*   4. Substring specs (start_pos) is valid. *)
 (*   5. The substring matches the preset hashtag. *)
 (*   6. Sufficient time (blocks) have passed since the user was awarded before. *)
 transition verify_tweet_pay (
     twitter_username: String,
     tweet_id: String, tweet_text: String,
-    start_pos: Uint32, end_pos: Uint32)
+    start_pos: Uint32)
 
     is_owner = builtin eq _sender owner;
 
@@ -126,8 +126,10 @@ transition verify_tweet_pay (
             already_verified <- exists verified_tweets[tweet_id];
             not_already_verified = negb already_verified;
             string_length = builtin strlen tweet_text;
+            valid_start_pos = builtin lt start_pos string_length;
+            hashtag_len = builtin strlen hashtag;
+            end_pos = builtin add start_pos hashtag_len;
             valid_end_pos = builtin lt end_pos string_length;
-            valid_start_pos = builtin lt start_pos end_pos;
             is_valid_substring = andb valid_start_pos valid_end_pos;
             is_valid = andb is_valid_substring not_already_verified;
             match is_valid with
@@ -149,9 +151,7 @@ transition verify_tweet_pay (
                     event e
                 end
             | True =>
-                substr_len = builtin sub end_pos start_pos;
-                substr_len = builtin add substr_len one;
-                match_hashtag = builtin substr tweet_text start_pos substr_len;
+                match_hashtag = builtin substr tweet_text start_pos hashtag_len;
                 is_hashtag = builtin eq match_hashtag hashtag;
                 match is_hashtag with
                 | False =>
@@ -166,8 +166,7 @@ transition verify_tweet_pay (
                     current_block <- & BLOCKNUMBER;
                     not_next_day_yet =
                     match withdrawal with
-                    | Some withdrawal =>
-                        let last_withdraw_block = withdrawal in
+                    | Some last_withdraw_block =>
                         let next_day_block = builtin badd last_withdraw_block blocks_per_day in
                         let not_next_day_yet = builtin blt current_block next_day_block in
                         not_next_day_yet

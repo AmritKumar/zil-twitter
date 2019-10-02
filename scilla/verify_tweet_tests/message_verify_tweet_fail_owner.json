@@ -22,11 +22,6 @@
 			"vname": "start_pos",
 			"type": "Uint32",
 			"value": "12"
-		},
-		{
-			"vname": "end_pos",
-			"type": "Uint32",
-			"value": "22"
 		}
 	]
 }
