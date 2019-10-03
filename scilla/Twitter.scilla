@@ -34,7 +34,6 @@ let is_valid_substring =
     let valid_end_pos = uint32_le end_pos string_length in
     andb valid_start_pos valid_end_pos
 
-
 let not_owner_code = Uint32 0
 let deposit_success_code = Uint32 1
 let registration_error_code = Uint32 2
@@ -44,6 +43,62 @@ let tweet_exists_code = Uint32 5
 let tweet_not_valid_code = Uint32 6
 let tweet_within_day_code = Uint32 7
 let verify_tweet_success_code = Uint32 8
+
+let mk_deposit_failed_event =
+  fun (sender : ByStr20) =>
+    {_eventname : "deposit_failed";
+     sender: sender;
+     code: not_owner_code }
+
+let mk_deposit_success_event =
+  fun(sender : ByStr20) =>
+    {_eventname : "deposit_successful";
+     sender: sender;
+     code: deposit_success_code }
+
+let mk_registration_failed_event =
+  fun (user_address : ByStr20) =>
+  fun (twitter_username : String) =>
+  fun (sender : ByStr20) =>
+  {_eventname : "user_registration_failed";
+   user_address: user_address;
+   twitter_username: twitter_username;
+   sender: sender;
+   code: registration_error_code }
+
+let mk_registration_success_event =
+  fun (user_address : ByStr20) =>
+  fun (twitter_username : String) =>
+  fun (sender : ByStr20) =>
+  {_eventname : "user_registration_successful";
+   user_address: user_address;
+   twitter_username: twitter_username;
+   sender: sender;
+   code: registered_success_code }
+
+let mk_verify_failed_event =
+  fun (sender : ByStr20) =>
+  fun (twitter_username : String) =>
+  fun (tweet_id : String) =>
+  fun (code : Uint32) =>
+    {_eventname : "verify_tweet_failed";
+     sender: sender;
+     twitter_username: twitter_username;
+     tweet_id: tweet_id;
+     code: code }
+
+let mk_verify_tweet_success_event =
+  fun (sender : ByStr20) =>
+  fun (recipient : ByStr20) =>
+  fun (reward_amount : Uint128) =>
+  fun (tweet_id : String) =>
+   {_eventname : "verify_tweet_successful";
+    sender: sender;
+    recipient: recipient;
+    reward_amount: reward_amount;
+    tweet_id: tweet_id;
+    code: verify_tweet_success_code }
+
 
 (***************************************************)
 (*             The contract definition             *)
@@ -69,15 +124,11 @@ transition deposit()
     sender_is_owner = builtin eq owner _sender;
     match sender_is_owner with
     | False =>
-        e = {_eventname : "deposit_failed";
-                sender: _sender;
-                code: not_owner_code };
+        e = mk_deposit_failed_event _sender;
         event e
     | True =>
         accept;
-        e = {_eventname : "deposit_successful";
-                sender: _sender;
-                code: deposit_success_code };
+        e = mk_deposit_success_event _sender;
         event e
     end
 end
@@ -88,23 +139,14 @@ transition register_user(user_address: ByStr20, twitter_username: String)
     can_register = register_allowed _sender owner user_exists;
     match can_register with
     | False =>
-        e = {_eventname : "user_registration_failed";
-                user_address: user_address;
-                twitter_username: twitter_username;
-                sender: _sender;
-                code: registration_error_code };
-      event e
+        e = mk_registration_failed_event user_address twitter_username _sender;
+        event e
     | True =>
         users[twitter_username] := user_address;
-        e = {_eventname : "user_registration_successful";
-                user_address: user_address;
-                twitter_username: twitter_username;
-                sender: _sender;
-                code: registered_success_code };
-        event e
+        e = mk_registration_success_event user_address twitter_username _sender;
+      event e
     end
 end
-
 
 (* this is sent by the owner *)
 (* The following conditions are checked for (in that order): *)
@@ -123,21 +165,13 @@ transition verify_tweet_pay (
 
     match is_owner with
     | False =>
-        e = {_eventname : "verify_tweet_failed";
-              sender: _sender;
-              twitter_username: twitter_username;
-              tweet_id: tweet_id;
-              code: not_owner_code };
+        e = mk_verify_failed_event _sender twitter_username tweet_id not_owner_code;
         event e
     | True =>
         recipient_address_opt <- users[twitter_username];
         match recipient_address_opt with
         | None =>
-            e = {_eventname : "verify_tweet_failed";
-                  sender: _sender;
-                  twitter_username: twitter_username;
-                  tweet_id: tweet_id;
-                  code: user_not_exists_code };
+            e = mk_verify_failed_event _sender twitter_username tweet_id user_not_exists_code;
             event e
         | Some recipient_address =>
             already_verified <- exists verified_tweets[tweet_id];
@@ -149,18 +183,10 @@ transition verify_tweet_pay (
             | False =>
                 match already_verified with
                 | True =>
-                    e = {_eventname : "verify_tweet_failed";
-                          sender: _sender;
-                          twitter_username: twitter_username;
-                          tweet_id: tweet_id;
-                          code: tweet_exists_code };
+                    e = mk_verify_failed_event _sender twitter_username tweet_id tweet_exists_code;
                     event e
                 | False =>
-                    e = {_eventname : "verify_tweet_failed";
-                          sender: _sender;
-                          twitter_username: twitter_username;
-                          tweet_id: tweet_id;
-                          code: tweet_not_valid_code };
+                    e = mk_verify_failed_event _sender twitter_username tweet_id tweet_not_valid_code;
                     event e
                 end
             | True =>
@@ -168,11 +194,7 @@ transition verify_tweet_pay (
                 is_hashtag = builtin eq match_hashtag hashtag;
                 match is_hashtag with
                 | False =>
-                    e = {_eventname : "verify_tweet_failed";
-                          sender: _sender;
-                          twitter_username: twitter_username;
-                          tweet_id: tweet_id;
-                          code: tweet_not_valid_code };
+                    e = mk_verify_failed_event _sender twitter_username tweet_id tweet_not_valid_code;
                     event e
                 | True =>
                     withdrawal <- last_withdrawal[recipient_address];
@@ -189,21 +211,12 @@ transition verify_tweet_pay (
                     ;
                     match not_next_day_yet with
                     | True =>
-                        e = {_eventname : "verify_tweet_failed";
-                              sender: _sender;
-                              twitter_username: twitter_username;
-                              tweet_id: tweet_id;
-                              code: tweet_within_day_code };
+                        e = mk_verify_failed_event _sender twitter_username tweet_id tweet_within_day_code;
                         event e
                     | False =>
                         verified_tweets[tweet_id] := recipient_address;
                         last_withdrawal[recipient_address] := current_block;
-                        e = {_eventname : "verify_tweet_successful";
-                              sender: _sender;
-                              recipient: recipient_address;
-                              reward_amount: zils_per_tweet;
-                              tweet_id: tweet_id;
-                              code: verify_tweet_success_code };
+                        e = mk_verify_tweet_success_event _sender recipient_address zils_per_tweet tweet_id;
                         event e;
                         msg = {_tag: "";
                                _recipient: recipient_address;
