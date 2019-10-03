@@ -1,6 +1,6 @@
 {
   "scilla_major_version": "0",
-  "gas_remaining": "6970",
+  "gas_remaining": "6852",
   "_accepted": "false",
   "message": null,
   "states": [
@@ -16,29 +16,14 @@
       "value": []
     },
     {
-      "vname": "unverified_tweets",
+      "vname": "users",
       "type": "Map (String) (ByStr20)",
       "value": [
         {
-          "key": "1085915996148264961",
+          "key": "kenchangh",
           "val": "0x44345678901234567890123456789012345678cd"
         }
       ]
-    },
-    {
-      "vname": "users",
-      "type": "Map (ByStr20) (String)",
-      "value": [
-        {
-          "key": "0x44345678901234567890123456789012345678cd",
-          "val": "kenchangh"
-        }
-      ]
-    },
-    {
-      "vname": "used_usernames",
-      "type": "Map (String) (Uint32)",
-      "value": [ { "key": "kenchangh", "val": "1" } ]
     }
   ],
   "events": [
@@ -51,16 +36,16 @@
           "value": "0x1234567890123456789012345678901234567890"
         },
         {
-          "vname": "user_address",
-          "type": "ByStr20",
-          "value": "0x44345668901234567890123456789012345678cd"
+          "vname": "twitter_username",
+          "type": "String",
+          "value": "kenchangh_420"
         },
         {
           "vname": "tweet_id",
           "type": "String",
           "value": "1085915996148264961"
         },
-        { "vname": "code", "type": "Uint32", "value": "8" }
+        { "vname": "code", "type": "Uint32", "value": "4" }
       ]
     }
   ]

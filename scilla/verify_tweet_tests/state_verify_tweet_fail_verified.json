@@ -11,32 +11,12 @@
     ]
   },
   {
-    "vname": "unverified_tweets",
-    "type": "Map (String) (ByStr20)",
-    "value": [
-      {
-        "key": "1085915996148264961",
-        "val": "0x44345678901234567890123456789012345678cd"
-      }
-    ]
-  },
-  {
     "vname": "users",
-    "type": "Map (ByStr20) (String)",
+    "type": "Map (String)  (ByStr20)",
     "value": [
       {
-        "key": "0x44345678901234567890123456789012345678cd",
-        "val": "kenchangh"
-      }
-    ]
-  },
-  {
-    "vname": "used_usernames",
-    "type": "Map (String) (Uint32)",
-    "value": [
-      {
-        "key": "kenchangh",
-        "val": "1"
+        "val": "0x44345678901234567890123456789012345678cd",
+        "key": "kenchangh"
       }
     ]
   }
