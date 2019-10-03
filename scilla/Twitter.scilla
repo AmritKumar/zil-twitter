@@ -1,6 +1,6 @@
 scilla_version 0
 
-import BoolUtils
+import BoolUtils IntUtils
 
 (* Twitter contract *)
 
@@ -15,6 +15,25 @@ let one_msg =
     Cons {Message} msg nil_msg
 
 let one = Uint32 1
+
+let register_allowed =
+  fun (sender : ByStr20) =>
+  fun (owner : ByStr20) =>
+  fun (user_exists : Bool) =>
+    let sender_is_owner = builtin eq owner sender in
+    let user_does_not_exist = negb user_exists in
+    andb sender_is_owner user_does_not_exist
+
+let is_valid_substring =
+  fun (tweet_text : String) =>
+  fun (start_pos : Uint32) =>
+  fun (hashtag_len : Uint32) =>
+    let string_length = builtin strlen tweet_text in
+    let valid_start_pos = builtin lt start_pos string_length in
+    let end_pos = builtin add start_pos hashtag_len in
+    let valid_end_pos = uint32_le end_pos string_length in
+    andb valid_start_pos valid_end_pos
+
 
 let not_owner_code = Uint32 0
 let deposit_success_code = Uint32 1
@@ -65,10 +84,8 @@ end
 
 (* The owner can register a user (twitter_username) with an address *)
 transition register_user(user_address: ByStr20, twitter_username: String)
-    sender_is_owner = builtin eq owner _sender;
     user_exists <- exists users[twitter_username];
-    user_does_not_exist = negb user_exists;
-    can_register = andb sender_is_owner user_does_not_exist;
+    can_register = register_allowed _sender owner user_exists;
     match can_register with
     | False =>
         e = {_eventname : "user_registration_failed";
@@ -125,13 +142,9 @@ transition verify_tweet_pay (
         | Some recipient_address =>
             already_verified <- exists verified_tweets[tweet_id];
             not_already_verified = negb already_verified;
-            string_length = builtin strlen tweet_text;
-            valid_start_pos = builtin lt start_pos string_length;
             hashtag_len = builtin strlen hashtag;
-            end_pos = builtin add start_pos hashtag_len;
-            valid_end_pos = builtin lt end_pos string_length;
-            is_valid_substring = andb valid_start_pos valid_end_pos;
-            is_valid = andb is_valid_substring not_already_verified;
+            valid_substring = is_valid_substring tweet_text start_pos hashtag_len;
+            is_valid = andb valid_substring not_already_verified;
             match is_valid with
             | False =>
                 match already_verified with
