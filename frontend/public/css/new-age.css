@@ -289,7 +289,7 @@ header.masthead-create .header-content .shiny-button:focus {
 header.masthead-create .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  /*background: #0a1e43;*/
+  background: #0a1e43;
   color: white;
   padding: 1rem;
 }
@@ -377,7 +377,7 @@ header.masthead-submit .header-content .shiny-button:focus {
 header.masthead-submit .header-content .shiny-button .shiny-button-content {
   font-size: 15px;
   border-radius: 10px;
-  /*background: #0a1e43;*/
+  background: #0a1e43;
   color: white;
   padding: 0.5rem;
 }
