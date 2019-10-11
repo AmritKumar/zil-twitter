@@ -36,18 +36,24 @@ export default class CreateWalletScreen extends Component {
     try {
       const username = this.getUsername();
       const isRegistered = await isUserRegistered(username);
+
       if (!isRegistered) {
         this.generateKey();
         privateKey = this.state.privateKey;
+
         await this.requestFunds(privateKey);
+
         await this.register(privateKey, username);
         localStorage.setItem("walletAddress", CP.getAddressFromPrivateKey(privateKey));
+      } else {
+        throw new Error('Your account is already registered.');
       }
+
       window.$('#loadingModal').modal('toggle');
       this.props.handleWalletStateChange(true, privateKey);
 
     } catch (e) {
-      this.setState({errMsg: e.message});
+      this.setState({ errMsg: e.message });
     }
   }
 
@@ -70,16 +76,16 @@ export default class CreateWalletScreen extends Component {
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/request-funds`, {
         method: "POST",
-        headers: { "Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address }),
-        credentials: "include"
+        credentials: 'include'
       });
       // Cookie has expired
       if (response.status === 401) {
         window.$('#loadingModal').modal("hide");
         window.$('body').removeClass('modal-open');
         window.$('.modal-backdrop').remove();
-        this.props.onLogout(true);
+        //this.props.onLogout(true);
         throw Error;
       }
       const receipt = await response.json();
@@ -99,30 +105,19 @@ export default class CreateWalletScreen extends Component {
     } = this.state;
 
     const msg = "\nPlease be patient, do not close this window.";
-    const loadingPercentages = [0, 25, 50, 75, 100];
-    let fromLoadingPercent = loadingPercentages[0];
-    let toLoadingPercent = loadingPercentages[1];
     let loadingText = "Checking if already registered";
 
     if (successRegisterUser && successRequestFund && privateKey) {
       loadingText = "Successfully registered wallet in contract. Redirecting you...";
-      fromLoadingPercent = loadingPercentages[3];
-      toLoadingPercent = loadingPercentages[4];
     } else if (successRequestFund && privateKey) {
       loadingText = "Registering wallet in contract..." + msg;
-      fromLoadingPercent = loadingPercentages[2];
-      toLoadingPercent = loadingPercentages[3];
     } else if (privateKey) {
       loadingText = "Requesting funds for wallet..." + msg;
-      fromLoadingPercent = loadingPercentages[1];
-      toLoadingPercent = loadingPercentages[2];
     }
     return (
       <header className="masthead-create">
         <LoadingModal
           title="Your Testnet Wallet"
-          fromLoadingPercent={fromLoadingPercent}
-          toLoadingPercent={toLoadingPercent}
           loadingText={loadingText}
           errorText={errMsg}
         />

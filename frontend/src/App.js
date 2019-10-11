@@ -76,6 +76,7 @@ class App extends Component {
   handleSuccess(response) {
     response.json().then(json => {
       localStorage.setItem("authenticatedUsername", json.username);
+      document.cookie = `token=${json.los}`;
       this.setState({isAuthenticated: true });
     });
   }
@@ -98,6 +99,9 @@ class App extends Component {
         return "This tweet is invalid. Please make sure you have fulfilled all requirements.";
       case 9:
         return "You can only submit one tweet every 24 hours.";
+      default:
+        return "Something wrong happened. Please try again.";
+        ;
     }
   }
 

@@ -20,6 +20,7 @@ export default class HomeScreen extends Component {
   render() {
     const { showAlert, alertText } = this.props;
     return (
+      <div>
       <header className="masthead">
         <div className="container h-100">
           <div className="row h-100">
@@ -45,10 +46,10 @@ export default class HomeScreen extends Component {
                   className="twitter-login btn shiny-button-content"
                 >
                   <div className="shiny-button">
-                    <button className="btn shiny-button-content">
+                    <a className="btn shiny-button-content">
                       <i className="fab fa-twitter mr-2" />
                       JOIN SOCIAL PAY WITH TWITTER [DEMO]
-                    </button>
+                    </a>
                   </div>
                 </TwitterLogin>
               </div>
@@ -59,6 +60,23 @@ export default class HomeScreen extends Component {
           </div>
         </div>
       </header>
+      <div className="section py-5">
+        <div className="container text-center">
+          <h2 className="title mb-5">How to use SocialPay?</h2>
+
+          <div className="row">
+            <div className="col-12 text-center d-none d-md-block">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/pagcITLyqLY" frameframeBorderborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+            </div>
+
+              <div className="col-12 text-center d-block d-md-none">
+                <iframe width="280" height="157" src="https://www.youtube.com/embed/pagcITLyqLY" frameBorder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+              </div>
+          </div>
+
+        </div>
+      </div>
+      </div>
     );
   }
 }

@@ -138,7 +138,7 @@ const getTweetId = async (txnId) => {
   }
 };
 
-const getHashtag = async() => {
+const getHashtag = async () => {
   try {
     const init = await zilliqa.blockchain.getSmartContractInit(contractAddress);
     const initParam = init.result.find(

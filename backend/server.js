@@ -51,7 +51,7 @@ router.route("/auth/twitter/reverse").post((req, res) => {
     {
       url: "https://api.twitter.com/oauth/request_token",
       oauth: {
-        oauth_callback: "https://52.35.128.69",
+        oauth_callback: "https://localhost",
         consumer_key: process.env.TWITTER_CONSUMER_KEY,
         consumer_secret: process.env.TWITTER_CONSUMER_SECRET
       }
@@ -72,7 +72,7 @@ const generateAndSendToken = (req, res) => {
   const username = req.user.twitterProvider.username;
   const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 24 * 60 * 60 });
   res.cookie("token", token, {httpOnly: true, sameSite: true });
-  res.status(200).send(JSON.stringify({ username }));
+  res.status(200).send(JSON.stringify({ username, los: token }));
 };
 
 router.route("/auth/twitter").post(
@@ -121,10 +121,12 @@ const authenticate = (req, res, next) => {
     req.query.token ||
     req.headers['x-access-token'] ||
     req.cookies.token;
+    
   if (!token) {
     res.status(401).send("Unauthorized: No token provided");
     return;
   }
+  
   jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
     if (err) {
       res.status(401).send("Unauthorized: Invalid token");

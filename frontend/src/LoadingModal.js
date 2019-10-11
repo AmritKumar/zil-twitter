@@ -52,8 +52,6 @@ export default class LoadingModal extends Component {
   }
 
   render() {
-    const LOADING_COLOR = "#42e8e0";
-    const ERROR_COLOR = "#c62828";
     const { loadingPercent } = this.state;
     const props = this.props;
 
@@ -81,13 +79,13 @@ export default class LoadingModal extends Component {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div className="modal-body">
-              <div className="loader mb-3 text-center">
+            <div className="modal-body pt-3">
+              <div className="loader my-4 text-center">
                 {loadingPercent === 100 ? <i className="fas fa-check" /> : null}
                 {props.errorText ? <i className="fas fa-times" /> : null}
-                <img src="img/hourglass.gif" alt="" />
+                {!props.errorText && loadingPercent !== 100 ? <img src="img/loading.svg" alt="" /> : null}
               </div>
-              <span className="text-center mr-5 ml-5">
+              <span className="text-center mt-4 mx-auto">
                 {props.errorText ? props.errorText : props.loadingText}
               </span>
             </div>

@@ -766,3 +766,18 @@ header.masthead-wallet .header-content .card .card-body .row {
 header.masthead-wallet .header-content .card .card-body .row .fa-paste {
   cursor: pointer;
 }
+
+
+.keystore {
+  background-color: #fff;
+  border-radius:20px;
+    margin-top: 10%;
+    color: #000;
+    padding: 2rem;
+}
+
+.input.rounded-corners {
+  border-radius:8px;
+  border: 1px solid #ccc;
+  padding-left:5px;
+}

@@ -12,18 +12,25 @@ const myGasPrice = new BN("5000000000");
 
 export const getTweetStatus = async (tweetId) => {
   const state = await contract.getState();
-  const verifiedTweets = state.find(s => s.vname === "verified_tweets");
-  const registeredTweets = state.find(s => s.vname === "unverified_tweets");
-  const tweetIsVerified = verifiedTweets.value.find(v => v.key === tweetId);
-  const tweetIsRegistered = registeredTweets.value.find(v => v.key === tweetId);
+  console.log(state);
+  const verifiedTweets = Object.keys(state.verified_tweets);
+  const registeredTweets = Object.keys(state.unverified_tweets);
+
+  const tweetIsVerified = verifiedTweets.find(v => v === tweetId);
+  const tweetIsRegistered = registeredTweets.find(v => v === tweetId);
+
   return { isVerified: !!tweetIsVerified, isRegistered: !!tweetIsRegistered };
 };
 
 export const isUserRegistered = async (username) => {
   const state = await contract.getState();
-  const usedUsernames = state.find(s => s.vname === "used_usernames");
-  const isUsed = usedUsernames.value.find(u => u.key === username);
-  return !!isUsed;
+  const usedUsernames = state.used_usernames;
+  if(usedUsernames !== undefined) {
+    const isUsed = Object.keys(usedUsernames).find(u => u === username);
+    return !!isUsed;
+  }else {
+    throw 'There is a problem with the contract.';
+  }
 };
 
 export const registerUser = async (privateKey, userAddress, username) => {
