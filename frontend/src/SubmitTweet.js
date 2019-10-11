@@ -332,7 +332,7 @@ export default class SubmitTweet extends Component {
                 <Link to="/wallet" className="btn btn-link px-0 mx-0">Account details</Link>
               </div>
               <div className="col-lg-12 my-auto">
-                <div className="keystore">
+                <div className="keystore d-none">
                   <h3>Your Wallet Access</h3>
                   <p>Now that the wallet has been successfully generated, you are in charge of keeping it safe.</p>
                   <p className="text-danger"><i className="fas fa-exclamation-triangle"></i><br />
