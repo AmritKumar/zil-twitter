@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import LoadingModal from "./LoadingModal";
 import InputModal from "./InputModal";
+import KeystoreNotification from "./components/KeystoreNotification";
 import {
   submitTweet as _submitTweet,
   getTweetStatus,
@@ -311,7 +312,7 @@ export default class SubmitTweet extends Component {
       <div>
         {showInput ? (
           <InputModal
-            title="Submit Private Key"
+            title="Confirm action"
             handleInput={this.handlePrivateKeySubmitted}
           />
         ) : null}
@@ -327,114 +328,83 @@ export default class SubmitTweet extends Component {
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
-              <div className="balance text-right">
-                <div> Balance: {balance} ZIL</div>
-                <Link to="/wallet" className="btn btn-link px-0 mx-0">Account details</Link>
-              </div>
+              {!this.props.showKeystore ? (
+                <div className="balance text-right">
+                  <div> Balance: {balance} ZIL</div>
+                  <Link to="/wallet" className="btn btn-link px-0 mx-0">Account details</Link>
+                </div>
+              ) : null}
+
               <div className="col-lg-12 my-auto">
-                <div className="keystore d-none">
-                  <h3>Your Wallet Access</h3>
-                  <p>Now that the wallet has been successfully generated, you are in charge of keeping it safe.</p>
-                  <p className="text-danger"><i className="fas fa-exclamation-triangle"></i><br />
-                    <b>Please store the following details somewhere safe.<br /> If you lose your Private Key and Keystore File you won't be able to access your wallet again.</b>
-                  </p>
-                  <div className="privateKey">
-                    <p className="font-weight-bold">Private Key:</p>
-                    <pre>025de355b88641700f91d29c21b111a8dbc84728367afd691f562a7c3cd6fa2b</pre>
-                  </div>
-                  <div className="keystore-file">
-                    <p className="font-weight-bold mb-0">Keystore File</p>
-                    <p className="small">Keystore Files need to be encrypted using a secret passhprase.<br />Please remember this passphrase for further actions on the wallet.</p>
-                    <div className="d-flex">
-                      <input type="text" placeholder="Enter passphrase" className="input rounded-corners mr-4" /> <button class="btn btn-outline-secondary"><i class="fas fa-download"></i> Download Keystore.json</button>
+                {this.props.showKeystore ? (<KeystoreNotification {...this.props} />) : (
+                  <div className="header-content mx-auto">
+                    <h1 className="mb-5">Enter your tweet ID</h1>
+                    <h2 className="mb-6">
+                      Your tweet must include the hashtag,{" "}
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                      >
+                        #BuildOnZIL
+                    </a>
+                    </h2>
+                    <div className="row my-auto w-100">
+                      <form
+                        action="#"
+                        className="submit-tweet-form form-inline justify-content-center w-100 mt-5"
+                      >
+                        <input
+                          onChange={this.handleChange}
+                          onKeyPress={e => {
+                            if (e.key === "Enter") this.submitTweet();
+                          }}
+                          value={this.state.tweetId}
+                          className="form-control mt-2 mb-2 mr-sm-3 pl-3"
+                          type="text"
+                          placeholder="Enter your tweet ID"
+                        />
+                        <div className="submit-tweet-btn shiny-button">
+                          <button
+                            type="button"
+                            onClick={this.submitTweet}
+                            className="btn shiny-button-content"
+                          >
+                            Submit
+                        </button>
+                        </div>
+                      </form>
+                    </div>
+                    <div className="cta-container col-lg-12 text-center">
+                      {validTweetId ? (
+                        <span>
+                          <TwitterTweetEmbed tweetId={tweetId} />
+                        </span>
+                      ) : (
+                          <span>
+                            <p>
+                              A tweet ID is the series of numbers in a tweet's URL.
+                              You're able to find the tweet URL in your browser's
+                              search bar.
+                        </p>
+                            <img
+                              className="mb-5"
+                              src="/img/tweet-id.png"
+                              alt="Tweet ID"
+                            />
+                            <br />
+                            <a
+                              onClick={this.handleInstructionsClick}
+                              className="cta-link"
+                              href="#"
+                            >
+                              How does this work?
+                        </a>
+                          </span>
+                        )}
                     </div>
                   </div>
-                  <div className="accept-tos my-4">
-                    <button className="btn btn-primary btn-lg"><i className="fas fa-arrow-right"></i> Continue to SocialPay</button>
-                  </div>
-                  <p class="small mt-5">
-                    The wallet generated by SocialPay is only recommended for storing funds you receive here. For any other tokens, we recommend the full feature wallets such  as Moonlet or ZilPay
-                  </p>
-                </div>
-                {this.props.showAlert ? (
-                  <div className="alert alert-warning alert-dismissible fade show my-5" id="alert" role="alert">
-                    <p class="d-flex flex-column justify-content-center">
-                      <i className="fa fa-2x fa-info"></i>
-                      {this.props.alertText}
-                    </p>
-                    <strong>{privateKey}</strong>
-                    <button type="button" className="close" data-dismiss="alert" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                ) : null}
-                <div className="header-content mx-auto">
-                  <h1 className="mb-5">Enter your tweet ID</h1>
-                  <h2 className="mb-6">
-                    Your tweet must include the hashtag,{" "}
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
-                    >
-                      #BuildOnZIL
-                    </a>
-                  </h2>
-                  <div className="row my-auto w-100">
-                    <form
-                      action="#"
-                      className="submit-tweet-form form-inline justify-content-center w-100 mt-5"
-                    >
-                      <input
-                        onChange={this.handleChange}
-                        onKeyPress={e => {
-                          if (e.key === "Enter") this.submitTweet();
-                        }}
-                        value={this.state.tweetId}
-                        className="form-control mt-2 mb-2 mr-sm-3 pl-3"
-                        type="text"
-                        placeholder="Enter your tweet ID"
-                      />
-                      <div className="submit-tweet-btn shiny-button">
-                        <button
-                          type="button"
-                          onClick={this.submitTweet}
-                          className="btn shiny-button-content"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                  <div className="cta-container col-lg-12 text-center">
-                    {validTweetId ? (
-                      <span>
-                        <TwitterTweetEmbed tweetId={tweetId} />
-                      </span>
-                    ) : (
-                        <span>
-                          <p>
-                            A tweet ID is the series of numbers in a tweet's URL.
-                            You're able to find the tweet URL in your browser's
-                            search bar.
-                        </p>
-                          <img
-                            className="mb-5"
-                            src="/img/tweet-id.png"
-                            alt="Tweet ID"
-                          />
-                          <br />
-                          <a
-                            onClick={this.handleInstructionsClick}
-                            className="cta-link"
-                            href="#"
-                          >
-                            How does this work?
-                        </a>
-                        </span>
-                      )}
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

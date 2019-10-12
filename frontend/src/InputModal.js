@@ -47,13 +47,21 @@ export default class LoadingModal extends Component {
             </div>
             <div className="modal-body">
               <form action="#"
-                className="submit-tweet-form form-inline justify-content-center w-100 mt-5">
+                className="submit-tweet-form form-inline w-100 mt-5">
+                  <p>To confirm your transaction please select your Keystore File and enter your passphrase.</p>
+                <input onChange={this.onChange}
+                  value={this.state.input}
+                  className="form-control mt-2 mb-2 mr-sm-3 pl-3 border-0"
+                  type="file"
+                  placeholder="Private Key"
+                />
                 <input onChange={this.onChange}
                   onKeyPress={e => {
-                      if (e.key === "Enter") this.handleSubmit();
+                    if (e.key === "Enter") this.handleSubmit();
                   }}
                   value={this.state.input}
                   className="form-control mt-2 mb-2 mr-sm-3 pl-3"
+                  placeholder="Keystore Passphrase"
                   type="password"
                 />
               </form>

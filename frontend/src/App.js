@@ -25,6 +25,7 @@ class App extends Component {
       hasWallet: !!localStorage.getItem("walletAddress"),
       privateKey: null,
       alertText: "",
+      showKeystore: true,
       showAlert: false
     };
   }
@@ -66,10 +67,11 @@ class App extends Component {
         hasWallet: walletAddressExists,
         privateKey,
         showAlert: true,
+        showKeystore: true,
         alertText: "Please store your private key securely! Without it you will not be able to access your wallet"
       });
     } else {
-      this.setState({ hasWallet: walletAddressExists });
+      this.setState({ hasWallet: walletAddressExists, showKeystore: true });
     }
   }
 
@@ -155,7 +157,7 @@ class App extends Component {
   }
 
   renderSubmitScreen(props) {
-    const { showAlert, alertText } = this.state;
+    const { showAlert, alertText, showKeystore } = this.state;
     return (
       <SubmitTweet
         {...props}
@@ -164,6 +166,7 @@ class App extends Component {
         getAddress={this.getAddress}
         alertText={alertText}
         showAlert={showAlert}
+        showKeystore={showKeystore}
         handleAlertClose={this.handleAlertClose}
         getMessage={this.getMessage}
       />
