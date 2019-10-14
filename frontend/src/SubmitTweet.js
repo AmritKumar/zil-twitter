@@ -1,15 +1,13 @@
-import React, { Component } from "react";
-import LoadingModal from "./LoadingModal";
-import InputModal from "./InputModal";
-import KeystoreNotification from "./components/KeystoreNotification";
-import {
-  submitTweet as _submitTweet,
-  getTweetStatus,
-  zilliqa
-} from "./zilliqa";
-import { Link } from "react-router-dom";
-import { TwitterTweetEmbed } from "react-twitter-embed";
-import { CURRENT_URI } from "./utils";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { TwitterTweetEmbed } from 'react-twitter-embed';
+
+import KeystoreNotification from './components/KeystoreNotification';
+import InputModal from './InputModal';
+import LoadingModal from './LoadingModal';
+import { CURRENT_URI, HASHTAG } from './utils';
+import { getTweetStatus, submitTweet as _submitTweet, zilliqa } from './zilliqa';
+
 const { units, BN } = require("@zilliqa-js/util");
 
 export default class SubmitTweet extends Component {
@@ -31,7 +29,9 @@ export default class SubmitTweet extends Component {
       submittedTweet: false,
       verifiedTweet: false,
       balance: 0,
-      privateKey: props.privateKey
+      keystore: null,
+      privateKey: props.privateKey,
+      passphrase: null
     };
   }
 
@@ -108,7 +108,7 @@ export default class SubmitTweet extends Component {
   }
 
   async submitTweet() {
-    const { tweetId } = this.state;
+    const { tweetId, passphrase } = this.state;
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
       return;
@@ -152,7 +152,7 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    if (!this.state.privateKey) {
+    if (!this.state.privateKey || !this.state.passphrase) {
       this.setState({
         showInput: true
       });
@@ -165,7 +165,7 @@ export default class SubmitTweet extends Component {
       this.setState({ showLoading: true });
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
       if (!isRegistered) {
-        const submitData = await _submitTweet(privateKey, tweetId);
+        const submitData = await _submitTweet(privateKey, tweetId, this.state.passphrase);
         id = submitData.id;
         isTransactionId = true;
         const submittedTweet = (submitData.receipt.event_logs[0]._eventname === "add_new_tweet_sucessful");
@@ -262,13 +262,15 @@ export default class SubmitTweet extends Component {
     }
   }
 
-  handlePrivateKeySubmitted(privateKey) {
+  handlePrivateKeySubmitted(payload) {
     window.$('#inputModal').modal("hide");
     window.$('body').removeClass('modal-open');
     window.$('.modal-backdrop').remove();
     this.setState({
       showInput: false,
-      privateKey: privateKey
+      privateKey: payload.keystore,
+      keystore: payload.keystore,
+      passphrase: payload.passphrase
     });
     this.submitTweet()
   }
@@ -344,9 +346,9 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href={`https://twitter.com/intent/tweet?hashtags=${HASHTAG}&tw_p=tweetbutton&text=Hello+world&via=zilliqa`}
                       >
-                        #BuildOnZIL
+                        #{HASHTAG}
                     </a>
                     </h2>
                     <div className="row my-auto w-100">
@@ -419,7 +421,7 @@ export default class SubmitTweet extends Component {
                   <ol>
                     <li>Register or Sign in with your Twitter account.</li>
                     <li>
-                      Note down the private key for your blockchain wallet
+                      Save your Keystore and passphrase for your blockchain wallet
                       generated for future use.
                     </li>
                     <li>
@@ -427,9 +429,9 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href={`https://twitter.com/intent/tweet?hashtags=${HASHTAG}&tw_p=tweetbutton&text=Hello+world&via=zilliqa`}
                       >
-                        #BuildOnZIL
+                        #{HASHTAG}
                       </a>
                       .
                     </li>

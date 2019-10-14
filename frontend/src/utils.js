@@ -6,6 +6,6 @@ if (process.env.NODE_ENV === "production") {
   CURRENT_URI = "http://localhost:4000";
 }
 
-const JWT_SECRET ='socialpaycookie182371';
+const HASHTAG ='Zilliqa';
 
-export { CURRENT_URI, JWT_SECRET };
+export { CURRENT_URI, HASHTAG };

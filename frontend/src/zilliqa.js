@@ -61,8 +61,9 @@ export const registerUser = async (privateKey, userAddress, username) => {
   return tx;
 };
 
-export const submitTweet = async (privateKey, tweetId) => {
-  zilliqa.wallet.addByPrivateKey(privateKey);
+export const submitTweet = async (privateKey, tweetId, passphrase) => {
+  const wallet = await zilliqa.wallet.addByKeystore(privateKey, passphrase);
+
 
   try {
     const tx = await contract.call(

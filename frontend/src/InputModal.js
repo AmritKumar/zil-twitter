@@ -4,10 +4,39 @@ export default class LoadingModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      input: ""
+      input: "",
+      keystore: ""
     };
     this.onChange = this.onChange.bind(this);
+    this.onChangeFile = this.onChangeFile.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  readUploadedFileAsText(inputFile) {
+    const temporaryFileReader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      temporaryFileReader.onerror = () => {
+        temporaryFileReader.abort();
+        reject(new Error("Problem parsing input file."));
+      };
+
+      temporaryFileReader.onload = () => {
+        resolve(temporaryFileReader.result);
+      };
+      temporaryFileReader.readAsText(inputFile);
+    });
+  }
+
+  async onChangeFile(e) {
+    const file = e.target.files[0];
+
+    const keystore = await this.readUploadedFileAsText(file);
+
+    this.setState({
+      keystore: keystore
+    });
+
   }
 
   onChange(e) {
@@ -17,7 +46,7 @@ export default class LoadingModal extends Component {
   }
 
   handleSubmit() {
-    this.props.handleInput(this.state.input);
+    this.props.handleInput({passphrase: this.state.input, keystore: this.state.keystore});
   }
 
   render() {
@@ -48,9 +77,8 @@ export default class LoadingModal extends Component {
             <div className="modal-body">
               <form action="#"
                 className="submit-tweet-form form-inline w-100 mt-5">
-                  <p>To confirm your transaction please select your Keystore File and enter your passphrase.</p>
-                <input onChange={this.onChange}
-                  value={this.state.input}
+                <p>To confirm your transaction please select your Keystore File and enter your passphrase.</p>
+                <input onChange={this.onChangeFile}
                   className="form-control mt-2 mb-2 mr-sm-3 pl-3 border-0"
                   type="file"
                   placeholder="Private Key"

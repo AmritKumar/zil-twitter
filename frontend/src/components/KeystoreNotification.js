@@ -11,7 +11,7 @@ export default class SubmitTweet extends Component {
             passphrase: '',
             keystore: props.keystore,
             privateKey: props.privateKey, 
-            // privateKey: "3375F915F3F9AE35E6B301B7670F53AD1A5BE15D8221EC7FD5E503F21D3450C8",
+            //privateKey: "025de355b88641700f91d29c21b111a8dbc84728367afd691f562a7c3cd6fa2b",
             passError: false,
             fileDownloaded: false
         };
@@ -41,7 +41,7 @@ export default class SubmitTweet extends Component {
         } else {
             zilliqa.wallet.addByPrivateKey(privateKey);
 
-            const keystore = await zilliqa.wallet.defaultAccount.toFile('pandarullz');
+            const keystore = await zilliqa.wallet.defaultAccount.toFile(this.state.passphrase);
 
             localStorage.setItem('keystore', JSON.stringify(keystore));
 

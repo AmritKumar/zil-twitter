@@ -25,7 +25,7 @@ class App extends Component {
       hasWallet: !!localStorage.getItem("walletAddress"),
       privateKey: null,
       alertText: "",
-      showKeystore: true,
+      showKeystore: false,
       showAlert: false
     };
   }

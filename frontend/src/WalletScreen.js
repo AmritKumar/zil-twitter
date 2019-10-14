@@ -65,8 +65,6 @@ export default class Wallet extends Component {
                     <h1>Wallet address</h1>
                     <p>To spend the funds obtained here, use your private key (that you received earlier)  in the following site: <a href="https://dev-wallet.zilliqa.com/send">https://dev-wallet.zilliqa.com/send</a>
                     </p>
-                    <p className="alert alert-info small">
-                      Kindly ensure you don’t share or lose your private key or you risk losing your funds permanently.</p>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
