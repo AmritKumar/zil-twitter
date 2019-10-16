@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Zilliqa } from '@zilliqa-js/zilliqa';
 
-export default class SubmitTweet extends Component {
+export default class KeystoreNotification extends Component {
     constructor(props) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
@@ -10,7 +10,7 @@ export default class SubmitTweet extends Component {
         this.state = {
             passphrase: '',
             keystore: props.keystore,
-            privateKey: props.privateKey, 
+            privateKey: props.getPrivateKey(), 
             //privateKey: "025de355b88641700f91d29c21b111a8dbc84728367afd691f562a7c3cd6fa2b",
             passError: false,
             fileDownloaded: false

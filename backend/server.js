@@ -71,7 +71,7 @@ const generateAndSendToken = (req, res) => {
   const { _id: id } = req.user;
   const username = req.user.twitterProvider.username;
   const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 24 * 60 * 60 });
-  res.cookie("token", token, {httpOnly: true, sameSite: true });
+  res.cookie("token", token, { httpOnly: true, sameSite: true });
   res.status(200).send(JSON.stringify({ username, los: token }));
 };
 
@@ -87,7 +87,7 @@ router.route("/auth/twitter").post(
         },
         form: { oauth_verifier: req.query.oauth_verifier }
       },
-      function(err, json) {
+      function (err, json) {
         if (err) {
           return res.send(500, { message: err.message });
         }
@@ -105,7 +105,7 @@ router.route("/auth/twitter").post(
       }
     );
   },
-  passport.authenticate("twitter-token", {session: false }),
+  passport.authenticate("twitter-token", { session: false }),
   (req, res, next) => {
     if (!req.user) {
       return res.send(401, "User Not Authenticated");
@@ -121,13 +121,13 @@ const authenticate = (req, res, next) => {
     req.query.token ||
     req.headers['x-access-token'] ||
     req.cookies.token;
-    
+
   if (!token) {
     res.status(401).send("Unauthorized: No token provided");
     return;
   }
-  
-  jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+
+  jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
     if (err) {
       res.status(401).send("Unauthorized: Invalid token");
       return;
@@ -178,22 +178,18 @@ const verifyUsername = async (req, res) => {
 
 const fulfillSubmitTweet = async (req, res) => {
   const { token, tokenSecret } = req.user.twitterProvider;
-  const { address: sender } = req.body;
-  let tweetId;
+  let tweetId = req.body.tweetId;
+
   try {
-    if (req.body.txnId) {
-      tweetId = await getTweetId(req.body.txnId);
-    }  else {
-      tweetId = req.body.tweetId;
-    }
     const tweetData = await getTweetData(tweetId, token, tokenSecret);
-    const { tweetText, startPos, endPos } = tweetData;
-    const tx = await verifyTweet(sender, tweetId, tweetText, startPos, endPos);
-    console.log(JSON.stringify(tx));
-    res.status(200).send(JSON.stringify(tx));
+
+    const verified = await verifyTweet(tweetData);
+
+    res.status(200).send(verified);
+    return tweetData;
   } catch (e) {
     console.error(e);
-    res.status(400).send("Tweet not valid");
+    res.status(400).send(e);
   }
 };
 

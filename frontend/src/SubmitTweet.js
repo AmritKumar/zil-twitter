@@ -6,7 +6,7 @@ import KeystoreNotification from './components/KeystoreNotification';
 import InputModal from './InputModal';
 import LoadingModal from './LoadingModal';
 import { CURRENT_URI, HASHTAG } from './utils';
-import { getTweetStatus, submitTweet as _submitTweet, zilliqa } from './zilliqa';
+import { getTweetStatus, zilliqa } from './zilliqa';
 
 const { units, BN } = require("@zilliqa-js/util");
 
@@ -49,6 +49,7 @@ export default class SubmitTweet extends Component {
 
   async getTweetVerification(id, isTransactionId, address) {
     const requestBody = isTransactionId ? { txnId: id, address } : { tweetId: id, address };
+
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
@@ -58,6 +59,7 @@ export default class SubmitTweet extends Component {
         body: JSON.stringify(requestBody),
         credentials: "include"
       });
+
       if (response.status === 401) {
         window.$('#loadingModal').modal("hide");
         window.$('body').removeClass('modal-open');
@@ -65,9 +67,13 @@ export default class SubmitTweet extends Component {
         this.props.onLogout(true);
         return;
       }
+
       const data = await response.json();
+
+      console.log(data);
       return data;
     } catch (e) {
+      console.log(e);
       throw new Error("Failed to verify tweet. Please try again.");
     }
   }
@@ -109,6 +115,7 @@ export default class SubmitTweet extends Component {
 
   async submitTweet() {
     const { tweetId, passphrase } = this.state;
+
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
       return;
@@ -143,7 +150,7 @@ export default class SubmitTweet extends Component {
       });
       return;
     }
-    const { isVerified, isRegistered } = await getTweetStatus(tweetId);
+    const { isVerified } = await getTweetStatus(tweetId);
     if (isVerified) {
       this.setState({
         errMsg: "Tweet ID already submitted. Please submit another tweet ID.",
@@ -162,26 +169,30 @@ export default class SubmitTweet extends Component {
     const privateKey = this.state.privateKey;
 
     try {
-      this.setState({ showLoading: true });
+      this.setState({
+        showLoading: true
+      });
+
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
-      if (!isRegistered) {
-        const submitData = await _submitTweet(privateKey, tweetId, this.state.passphrase);
-        id = submitData.id;
-        isTransactionId = true;
-        const submittedTweet = (submitData.receipt.event_logs[0]._eventname === "add_new_tweet_sucessful");
-        if (!submittedTweet) {
-          throw Error(this.props.getMessage(submitData));
-        }
+
+      const submitData = await this.getTweetVerification(id, false, address);
+
+      const isSuccessfull = (submitData.receipt.success === true);
+
+      if(!isSuccessfull) {
+        throw new Error('There is something wrong with the contract TX. Please try again later.');
       }
-      this.setState({ submittedTweet: true });
-      const data = await this.getTweetVerification(id, isTransactionId, address);
-      const verifiedTweet = (data.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+
+      //const submitData = await _submitTweet(privateKey, data, this.state.passphrase);
+      const verifiedTweet = (submitData.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+
       if (!verifiedTweet) {
-        throw Error(this.props.getMessage(data));
+        throw Error(this.props.getMessage(submitData));
       } else {
         this.setState({ verifiedTweet });
       }
     } catch (e) {
+      console.log(e);
       this.setState({ errMsg: e.message });
     }
   }
@@ -349,7 +360,7 @@ export default class SubmitTweet extends Component {
                         href={`https://twitter.com/intent/tweet?hashtags=${HASHTAG}&tw_p=tweetbutton&text=Hello+world&via=zilliqa`}
                       >
                         #{HASHTAG}
-                    </a>
+                      </a>
                     </h2>
                     <div className="row my-auto w-100">
                       <form
