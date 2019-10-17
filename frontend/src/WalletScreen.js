@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { toBech32Address } from "@zilliqa-js/crypto";
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
 
@@ -47,7 +48,7 @@ export default class Wallet extends Component {
 
   render() {
     const { balance } = this.state;
-    const address = this.props.getAddress();
+    const address = toBech32Address(this.props.getAddress());
     return (
       <header className="masthead-wallet">
         <div className="container h-100">

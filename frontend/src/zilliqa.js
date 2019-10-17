@@ -5,11 +5,11 @@ const CHAIN_ID = 333;
 const MSG_VERSION = 1;
 const VERSION = bytes.pack(CHAIN_ID, MSG_VERSION);
 
-const contractAddress = "876811442716d9187F57C6612dfE2b15806d7a47";
+const contractAddress = "776f230Bb317015C920928ad32267519DB306881";
 const opk = "db11cfa086b92497c8ed5a4cc6edb3a5bfe3a640c43ffb9fc6aa0873c56f2ee3";
 export const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
 const contract = zilliqa.contracts.at(contractAddress);
-const myGasPrice = new BN("5000000000");
+const myGasPrice = new BN("1000000000");
 
 export const getTweetStatus = async (tweetId) => {
   const state = await contract.getState();

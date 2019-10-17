@@ -61,7 +61,7 @@ export default class KeystoreNotification extends Component {
             <h3>Your Wallet Access</h3>
             <p>Now that the wallet has been successfully generated, you are in charge of keeping it safe.</p>
             <p className="text-danger"><i className="fas fa-exclamation-triangle"></i><br />
-                <b>Please store the following details somewhere safe.<br /> If you lose your Private Key and Keystore File you won't be able to access your wallet again.</b>
+                <b>Please store the following details somewhere safe.<br /> If you lose your Keystore File and Passphrase you won't be able to access your wallet again.</b>
             </p>
             <div className="privateKey">
                 <p className="font-weight-bold">Private Key:</p>

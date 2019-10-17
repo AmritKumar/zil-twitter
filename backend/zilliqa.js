@@ -17,7 +17,7 @@ const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY;
 zilliqa.wallet.addByPrivateKey(OWNER_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
-const contractAddress = "876811442716d9187F57C6612dfE2b15806d7a47";
+const contractAddress = "776f230Bb317015C920928ad32267519DB306881";
 const deployedContract = zilliqa.contracts.at(contractAddress);
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
@@ -47,7 +47,7 @@ const initParams = [
   {
     "vname": "zils_per_tweet",
     "type": "Uint128",
-    "value": "1000"
+    "value": "1000000000000000"
   },
   {
     "vname": "blocks_per_day",
@@ -84,8 +84,8 @@ const fundAccount = async (address) => {
     zilliqa.transactions.new({
       version: VERSION,
       toAddr: `0x${address}`,
-      amount: new BN(units.toQa("50", units.Units.Zil)),
-      gasPrice: new BN("2000000000"),
+      amount: new BN(units.toQa("1000", units.Units.Zil)),
+      gasPrice: new BN("1000000000"),
       gasLimit: Long.fromNumber(1)
     })
   );
@@ -119,7 +119,7 @@ const verifyTweet = async (data) => {
   const tx = await deployedContract.call("verify_tweet_pay", params, {
     version: VERSION,
     amount: new BN(0),
-    gasPrice: new BN("5000000000"),
+    gasPrice: new BN("1000000000"),
     gasLimit: Long.fromNumber(50000)
   });
   return tx;
@@ -161,8 +161,8 @@ const depositToContract = async (contract) => {
   try {
     const tx = await contract.call("deposit", [], {
       version: VERSION,
-      amount: new BN(units.toQa("50000", units.Units.Zil)),
-      gasPrice: new BN("5000000000"),
+      amount: new BN(units.toQa("10000", units.Units.Zil)),
+      gasPrice: new BN("1000000000"),
       gasLimit: Long.fromNumber(1000)
     });
     console.log(tx, tx.receipt);

@@ -189,7 +189,7 @@ export default class SubmitTweet extends Component {
       if (!verifiedTweet) {
         throw Error(this.props.getMessage(submitData));
       } else {
-        this.setState({ verifiedTweet });
+        this.setState({ verifiedTweet, submittedTweet: true });
       }
     } catch (e) {
       console.log(e);
