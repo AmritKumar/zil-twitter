@@ -22,13 +22,12 @@ export const getTweetStatus = async (tweetId) => {
 
 export const isUserRegistered = async (username) => {
   const state = await contract.getState();
-  const usedUsernames = state.users;
 
-  if (usedUsernames !== undefined) {
-    const isUsed = Object.values(usedUsernames).find(u => u === username);
+  if (state.users !== undefined) {
+    const isUsed = Object.keys(state.users).find(u => u.toLowerCase() === username.toLowerCase());
     return !!isUsed;
   } else {
-    throw 'There is a problem with the contract.';
+    throw new Error('There is a problem with the contract.');
   }
 };
 

@@ -48,7 +48,8 @@ export default class Wallet extends Component {
 
   render() {
     const { balance } = this.state;
-    const address = toBech32Address(this.props.getAddress());
+    
+    const address = this.props.getAddress();
     return (
       <header className="masthead-wallet">
         <div className="container h-100">

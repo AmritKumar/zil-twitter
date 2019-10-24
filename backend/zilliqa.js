@@ -84,7 +84,7 @@ const fundAccount = async (address) => {
     zilliqa.transactions.new({
       version: VERSION,
       toAddr: `0x${address}`,
-      amount: new BN(units.toQa("1000", units.Units.Zil)),
+      amount: new BN(units.toQa("50", units.Units.Zil)),
       gasPrice: new BN("1000000000"),
       gasLimit: Long.fromNumber(1)
     })
@@ -171,11 +171,28 @@ const depositToContract = async (contract) => {
   }
 };
 
+
+const depositToAddress = async (address) => {
+  try {
+    const contract = zilliqa.contracts.at(address);
+    const tx = await contract.call("deposit", [], {
+      version: VERSION,
+      amount: new BN(units.toQa("100000", units.Units.Zil)),
+      gasPrice: new BN("1000000000"),
+      gasLimit: Long.fromNumber(1000)
+    });
+    console.log(tx, tx.receipt);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 module.exports = {
   fundAccount,
   getTweetId,
   getHashtag,
   verifyTweet,
   depositToContract,
-  deployTestContract
+  deployTestContract,
+  depositToAddress
 };
