@@ -34,6 +34,8 @@ async function getTweetData(tweetId, accessToken, accessTokenSecret) {
     const hashtag = await getHashtag();
     const data = await getTweet(tweetId, accessToken, accessTokenSecret);
     const tweetText = data.full_text.toLowerCase();
+
+    console.log(hashtag);
     let startPos = tweetText.indexOf(hashtag.toLowerCase());
     let endPos = 0;
     if (startPos !== -1) {

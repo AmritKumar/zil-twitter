@@ -1,15 +1,13 @@
-import React, { Component } from "react";
-import Joyride from "react-joyride";
-import LoadingModal from "./LoadingModal";
-import InputModal from "./InputModal";
-import {
-  submitTweet as _submitTweet,
-  getTweetStatus,
-  zilliqa
-} from "./zilliqa";
-import { Link } from "react-router-dom";
-import { TwitterTweetEmbed } from "react-twitter-embed";
-import { CURRENT_URI } from "./utils";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import { TwitterTweetEmbed } from 'react-twitter-embed';
+
+import KeystoreNotification from './components/KeystoreNotification';
+import InputModal from './InputModal';
+import LoadingModal from './LoadingModal';
+import { CURRENT_URI, HASHTAG } from './utils';
+import { getTweetStatus, zilliqa } from './zilliqa';
+
 const { units, BN } = require("@zilliqa-js/util");
 
 export default class SubmitTweet extends Component {
@@ -31,7 +29,9 @@ export default class SubmitTweet extends Component {
       submittedTweet: false,
       verifiedTweet: false,
       balance: 0,
-      privateKey: props.privateKey
+      keystore: null,
+      privateKey: props.privateKey,
+      passphrase: null
     };
   }
 
@@ -48,7 +48,8 @@ export default class SubmitTweet extends Component {
   }
 
   async getTweetVerification(id, isTransactionId, address) {
-    const requestBody = isTransactionId ? {txnId: id, address} : {tweetId: id, address};
+    const requestBody = isTransactionId ? { txnId: id, address } : { tweetId: id, address };
+
     try {
       const response = await fetch(`${CURRENT_URI}/api/v1/submit-tweet`, {
         method: "POST",
@@ -58,6 +59,7 @@ export default class SubmitTweet extends Component {
         body: JSON.stringify(requestBody),
         credentials: "include"
       });
+
       if (response.status === 401) {
         window.$('#loadingModal').modal("hide");
         window.$('body').removeClass('modal-open');
@@ -65,9 +67,13 @@ export default class SubmitTweet extends Component {
         this.props.onLogout(true);
         return;
       }
+
       const data = await response.json();
+
+      console.log(data);
       return data;
     } catch (e) {
+      console.log(e);
       throw new Error("Failed to verify tweet. Please try again.");
     }
   }
@@ -108,7 +114,8 @@ export default class SubmitTweet extends Component {
   }
 
   async submitTweet() {
-    const { tweetId } = this.state;
+    const { tweetId, passphrase } = this.state;
+
     if (tweetId === "") {
       this.setState({ errMsg: "Tweet ID cannot be empty", showLoading: true });
       return;
@@ -143,7 +150,7 @@ export default class SubmitTweet extends Component {
       });
       return;
     }
-    const { isVerified, isRegistered } = await getTweetStatus(tweetId);
+    const { isVerified } = await getTweetStatus(tweetId);
     if (isVerified) {
       this.setState({
         errMsg: "Tweet ID already submitted. Please submit another tweet ID.",
@@ -152,7 +159,7 @@ export default class SubmitTweet extends Component {
       return;
     }
 
-    if (!this.state.privateKey) {
+    if (!this.state.privateKey || !this.state.passphrase) {
       this.setState({
         showInput: true
       });
@@ -162,26 +169,30 @@ export default class SubmitTweet extends Component {
     const privateKey = this.state.privateKey;
 
     try {
-      this.setState({ showLoading: true });
+      this.setState({
+        showLoading: true
+      });
+
       let id = tweetId, isTransactionId = false, address = this.props.getAddress();
-      if (!isRegistered) {
-        const submitData = await _submitTweet(privateKey, tweetId);
-        id = submitData.id;
-        isTransactionId = true;
-        const submittedTweet = (submitData.receipt.event_logs[0]._eventname === "add_new_tweet_sucessful");
-        if (!submittedTweet) {
-          throw Error(this.props.getMessage(submitData));
-        }
+
+      const submitData = await this.getTweetVerification(id, false, address);
+
+      const isSuccessfull = (submitData.receipt.success === true);
+
+      if(!isSuccessfull) {
+        throw new Error('There is something wrong with the contract TX. Please try again later.');
       }
-      this.setState({ submittedTweet: true });
-      const data = await this.getTweetVerification(id, isTransactionId, address);
-      const verifiedTweet = (data.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+
+      //const submitData = await _submitTweet(privateKey, data, this.state.passphrase);
+      const verifiedTweet = (submitData.receipt.event_logs[0]._eventname === "verify_tweet_successful");
+
       if (!verifiedTweet) {
-        throw Error(this.props.getMessage(data));
+        throw Error(this.props.getMessage(submitData));
       } else {
-        this.setState({ verifiedTweet });
+        this.setState({ verifiedTweet, submittedTweet: true });
       }
     } catch (e) {
+      console.log(e);
       this.setState({ errMsg: e.message });
     }
   }
@@ -262,13 +273,15 @@ export default class SubmitTweet extends Component {
     }
   }
 
-  handlePrivateKeySubmitted(privateKey) {
+  handlePrivateKeySubmitted(payload) {
     window.$('#inputModal').modal("hide");
     window.$('body').removeClass('modal-open');
     window.$('.modal-backdrop').remove();
     this.setState({
       showInput: false,
-      privateKey: privateKey
+      privateKey: payload.keystore,
+      keystore: payload.keystore,
+      passphrase: payload.passphrase
     });
     this.submitTweet()
   }
@@ -302,14 +315,6 @@ export default class SubmitTweet extends Component {
       loadingText = "Verifying tweet hashtag..." + msg;
     }
 
-    const steps = [
-      {
-        target: ".balance",
-        content:
-          "You can view your testnet wallet's address here.",
-        disableBeacon: true
-      }
-    ];
     let privateKey;
     if (!this.state.privateKey) {
       privateKey = this.props.getPrivateKey();
@@ -320,7 +325,7 @@ export default class SubmitTweet extends Component {
       <div>
         {showInput ? (
           <InputModal
-            title="Submit Private Key"
+            title="Confirm action"
             handleInput={this.handlePrivateKeySubmitted}
           />
         ) : null}
@@ -336,85 +341,83 @@ export default class SubmitTweet extends Component {
         <header className="masthead-submit">
           <div className="container h-100">
             <div className="row h-100">
-              <div className="balance">
-                <p> Balance: {balance} ZILs</p>
-                <Link to="/wallet" id="link"> Click here for account details</Link>
-              </div>
-              <div className="col-lg-12 my-auto">
-                {this.props.showAlert ? (<div className="alert alert-primary alert-dismissible fade show" id="alert" role="alert">
-                  <p>{this.props.alertText}</p>
-                  <strong>{privateKey}</strong>
-                  <button type="button" className="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>) : null}
-                <div className="header-content mx-auto">
-                  <h1 className="mb-5">Enter your tweet ID</h1>
-                  <h2 className="mb-6">
-                    Your tweet must include the hashtag,{" "}
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
-                    >
-                      #BuildOnZIL
-                    </a>
-                  </h2>
-                  <div className="row my-auto w-100">
-                    <form
-                      action="#"
-                      className="submit-tweet-form form-inline justify-content-center w-100 mt-5"
-                    >
-                      <input
-                        onChange={this.handleChange}
-                        onKeyPress={e => {
-                          if (e.key === "Enter") this.submitTweet();
-                        }}
-                        value={this.state.tweetId}
-                        className="form-control mt-2 mb-2 mr-sm-3 pl-3"
-                        type="text"
-                        placeholder="Enter the last number in your tweet’s url"
-                      />
-                      <div className="submit-tweet-btn shiny-button">
-                        <button
-                          type="button"
-                          onClick={this.submitTweet}
-                          className="btn shiny-button-content"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                  <div className="cta-container col-lg-12 text-center">
-                    {validTweetId ? (
-                      <span>
-                        <TwitterTweetEmbed tweetId={tweetId} />
-                      </span>
-                    ) : (
-                      <span>
-                        <p>
-                          A tweet ID is the series of numbers in a tweet's URL.
-                          You're able to find the tweet URL in your browser's
-                          search bar.
-                        </p>
-                        <img
-                          className="mb-5"
-                          src="/img/tweet-id.png"
-                          alt="Tweet ID"
-                        />
-                        <br />
-                        <a
-                          onClick={this.handleInstructionsClick}
-                          className="cta-link"
-                          href=""
-                        >
-                          How does this work?
-                        </a>
-                      </span>
-                    )}
-                  </div>
+              {!this.props.showKeystore ? (
+                <div className="balance text-right">
+                  <div> Balance: {balance} ZIL</div>
+                  <Link to="/wallet" className="btn btn-link px-0 mx-0">Account details</Link>
                 </div>
+              ) : null}
+
+              <div className="col-lg-12 my-auto">
+                {this.props.showKeystore ? (<KeystoreNotification {...this.props} />) : (
+                  <div className="header-content mx-auto">
+                    <h1 className="mb-5">Enter your tweet ID</h1>
+                    <h2 className="mb-6">
+                      Your tweet must include the hashtag,{" "}
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://twitter.com/intent/tweet?hashtags=${HASHTAG}&tw_p=tweetbutton&text=Hello+world&via=zilliqa`}
+                      >
+                        #{HASHTAG}
+                      </a>
+                    </h2>
+                    <div className="row my-auto w-100">
+                      <form
+                        action="#"
+                        className="submit-tweet-form form-inline justify-content-center w-100 mt-5"
+                      >
+                        <input
+                          onChange={this.handleChange}
+                          onKeyPress={e => {
+                            if (e.key === "Enter") this.submitTweet();
+                          }}
+                          value={this.state.tweetId}
+                          className="form-control mt-2 mb-2 mr-sm-3 pl-3"
+                          type="text"
+                          placeholder="Enter your tweet ID"
+                        />
+                        <div className="submit-tweet-btn shiny-button">
+                          <button
+                            type="button"
+                            onClick={this.submitTweet}
+                            className="btn shiny-button-content"
+                          >
+                            Submit
+                        </button>
+                        </div>
+                      </form>
+                    </div>
+                    <div className="cta-container col-lg-12 text-center">
+                      {validTweetId ? (
+                        <span>
+                          <TwitterTweetEmbed tweetId={tweetId} />
+                        </span>
+                      ) : (
+                          <span>
+                            <p>
+                              A tweet ID is the series of numbers in a tweet's URL.
+                              You're able to find the tweet URL in your browser's
+                              search bar.
+                        </p>
+                            <img
+                              className="mb-5"
+                              src="/img/tweet-id.png"
+                              alt="Tweet ID"
+                            />
+                            <br />
+                            <a
+                              onClick={this.handleInstructionsClick}
+                              className="cta-link"
+                              href="#"
+                            >
+                              How does this work?
+                        </a>
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -429,7 +432,7 @@ export default class SubmitTweet extends Component {
                   <ol>
                     <li>Register or Sign in with your Twitter account.</li>
                     <li>
-                      Note down the private key for your blockchain wallet
+                      Save your Keystore and passphrase for your blockchain wallet
                       generated for future use.
                     </li>
                     <li>
@@ -437,9 +440,9 @@ export default class SubmitTweet extends Component {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        href="https://twitter.com/intent/tweet?hashtags=BuildOnZIL&tw_p=tweetbutton&text=Hello+world&via=zilliqa"
+                        href={`https://twitter.com/intent/tweet?hashtags=${HASHTAG}&tw_p=tweetbutton&text=Hello+world&via=zilliqa`}
                       >
-                        #BuildOnZIL
+                        #{HASHTAG}
                       </a>
                       .
                     </li>

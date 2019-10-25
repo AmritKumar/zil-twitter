@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { toBech32Address } from "@zilliqa-js/crypto";
 const { units, BN } = require("@zilliqa-js/util");
 const { zilliqa } = require("./zilliqa");
 
@@ -47,6 +48,7 @@ export default class Wallet extends Component {
 
   render() {
     const { balance } = this.state;
+    
     const address = this.props.getAddress();
     return (
       <header className="masthead-wallet">
@@ -63,7 +65,8 @@ export default class Wallet extends Component {
                       </Link>
                     </div>
                     <h1>Wallet address</h1>
-                    <p> You can use this wallet to send funds associated from this wallet from here use your private key <a href="https://dev-wallet.zilliqa.com/send">here</a></p>
+                    <p>To spend the funds obtained here, use your private key (that you received earlier)  in the following site: <a href="https://dev-wallet.zilliqa.com/send">https://dev-wallet.zilliqa.com/send</a>
+                    </p>
                     <div>
                       <div className="row">
                         <div className="col-lg-3">Balance</div>
@@ -85,7 +88,8 @@ export default class Wallet extends Component {
                           <a
                             href={`https://viewblock.io/zilliqa/address/${
                               address
-                            }?network=testnet`}
+                              }?network=testnet`}
+                              target="_blank"
                           >
                             View on ViewBlock.io
                           </a>

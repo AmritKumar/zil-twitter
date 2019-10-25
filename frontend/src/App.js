@@ -25,6 +25,7 @@ class App extends Component {
       hasWallet: !!localStorage.getItem("walletAddress"),
       privateKey: null,
       alertText: "",
+      showKeystore: false,
       showAlert: false
     };
   }
@@ -66,16 +67,18 @@ class App extends Component {
         hasWallet: walletAddressExists,
         privateKey,
         showAlert: true,
+        showKeystore: true,
         alertText: "Please store your private key securely! Without it you will not be able to access your wallet"
       });
     } else {
-      this.setState({ hasWallet: walletAddressExists });
+      this.setState({ hasWallet: walletAddressExists, showKeystore: true });
     }
   }
 
   handleSuccess(response) {
     response.json().then(json => {
       localStorage.setItem("authenticatedUsername", json.username);
+      document.cookie = `token=${json.los}`;
       this.setState({isAuthenticated: true });
     });
   }
@@ -98,6 +101,9 @@ class App extends Component {
         return "This tweet is invalid. Please make sure you have fulfilled all requirements.";
       case 9:
         return "You can only submit one tweet every 24 hours.";
+      default:
+        return "Something wrong happened. Please try again.";
+        ;
     }
   }
 
@@ -151,7 +157,7 @@ class App extends Component {
   }
 
   renderSubmitScreen(props) {
-    const { showAlert, alertText } = this.state;
+    const { showAlert, alertText, showKeystore } = this.state;
     return (
       <SubmitTweet
         {...props}
@@ -160,6 +166,7 @@ class App extends Component {
         getAddress={this.getAddress}
         alertText={alertText}
         showAlert={showAlert}
+        showKeystore={showKeystore}
         handleAlertClose={this.handleAlertClose}
         getMessage={this.getMessage}
       />

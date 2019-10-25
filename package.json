@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@zilliqa-js/crypto": "^0.8.1-alpha.2",
     "@zilliqa-js/zilliqa": "^0.8.0-alpha.0",
     "tslib": "^1.10.0"
   }

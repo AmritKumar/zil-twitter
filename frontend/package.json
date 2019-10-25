@@ -5,6 +5,7 @@
   "dependencies": {
     "@zilliqa-js/zilliqa": "^0.5.1",
     "bootstrap": "^4.3.1",
+    "file-saver": "^2.0.2",
     "postscribe": "^2.0.8",
     "rc-progress": "^2.3.0",
     "react": "^16.8.6",

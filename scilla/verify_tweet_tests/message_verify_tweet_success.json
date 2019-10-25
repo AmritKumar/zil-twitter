@@ -1,27 +1,38 @@
 {
-	"_tag": "verify_tweet_pay",
-	"_amount": "0",
-	"_sender": "0x1234567890123456789012345678901234567890",
-	"params": [
-		{
-			"vname": "twitter_username",
-			"type": "String",
-			"value": "kenchangh"
+	"code": "",
+	"data": "{\"_tag\":\"verify_tweet_pay\",\"params\":[{\"vname\":\"twitter_username\",\"type\":\"ByStr20\",\"value\":\"alexandrastn20\"},{\"vname\":\"tweet_id\",\"type\":\"String\",\"value\":\"1184079701826031623\"},{\"vname\":\"tweet_text\",\"type\":\"String\",\"value\":\"hello world #zilliqa via @zilliqa\"},{\"vname\":\"start_pos\",\"type\":\"Uint32\",\"value\":\"12\"}]}",
+	"version": 21823489,
+	"toAddr": "876811442716d9187F57C6612dfE2b15806d7a47",
+	"nonce": 635,
+	"pubKey": "03d8e6450e260f80983bcd4fadb6cbc132ae7feb552dda45f94b48c80b86c6c3be",
+	"amount": "0",
+	"signature": "a2836701804da0a32d17d5d3876a336ce128885e6ed0ca96bd6630c94931901e243efd0c3c78267a6955fe87b0b31b3ee5c5d28ff0cae1ad5f5a64105996d54e",
+	"gasPrice": "12a05f200",
+	"gasLimit": {
+		"low": 50000,
+		"high": 0,
+		"unsigned": false
+	},
+	"receipt": {
+		"cumulative_gas": 310,
+		"epoch_num": "838111",
+		"errors": {
+			"0": [
+				9
+			]
 		},
-		{
-			"vname": "tweet_id",
-			"type": "String",
-			"value": "1085915996148264961"
+		"success": false
+	},
+	"provider": {
+		"middleware": {
+			"request": {},
+			"response": {}
 		},
-		{
-			"vname": "tweet_text",
-			"type": "String",
-			"value": "Hello world #buildonzil via @zilliqa"
-		},
-		{
-			"vname": "start_pos",
-			"type": "Uint32",
-			"value": "12"
-		}
-	]
+		"nodeURL": "https://dev-api.zilliqa.com",
+		"reqMiddleware": {},
+		"resMiddleware": {}
+	},
+	"status": 3,
+	"toDS": false,
+	"id": "503686b9417ab80f5df96f6b1a3b25fb792ab92c0e6db611f7e479157b7fa447"
 }

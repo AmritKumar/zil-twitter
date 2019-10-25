@@ -17,7 +17,7 @@ const OWNER_PRIVATE_KEY = process.env.OWNER_PRIVATE_KEY;
 zilliqa.wallet.addByPrivateKey(OWNER_PRIVATE_KEY);
 
 const ownerAddress = CP.getAddressFromPrivateKey(OWNER_PRIVATE_KEY);
-const contractAddress = "a0594b12f6f6bd0430417f3c544bf4ed4f9515fb";
+const contractAddress = "776f230Bb317015C920928ad32267519DB306881";
 const deployedContract = zilliqa.contracts.at(contractAddress);
 // const myGasPrice = new BN(units.fromQa(new BN("100"), units.Units.Li));
 // const myGasPrice = units.toQa("1000", units.Units.Li);
@@ -45,9 +45,19 @@ const initParams = [
     value: `0x${ownerAddress}`
   },
   {
+    "vname": "zils_per_tweet",
+    "type": "Uint128",
+    "value": "1000000000000000"
+  },
+  {
+    "vname": "blocks_per_day",
+    "type": "Uint32",
+    "value": "1103"
+  },
+  {
     vname: "hashtag",
     type: "String",
-    value: "#buildonzil"
+    value: "#zilliqa"
   }
 ];
 
@@ -59,7 +69,7 @@ const deployTestContract = async () => {
     const [deployTx, deployedContract] = await contract.deploy({
       version: VERSION,
       gasPrice: myGasPrice,
-      gasLimit: Long.fromNumber(100000)
+      gasLimit: Long.fromNumber(50000)
     });
     console.log(deployTx, deployedContract);
     console.log(deployTx.receipt);
@@ -75,47 +85,42 @@ const fundAccount = async (address) => {
       version: VERSION,
       toAddr: `0x${address}`,
       amount: new BN(units.toQa("50", units.Units.Zil)),
-      gasPrice: new BN("2000000000"),
+      gasPrice: new BN("1000000000"),
       gasLimit: Long.fromNumber(1)
     })
   );
   return tx.receipt;
 };
 
-const verifyTweet = async (userAddress, tweetId, tweetText, startPos, endPos) => {
+const verifyTweet = async (data) => {
   const params = [
     {
-      vname: "user_address",
-      type: "ByStr20",
-      value: `0x${userAddress}`
+      vname: "twitter_username",
+      type: "String",
+      value: `${data.username}`
     },
     {
       vname: "tweet_id",
       type: "String",
-      value: tweetId
+      value: `${data.tweetId}`
     },
     {
       vname: "tweet_text",
       type: "String",
-      value: tweetText
+      value: `${data.tweetText}`
     },
     {
       vname: "start_pos",
       type: "Uint32",
-      value: startPos.toString()
-    },
-    {
-      vname: "end_pos",
-      type: "Uint32",
-      value: endPos.toString()
+      value: `${data.startPos}`
     }
   ];
   zilliqa.wallet.setDefault(ownerAddress);
-  const tx = await deployedContract.call("verify_tweet", params, {
+  const tx = await deployedContract.call("verify_tweet_pay", params, {
     version: VERSION,
     amount: new BN(0),
-    gasPrice: new BN("5000000000"),
-    gasLimit: Long.fromNumber(5000)
+    gasPrice: new BN("1000000000"),
+    gasLimit: Long.fromNumber(50000)
   });
   return tx;
 };
@@ -138,9 +143,10 @@ const getTweetId = async (txnId) => {
   }
 };
 
-const getHashtag = async() => {
+const getHashtag = async () => {
   try {
     const init = await zilliqa.blockchain.getSmartContractInit(contractAddress);
+
     const initParam = init.result.find(
       initParam => initParam.vname === "hashtag"
     );
@@ -155,8 +161,24 @@ const depositToContract = async (contract) => {
   try {
     const tx = await contract.call("deposit", [], {
       version: VERSION,
-      amount: new BN(units.toQa("50", units.Units.Zil)),
-      gasPrice: new BN("5000000000"),
+      amount: new BN(units.toQa("10000", units.Units.Zil)),
+      gasPrice: new BN("1000000000"),
+      gasLimit: Long.fromNumber(1000)
+    });
+    console.log(tx, tx.receipt);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+
+const depositToAddress = async (address) => {
+  try {
+    const contract = zilliqa.contracts.at(address);
+    const tx = await contract.call("deposit", [], {
+      version: VERSION,
+      amount: new BN(units.toQa("100000", units.Units.Zil)),
+      gasPrice: new BN("1000000000"),
       gasLimit: Long.fromNumber(1000)
     });
     console.log(tx, tx.receipt);
@@ -171,5 +193,6 @@ module.exports = {
   getHashtag,
   verifyTweet,
   depositToContract,
-  deployTestContract
+  deployTestContract,
+  depositToAddress
 };
